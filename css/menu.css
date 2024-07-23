@@ -35,7 +35,6 @@ h1, h2, h3, h4, h5, h6 {
 #command-menu {
     display: flex;
     flex-direction: row;
-    list-style: none;
     width: 100%;
     height: 8vh;
     padding: 0;
@@ -87,8 +86,9 @@ h1, h2, h3, h4, h5, h6 {
 .dropdown > div > * {
     width: 100%;
     height: inherit;
-    padding: 0.5vh 2vw;
+    padding: 0.7vh 2vw;
     box-sizing: border-box;
+    border-bottom: 1px solid var(--accent);
 }
 .dropdown > div {
     display: none;
@@ -99,8 +99,58 @@ h1, h2, h3, h4, h5, h6 {
     top: 100%;
     left: 0;
 }
-
-
 .dropdown:hover > div {
     display: block;
+}
+
+#tool-menu {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 7vh;
+    padding: 1vh 2vw;
+    margin: 0;
+    background-color: var(--primary);
+    box-sizing: border-box;
+    border-top: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+}
+
+#tool-menu button {
+    border: none;
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin: 0 1vw;
+    padding: 0;
+    aspect-ratio: 1/1;
+    box-sizing: content-box;
+    background-color: transparent;
+}
+
+#vertex-btn {
+    background-image: url("../img/VertexIcon.png");
+}
+#edge-btn {
+    background-image: url("../img/EdgeIcon.png");
+}
+#edge-cap-btn {
+    background-image: url("../img/EdgeCapIcon.png");
+}
+#label-btn {
+    background-image: url("../img/LabelIcon.png");
+}
+#select-btn {
+    background-image: url("../img/SelectIcon.png");
+}
+#erase-btn {
+    background-image: url("../img/EraserIcon.png");
+}
+#transform-btn {
+    background-image: url("../img/TransformIcon.png");
+}
+#split-btn {
+    background-image: url("../img/SplitIcon.png");
+}
+#merge-btn {
+    background-image: url("../img/MergeIcon.png");
 }
