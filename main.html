@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="./css/shared.css">
     <link rel="stylesheet" href="./css/menu.css">
     <link rel="stylesheet" href="./css/render.css">
+    <script src="./js/graph.js" type="module"></script>
 </head>
 
 <body>
@@ -32,16 +33,47 @@
                 <span class="clickable">
                     <h3>Edit</h3>
                 </span>
+                <div>
+                    <h4 class="clickable">Undo</h4>
+                    <h4 class="clickable">Redo</h4>
+                    <h4 class="clickable">Vertex Tool</h4>
+                    <h4 class="clickable">Edge Tool</h4>
+                    <h4 class="clickable">Edge Cap Tool</h4>
+                    <h4 class="clickable">Label Tool</h4>
+                    <h4 class="clickable">Select Tool</h4>
+                    <h4 class="clickable">Area Select Tool</h4>
+                    <h4 class="clickable">Lasso Tool</h4>
+                    <h4 class="clickable">Style Tool</h4> <!-- Transform is applying style like custom shape or color -->
+                    <h4 class="clickable">Split Tool</h4>
+                    <h4 class="clickable">Merge Tool</h4>
+                </div>
             </div>
             <div class="dropdown">
                 <span class="clickable">
                     <h3>View</h3>
                 </span>
+                <div>
+                    <h4 class="clickable">Zoom In</h4>
+                    <h4 class="clickable">Zoom Out</h4>
+                    <h4 class="clickable">Fit on Screen</h4>
+                    <h4 class="clickable">Toggle Grid</h4>
+                    <h4 class="clickable">Toggle Menubar</h4>
+                    <h4 class="clickable">Toggle Toolbar</h4>
+                </div>
             </div>
             <div class="dropdown">
                 <span class="clickable">
-                    <h3>Settings</h3>
+                    <h3>Other</h3>
                 </span>
+                <div>
+                    <h4 class="clickable">Graph Info</h4>
+                    <h4 class="clickable">Toggle Grid Snap</h4>
+                    <h4 class="clickable">Toggle Angle Snap</h4>
+                    <h4 class="clickable">Toggle Distance Snap</h4>
+                    <h4 class="clickable">Toggle Light/Dark Mode</h4>
+                    <h4 class="clickable">All Settings</h4>
+                    <h4 class="clickable">About</h4>
+                </div>
             </div>
             </ul>
         </menu>
@@ -50,6 +82,7 @@
             <button class="clickable" id="vertex-btn" title="vertex" type="button"></button>
             <button class="clickable" id="edge-btn" title="edge" type="button"></button>
             <button class="clickable" id="edge-cap-btn" title="edge cap" type="button"></button>
+            <button class="clickable" id="label-btn" title="label" type="button"></button>
             <button class="clickable" id="select-btn" title="select" type="button"></button>
             <button class="clickable" id="erase-btn" title="eraser" type="button"></button>
             <button class="clickable" id="transform-btn" title="transform" type="button"></button>
