@@ -1,12 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-US">
 
 <head>
+    <title>TikzGraphGen</title>
+    <link rel="stylesheet" href="./css/shared.css">
     <link rel="stylesheet" href="./css/menu.css">
+    <link rel="stylesheet" href="./css/render.css">
 </head>
 
 <body>
-    <menu id="command-menu">
+    <div id="wrapper">
+        <menu id="command-menu">
             <div>
                 <h1>TikzGraphGen</h1>
             </div>
@@ -18,6 +22,7 @@
                     <h4 class="clickable">New Graph</h4>
                     <h4 class="clickable">Save</h4>
                     <h4 class="clickable">Save As</h4>
+                    <h4 class=clickable>Import</h4>
                     <h4 class="clickable">Export</h4>
                     <h4 class="clickable">Export As</h4>
                     <h4 class="clickable">Copy to Clipboard</h4>
@@ -38,21 +43,26 @@
                     <h3>Settings</h3>
                 </span>
             </div>
-        </ul>
-    </menu>
-    <menu id="tool-menu">
-        <button class = "clickable" id="vertex-btn"></button>
-        <button class = "clickable" id="edge-btn"></button>
-        <button class = "clickable" id="edge-cap-btn"></button>
-        <button class = "clickable" id="select-btn"></button>
-        <button class = "clickable" id="erase-btn"></button>
-        <button class = "clickable" id="transform-btn"></button>
-        <button class = "clickable" id="split-btn"></button>
-        <button class = "clickable" id="merge-btn"></button>
-    </menu>
-    <canvas>
-        Editor
-    </canvas>
+            </ul>
+        </menu>
+        <div class="border-line"></div>
+        <menu id="tool-menu">
+            <button class="clickable" id="vertex-btn" title="vertex" type="button"></button>
+            <button class="clickable" id="edge-btn" title="edge" type="button"></button>
+            <button class="clickable" id="edge-cap-btn" title="edge cap" type="button"></button>
+            <button class="clickable" id="select-btn" title="select" type="button"></button>
+            <button class="clickable" id="erase-btn" title="eraser" type="button"></button>
+            <button class="clickable" id="transform-btn" title="transform" type="button"></button>
+            <button class="clickable" id="split-btn" title="split" type="button"></button>
+            <button class="clickable" id="merge-btn" title="merge" type="button"></button>
+        </menu>
+        <div class="border-line"></div>
+        <div id="render-wrapper">
+            <canvas id="render">
+                Editor
+            </canvas>
+        </div>
+    </div>
 </body>
 
 </html>
