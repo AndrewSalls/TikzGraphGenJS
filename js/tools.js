@@ -61,6 +61,8 @@ toolList.set("edge", new Tool("edge",
             graphData.vertices.push(toolData.cursorVertex);
             toolData.tempEdge = new GraphObject.Edge(toolData.startPos, toolData.cursorVertex);
             graphData.edges.push(toolData.tempEdge);
+        } else {
+            toolData = null;
         }
     },
     (mouse, graphData) => {
