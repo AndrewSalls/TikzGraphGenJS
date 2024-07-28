@@ -28,6 +28,21 @@ document.addEventListener("DOMContentLoaded", () => {
     
     let graphData = new GraphData();
     let tool = "vertex";
+    
+    const buttons = document.querySelectorAll("#tool-menu > *");
+    for(const toolBtn of buttons) {
+        if(toolBtn.title === tool) {
+            toolBtn.classList.add("selected-tool");
+        }
+
+        toolBtn.addEventListener("click", () => {
+            tool = toolBtn.title;
+            for(const toolBtnMod of buttons) {
+                toolBtnMod.classList.remove("selected-tool");
+            }
+            toolBtn.classList.add("selected-tool");
+        })
+    }
 
     canvas.addEventListener("mousedown", ev => {
         toolList.get(tool).onDown(ev, graphData);

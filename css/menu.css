@@ -119,3 +119,8 @@
 #merge-btn {
     background-image: url("../img/MergeIcon.png");
 }
+
+#tool-menu .selected-tool {
+    border: 2px solid var(--text);
+    background-color: var(--accent);
+}
