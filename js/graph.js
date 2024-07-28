@@ -1,4 +1,4 @@
-import toolList from "./tools.js";
+import { toolList, toolData } from "./tools.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("render");
@@ -11,7 +11,35 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     
         getClickedObject(mouseX, mouseY) {
-            // TODO
+            let x = this.vertices.length - 1, y = this.edges.length - 1;
+            while(x >= 0 && y >= 0) {
+                if(this.vertices[x].id >= this.edges[y].id) {
+                    if(this.vertices[x].intersects(mouseX, mouseY)) {
+                        return this.vertices[x];
+                    }
+                    x = x - 1;
+                } else {
+                    if(this.edges[y].intersectsOrNear(mouseX, mouseY)) {
+                        return this.edges[y];
+                    }
+                    y = y - 1;
+                }
+            }
+
+            while(x >= 0) {
+                if(this.vertices[x].intersects(mouseX, mouseY)) {
+                    return this.vertices[x];
+                }
+                x = x - 1;
+            }
+            while(y >= 0) {
+                if(this.edges[y].intersectsOrNear(mouseX, mouseY)) {
+                    return this.edges[y];
+                }
+                y = y - 1;
+            }
+
+            return null;
         }
     
         drawGraph() {
@@ -21,8 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 vertex.render(ctx);
             }
     
-            // TODO also draw edges, edge caps, etc.
-
+            for(let edge of this.edges) {
+                edge.render(ctx);
+            }
         }
     }
     
@@ -41,12 +70,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 toolBtnMod.classList.remove("selected-tool");
             }
             toolBtn.classList.add("selected-tool");
+            toolData = null; // Clear data on tool switch to avoid weird cross-tool errors
         })
     }
 
     canvas.addEventListener("mousedown", ev => {
         toolList.get(tool).onDown(ev, graphData);
     });
+    canvas.addEventListener("mousemove", ev => {
+        toolList.get(tool).onMove(ev, graphData);
+    })
     canvas.addEventListener("mouseup", ev => {
         toolList.get(tool).onUp(ev, graphData);
     });
