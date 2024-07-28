@@ -1,4 +1,4 @@
-import { toolList, toolData } from "./tools.js";
+import { toolList, clearData } from "./tools.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("render");
@@ -10,9 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
             this.edges = [];
         }
     
-        getClickedObject(mouseX, mouseY) {
+        getClickedObject(mouseX, mouseY, filter = null) {
             let x = this.vertices.length - 1, y = this.edges.length - 1;
-            while(x >= 0 && y >= 0) {
+            while(x >= 0 && y >= 0 && filter === null) {
                 if(this.vertices[x].id >= this.edges[y].id) {
                     if(this.vertices[x].intersects(mouseX, mouseY)) {
                         return this.vertices[x];
@@ -26,13 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            while(x >= 0) {
+            while(x >= 0 && filter === "vertex") {
                 if(this.vertices[x].intersects(mouseX, mouseY)) {
                     return this.vertices[x];
                 }
                 x = x - 1;
             }
-            while(y >= 0) {
+            while(y >= 0 && filter === "edge") {
                 if(this.edges[y].intersectsOrNear(mouseX, mouseY)) {
                     return this.edges[y];
                 }
@@ -70,18 +70,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 toolBtnMod.classList.remove("selected-tool");
             }
             toolBtn.classList.add("selected-tool");
-            toolData = null; // Clear data on tool switch to avoid weird cross-tool errors
+            clearData();
         })
     }
 
     canvas.addEventListener("mousedown", ev => {
-        toolList.get(tool).onDown(ev, graphData);
+        toolList.get(tool).onDown({ x: ev.pageX - ev.currentTarget.offsetLeft, y: ev.pageY - ev.currentTarget.offsetTop }, graphData);
     });
     canvas.addEventListener("mousemove", ev => {
-        toolList.get(tool).onMove(ev, graphData);
+        toolList.get(tool).onMove({ x: ev.pageX - ev.currentTarget.offsetLeft, y: ev.pageY - ev.currentTarget.offsetTop }, graphData);
     })
     canvas.addEventListener("mouseup", ev => {
-        toolList.get(tool).onUp(ev, graphData);
+        toolList.get(tool).onUp({ x: ev.pageX - ev.currentTarget.offsetLeft, y: ev.pageY - ev.currentTarget.offsetTop }, graphData);
     });
     canvas.addEventListener("resize", () => {
         canvas.width = canvas.clientWidth;
