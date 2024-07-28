@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 toolBtnMod.classList.remove("selected-tool");
             }
             toolBtn.classList.add("selected-tool");
-            clearData();
+            clearData(graphData);
         })
     }
 

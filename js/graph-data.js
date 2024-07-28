@@ -1,7 +1,7 @@
 let increment = Number.MIN_SAFE_INTEGER; // id system, has 2^53 possible values before collision occurs, so don't do that
 
 class Vertex {
-    constructor(mouseX, mouseY) {
+    constructor(mouseX, mouseY, dummy = false) {
         this.x = mouseX;
         this.y = mouseY;
         this.shape = "circle";
@@ -9,8 +9,13 @@ class Vertex {
         this.borderScale = 2;
         this.color = "#000000";
         this.fill = "transparent";
-        this.id = increment;
-        increment = increment + 1;
+
+        if(!dummy) {
+            this.id = increment;
+            increment = increment + 1;
+        } else {
+            this.id = "dummy";
+        }
     }
 
     render(ctx) {
@@ -26,6 +31,10 @@ class Vertex {
     }
 
     intersects(mouseX, mouseY) {
+        if(this.id === "dummy") {
+            return false;
+        }
+
         switch(this.shape) {
             case "circle":
                 // Scale in this case is the radius
@@ -46,14 +55,19 @@ class Vertex {
 }
 
 class Edge {
-    constructor(vertexStart, vertexEnd) {
+    constructor(vertexStart, vertexEnd, dummy = false) {
         this.start = vertexStart;
         this.end = vertexEnd;
 
         this.scale = 3;
         this.color = "#000000";
-        this.id = increment;
-        increment = increment + 1;
+
+        if(!dummy) {
+            this.id = increment;
+            increment = increment + 1;
+        } else {
+            this.id = "dummy";
+        }
     }
 
     render(ctx) {
@@ -73,6 +87,10 @@ class Edge {
     }
 
     intersectsOrNear(mouseX, mouseY) {
+        if(this.id === "dummy") {
+            return false;
+        }
+        
         return false; //TODO
     }
 }
