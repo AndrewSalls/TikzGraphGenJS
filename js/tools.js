@@ -1,4 +1,5 @@
 import * as GraphObject from "./graph-data.js";
+import { Edit, makeEdit } from "./history.js";
 
 class Tool {
     constructor(name, downEv, moveEv, upEv) {
@@ -29,19 +30,35 @@ function clearData(graphData) {
 
 toolList.set("vertex", new Tool("vertex", 
     (mouse, graphData) => {
-        toolData = graphData.getClickedObject(mouse.x, mouse.y, "vertex");
-    },
-    (mouse, graphData) => {
-        if(toolData instanceof GraphObject.Vertex) {
-            toolData.x = mouse.x;
-            toolData.y = mouse.y;
+        toolData = {
+            vertex: graphData.getClickedObject(mouse.x, mouse.y, "vertex"),
+        };
+        if(toolData.vertex instanceof GraphObject.Vertex) {
+            toolData.originX = toolData.vertex.x;
+            toolData.originY = toolData.vertex.y;
+        } else {
+            toolData = null;
         }
     },
     (mouse, graphData) => {
         if(toolData !== null) {
+            toolData.vertex.x = mouse.x;
+            toolData.vertex.y = mouse.y;
+        }
+    },
+    (mouse, graphData) => {
+        if(toolData !== null) {
+            makeEdit(new Edit("mutation", {
+                type: "Vertex",
+                id: toolData.vertex.id,
+                originalValues: { x: toolData.originX, y: toolData.originY },
+                modifiedValues: { x: toolData.vertex.x, y: toolData.vertex.y }
+            }));
             toolData = null;
         } else {
-            graphData.vertices.push(new GraphObject.Vertex(mouse.x, mouse.y));
+            const created = new GraphObject.Vertex(mouse.x, mouse.y);
+            graphData.vertices.push(created);
+            makeEdit(new Edit("add", created));
         }
     }
 ));
@@ -76,6 +93,7 @@ toolList.set("edge", new Tool("edge",
             const selectedEnd = graphData.getClickedObject(mouse.x, mouse.y, "vertex");
             if(selectedEnd !== null) {
                 toolData.tempEdge.end = selectedEnd;
+                makeEdit(new Edit("add", toolData.tempEdge));
                 //TODO: Show curve handlebars to make it easier to edit
             } else {
                 graphData.edges.pop();

@@ -1,4 +1,5 @@
 import { toolList, clearData } from "./tools.js";
+import initialize from "./menu.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("render");
@@ -91,4 +92,5 @@ document.addEventListener("DOMContentLoaded", () => {
     canvas.height = canvas.clientHeight;
 
     setInterval(() => graphData.drawGraph(), 1000 / 30); // Refreshes 30 times per second
+    initialize(graphData);
 });
