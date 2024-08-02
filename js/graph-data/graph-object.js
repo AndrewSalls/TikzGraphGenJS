@@ -59,12 +59,21 @@ export class GraphObject {
     }
 
     /**
-     * Gives a bounding box for the object.
-     * @returns {[[Number, Number], [Number, Number]]} The coordinates of the upper left and bottom right corner. *SHOULD NOT BE CALLEd DIRECTLY*
+     * Gives a bounding box for the object. *SHOULD NOT BE CALLED DIRECTLY*
+     * @returns {[[Number, Number], [Number, Number]]} The coordinates of the upper left and bottom right corner.
      */
     boundingBox() {
         if(constructor.name === "GraphObject") {
             console.error("GraphObject is an abstract class and cannot be instantiated.")
         }
+    }
+
+    /**
+     * Gives the {@link GRAPH_DATATYPE} associated with this object. *SHOULD NOT BE CALLED DIRECTLY*
+     * @returns {GRAPH_DATATYPE} The type of graph object that this represents.
+     */
+    giveType() {
+        console.error("GraphObject is an abstract class and cannot be instantiated.");
+        return null;
     }
 }

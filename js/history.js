@@ -60,6 +60,7 @@ export function makeEdit(edit) {
     //Add to history
     history.push(edit);
     editPos = editPos + 1;
+    console.log(history);
 }
 
 /**
@@ -122,11 +123,11 @@ function handleEdit(graphData, edit, inverted = false) {
         case EDIT_TYPE.COMPOSITE:
             if(inverted) {
                 for(let x = edit.targetData.length - 1; x >= 0; x--) {
-                    handleEdit(edit.targetData[x], inverted);
+                    handleEdit(graphData, edit.targetData[x], inverted);
                 }
             } else {
                 for(const subEdit of edit.targetData) {
-                    handleEdit(subEdit, inverted);
+                    handleEdit(graphData, subEdit, inverted);
                 }
             }
             break;

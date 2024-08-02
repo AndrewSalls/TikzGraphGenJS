@@ -1,4 +1,4 @@
-import { GraphObject } from "./graph-object.js";
+import { GRAPH_DATATYPE, GraphObject } from "./graph-object.js";
 
 const MIN_OFFSET = 3;
 
@@ -82,5 +82,13 @@ export default class Edge extends GraphObject {
         
         return [[Math.min(startPos.x, endPos.x), Math.min(startPos.y, endPos.y)],
                 [Math.max(startPos.x, endPos.x), Math.max(startPos.y, endPos.y)]];
+    }
+
+    /**
+     * Gives the {@link GRAPH_DATATYPE} associated with this object. *SHOULD NOT BE CALLED DIRECTLY*
+     * @returns {GRAPH_DATATYPE} The type of graph object that this represents.
+     */
+    giveType() {
+        return GRAPH_DATATYPE.EDGE;
     }
 }

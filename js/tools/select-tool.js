@@ -1,3 +1,4 @@
+import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import { GraphSession, MouseInteraction } from "../graph-session.js";
 import { Edit, EDIT_TYPE, makeEdit } from "../history.js";
 import { Tool } from "./tool.js";
@@ -29,8 +30,16 @@ function onDown(mouse, graphData, toolData, selectedData) {
     toolData = {
         x: mouse.x,
         y: mouse.y,
-        isAreaSelect: false
+        isAreaSelect: false,
+        dragging: false
     };
+    
+    if(selectedData.has(graphData.getClickedObject(mouse.x, mouse.y))) {
+        toolData.dragging = true;
+        //Prevent initial delta from being NaN
+        toolData.newX = toolData.x;
+        toolData.newY = toolData.y;
+    }
 
     return toolData;
 }
@@ -45,8 +54,25 @@ function onDown(mouse, graphData, toolData, selectedData) {
  */
 function onMove(mouse, graphData, toolData, selectedData) {
     //TODO: Alt behavior for mass dragging selected items if clicking on selected item
+    if(toolData !== null && toolData.dragging) {
+        const deltaX = mouse.x - toolData.newX;
+        const deltaY = mouse.y - toolData.newY;
 
-    if(toolData !== null && (toolData.isAreaSelect || Math.sqrt(Math.pow(mouse.x - toolData.x, 2) + Math.pow(mouse.y - toolData.y, 2)) > MIN_AREA_SELECT)) {
+        const iter = selectedData.values();
+        let next = iter.next();
+        while(!next.done) {
+            if(next.value.giveType() === GRAPH_DATATYPE.VERTEX) {
+                next.value.x += deltaX;
+                next.value.y += deltaY;
+                next = iter.next();
+            } else { // Relies on next always returning vertices first
+                next.done = true;
+            }
+        }
+        
+        toolData.newX = mouse.x;
+        toolData.newY = mouse.y;
+    } else if(toolData !== null && (toolData.isAreaSelect || Math.sqrt(Math.pow(mouse.x - toolData.x, 2) + Math.pow(mouse.y - toolData.y, 2)) > MIN_AREA_SELECT)) {
         toolData.newX = mouse.x;
         toolData.newY = mouse.y;
         toolData.isAreaSelect = true;
@@ -65,7 +91,33 @@ function onMove(mouse, graphData, toolData, selectedData) {
  */
 function onUp(mouse, graphData, toolData, selectedData) {
     if(toolData !== null) {
-        if(toolData.isAreaSelect) {
+        if(toolData.dragging) {
+            const deltaX = toolData.newX - toolData.x;
+            const deltaY = toolData.newY - toolData.y;
+
+            const editList = [];
+            const iter = selectedData.values();
+            let next = iter.next();
+            while(!next.done) {
+                if(next.value.giveType() === GRAPH_DATATYPE.VERTEX) {
+                    editList.push(new Edit(EDIT_TYPE.MUTATION, {
+                        type: next.value.giveType(),
+                        id: next.value.id,
+                        originalValues: { x: next.value.x - deltaX, y: next.value.y - deltaY },
+                        modifiedValues: { x: next.value.x, y: next.value.y }
+                    }));
+                }
+                next = iter.next();
+            }
+
+            if(editList.length > 0) {
+                if(editList.length === 1) {
+                    makeEdit(editList[0]);
+                } else {
+                    makeEdit(new Edit(EDIT_TYPE.COMPOSITE, editList));
+                }
+            }
+        } else if(toolData.isAreaSelect) {
             selectedData.clear();
             const iter = graphData.iterateThroughAllData();
             let next = iter.next();

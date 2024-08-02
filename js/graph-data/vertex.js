@@ -1,4 +1,4 @@
-import { GraphObject } from "./graph-object.js";
+import { GRAPH_DATATYPE, GraphObject } from "./graph-object.js";
 
 /**
  * A representation of a LaTeX Tikz node.
@@ -83,5 +83,13 @@ export default class Vertex extends GraphObject {
         }
 
         return [[this.x - this.scaleX, this.y - this.scaleY], [this.x + this.scaleX, this.y + this.scaleY]];
+    }
+
+    /**
+     * Gives the {@link GRAPH_DATATYPE} associated with this object. *SHOULD NOT BE CALLED DIRECTLY*
+     * @returns {GRAPH_DATATYPE} The type of graph object that this represents.
+     */
+    giveType() {
+        return GRAPH_DATATYPE.VERTEX;
     }
 }
