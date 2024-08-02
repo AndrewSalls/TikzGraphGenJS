@@ -1,5 +1,6 @@
 
 import { GRAPH_DATATYPE } from "./graph-data/graph-object.js";
+import { tool_onPaint } from "./tools/tool.js";
 
 /**
  * An enum representing the type of click performed by a mouse. Multiple values can be set,
@@ -69,27 +70,40 @@ export class GraphSession {
                 }
                 x = x - 1;
             } else {
-                if(this.edges[y].intersectsOrNear(mouseX, mouseY)) {
+                if(this.edges[y].intersects(mouseX, mouseY)) {
                     return this.edges[y];
                 }
                 y = y - 1;
             }
         }
 
-        while(x >= 0 && filter === GRAPH_DATATYPE.VERTEX) {
+        while(x >= 0 && (filter === GRAPH_DATATYPE.VERTEX || filter === null)) {
             if(this.vertices[x].intersects(mouseX, mouseY)) {
                 return this.vertices[x];
             }
             x = x - 1;
         }
-        while(y >= 0 && filter === GRAPH_DATATYPE.EDGE) {
-            if(this.edges[y].intersectsOrNear(mouseX, mouseY)) {
+        while(y >= 0 && (filter === GRAPH_DATATYPE.EDGE || filter === null)) {
+            if(this.edges[y].intersects(mouseX, mouseY)) {
                 return this.edges[y];
             }
             y = y - 1;
         }
 
         return null;
+    }
+
+    /**
+     * Provides access to all graph objects at once in the form of an iterator.
+     * @returns {Iterator} A single iterable array containing all graph objects stored in the session.
+     */
+    *iterateThroughAllData() {
+        for(let x = 0; x < this.vertices.length; x++) {
+            yield this.vertices[x];
+        }
+        for(let x = 0; x < this.edges.length; x++) {
+            yield this.edges[x];
+        }
     }
 
     /**
@@ -105,5 +119,7 @@ export class GraphSession {
         for(let edge of this.edges) {
             edge.render(this.ctx);
         }
+
+        tool_onPaint(this, this.ctx);
     }
 }

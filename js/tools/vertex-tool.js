@@ -11,7 +11,7 @@ let VERTEX_TOOL;
  */
 export default function accessVertexTool() { 
     if(VERTEX_TOOL === undefined) {
-        VERTEX_TOOL = new Tool("vertex", onDown, onMove, onUp);
+        VERTEX_TOOL = new Tool("vertex", onDown, onMove, onUp, onPaint);
     }
 
     return VERTEX_TOOL;
@@ -22,15 +22,18 @@ export default function accessVertexTool() {
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
  * @param {*} toolData Temporary data storage for this tool.
+ * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
  * @returns {*} The updated value for toolData.
  */
-function onDown(mouse, graphData, toolData) {
+function onDown(mouse, graphData, toolData, selectedData) {
     toolData = {
         vertex: graphData.getClickedObject(mouse.x, mouse.y, GRAPH_DATATYPE.VERTEX),
     };
     if(toolData.vertex instanceof Vertex) {
         toolData.originX = toolData.vertex.x;
         toolData.originY = toolData.vertex.y;
+        selectedData.clear();
+        selectedData.add(toolData.vertex);
     } else {
         toolData = null;
     }
@@ -43,9 +46,10 @@ function onDown(mouse, graphData, toolData) {
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
  * @param {*} toolData Temporary data storage for this tool.
+ * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
  * @returns {*} The updated value for toolData.
  */
-function onMove(mouse, graphData, toolData) {
+function onMove(mouse, graphData, toolData, selectedData) {
     if(toolData !== null) {
         toolData.vertex.x = mouse.x;
         toolData.vertex.y = mouse.y;
@@ -59,9 +63,10 @@ function onMove(mouse, graphData, toolData) {
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
  * @param {*} toolData Temporary data storage for this tool.
+ * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
  * @returns {*} The updated value for toolData.
  */
-function onUp(mouse, graphData, toolData) {
+function onUp(mouse, graphData, toolData, selectedData) {
     if(toolData !== null) {
         makeEdit(new Edit(EDIT_TYPE.MUTATION, {
             type: "Vertex",
@@ -69,12 +74,19 @@ function onUp(mouse, graphData, toolData) {
             originalValues: { x: toolData.originX, y: toolData.originY },
             modifiedValues: { x: toolData.vertex.x, y: toolData.vertex.y }
         }));
+        
+        selectedData.clear();
+        selectedData.add(toolData.vertex);
         toolData = null;
     } else {
         const created = new Vertex(mouse.x, mouse.y);
         graphData.vertices.push(created);
         makeEdit(new Edit(EDIT_TYPE.ADD, created));
+        selectedData.clear();
+        selectedData.add(created);
     }
 
     return toolData;
 }
+
+const onPaint = undefined;

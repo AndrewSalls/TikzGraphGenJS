@@ -12,6 +12,7 @@ export default function initializeToolbar(graphData) {
     lastSelectedTool.classList.add("selected-tool");
     document.querySelector("#vertex-btn").onclick = ev => setSelected(TOOL_TYPE.VERTEX, ev.target, graphData);
     document.querySelector("#edge-btn").onclick = ev => setSelected(TOOL_TYPE.EDGE, ev.target, graphData);
+    document.querySelector("#select-btn").onclick = ev => setSelected(TOOL_TYPE.SELECT, ev.target, graphData);
 
     document.addEventListener("keyup", ev => {
         // if(ev.ctrlKey) {

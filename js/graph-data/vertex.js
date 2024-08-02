@@ -72,4 +72,16 @@ export default class Vertex extends GraphObject {
                 console.error("Border calculation not implemented for shape " + this.shape);
         }
     }
+
+    /**
+     * Gives a bounding box for the vertex.
+     * @returns {[[Number, Number], [Number, Number]]} The coordinates of the upper left and bottom right corner.
+     */
+    boundingBox() {
+        if(typeof this.scale === "number") {
+            return [[this.x - this.scale, this.y - this.scale], [this.x + this.scale, this.y + this.scale]];
+        }
+
+        return [[this.x - this.scaleX, this.y - this.scaleY], [this.x + this.scaleX, this.y + this.scaleY]];
+    }
 }

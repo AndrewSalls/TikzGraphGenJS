@@ -15,7 +15,7 @@ function convertMouse(ev) {
     clickOptions += ev.altKey ? MOUSE_CLICK_TYPE.ALT_HELD : 0;
     clickOptions += ev.ctrlKey ? MOUSE_CLICK_TYPE.CTRL_HELD : 0;
 
-    return new MouseInteraction(ev.pageX - ev.currentTarget.offsetLeft, ev.pageY - ev.currentTarget.offsetTop);
+    return new MouseInteraction(ev.pageX - ev.currentTarget.offsetLeft, ev.pageY - ev.currentTarget.offsetTop, clickOptions);
 }
 
 document.addEventListener("DOMContentLoaded", () => {

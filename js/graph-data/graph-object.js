@@ -57,4 +57,14 @@ export class GraphObject {
             console.error("GraphObject is an abstract class and cannot be instantiated.");
         }
     }
+
+    /**
+     * Gives a bounding box for the object.
+     * @returns {[[Number, Number], [Number, Number]]} The coordinates of the upper left and bottom right corner. *SHOULD NOT BE CALLEd DIRECTLY*
+     */
+    boundingBox() {
+        if(constructor.name === "GraphObject") {
+            console.error("GraphObject is an abstract class and cannot be instantiated.")
+        }
+    }
 }

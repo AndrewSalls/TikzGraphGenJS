@@ -1,5 +1,6 @@
 import { GraphSession, MouseInteraction } from "../graph-session.js";
 import accessEdgeTool from "./edge-tool.js";
+import accessSelectTool from "./select-tool.js";
 import accessVertexTool from "./vertex-tool.js";
 
 /**
@@ -9,7 +10,8 @@ import accessVertexTool from "./vertex-tool.js";
  */
 export const TOOL_TYPE = {
     VERTEX: 0,
-    EDGE: 1
+    EDGE: 1,
+    SELECT: 4
 }
 
 /**
@@ -22,17 +24,20 @@ export class Tool {
      * @param {(mouseData: MouseInteraction, graphData: GraphSession, toolData: Object|null)} downEv the event called when the user starts holding a mouse button on the graph.
      * @param {(mouseData: MouseInteraction, graphData: GraphSession, toolData: Object|null)} moveEv the event called when the user moves their mouse on the graph, regardless of if they clicked or not.
      * @param {(mouseData: MouseInteraction, graphData: GraphSession, toolData: Object|null)} upEv the event called when the user releases a mouse button on the graph.
+     * @param {(graphData: GraphSession, toolData: Object|null, CanvasRenderingContext2D ctx)} paintEv the event called when the canvas refreshes, called after all other paint effects
      */
-    constructor(name, downEv, moveEv, upEv) {
+    constructor(name, downEv, moveEv, upEv, paintEv = undefined) {
         this.name = name;
         this.onDown = downEv;
         this.onMove = moveEv;
         this.onUp = upEv;
+        this.onPaint = paintEv;
     }
 };
 
 let activeTool = accessVertexTool();
 let toolData = null;
+let selectedData = new Set();
 
 /**
  * Sets the active tool.
@@ -45,6 +50,9 @@ export function setTool(toolType) {
             break;
         case TOOL_TYPE.EDGE:
             activeTool = accessEdgeTool();
+            break;
+        case TOOL_TYPE.SELECT:
+            activeTool = accessSelectTool();
             break;
         default:
             console.error("Missing tool link to tool of type " + toolType + ", or tool is not yet implemented.");
@@ -74,7 +82,7 @@ export function clearData(graphData) {
  * @param {GraphSession} graphData the graph data the tool can modify.
  */
 export function tool_onMouseDown(mouseData, graphData) {
-    toolData = activeTool.onDown(mouseData, graphData, toolData);
+    toolData = activeTool.onDown(mouseData, graphData, toolData, selectedData);
 }
 
 /**
@@ -83,7 +91,7 @@ export function tool_onMouseDown(mouseData, graphData) {
  * @param {GraphSession} graphData the graph data the tool can modify.
  */
 export function tool_onMouseMove(mouseData, graphData) {
-    toolData = activeTool.onMove(mouseData, graphData, toolData);
+    toolData = activeTool.onMove(mouseData, graphData, toolData, selectedData);
 }
 
 /**
@@ -92,5 +100,16 @@ export function tool_onMouseMove(mouseData, graphData) {
  * @param {GraphSession} graphData the graph data the tool can modify.
  */
 export function tool_onMouseUp(mouseData, graphData) {
-    toolData = activeTool.onUp(mouseData, graphData, toolData);
+    toolData = activeTool.onUp(mouseData, graphData, toolData, selectedData);
+}
+
+/**
+ * Calls the active tool's paint event handler.
+ * @param {GraphSession} graphData the graph data the tool can modify.
+ * @param {CanvasRenderingContext2D} ctx the canvas context to draw on.
+ */
+export function tool_onPaint(graphData, ctx) {
+    if(activeTool.onPaint !== undefined) {
+        activeTool.onPaint(graphData, toolData, ctx);
+    }
 }

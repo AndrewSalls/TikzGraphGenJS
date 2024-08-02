@@ -13,7 +13,7 @@ let EDGE_TOOL;
  */
 export default function accessEdgeTool() {
     if(EDGE_TOOL === undefined) {
-        EDGE_TOOL = new Tool("edge", onDown, onMove, onUp);
+        EDGE_TOOL = new Tool("edge", onDown, onMove, onUp, onPaint);
     }
 
     return EDGE_TOOL;
@@ -24,9 +24,10 @@ export default function accessEdgeTool() {
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
  * @param {*} toolData Temporary data storage for this tool.
+ * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
  * @returns {*} The updated value for toolData.
  */
-function onDown(mouse, graphData, toolData) {
+function onDown(mouse, graphData, toolData, selectedData) {
     toolData = { startPos: graphData.getClickedObject(mouse.x, mouse.y, GRAPH_DATATYPE.VERTEX)};
         
     if(toolData.startPos !== null) {
@@ -52,9 +53,10 @@ function onDown(mouse, graphData, toolData) {
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
  * @param {*} toolData Temporary data storage for this tool.
+ * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
  * @returns {*} The updated value for toolData.
  */
-function onMove(mouse, graphData, toolData) {
+function onMove(mouse, graphData, toolData, selectedData) {
     if(toolData !== null) {
         toolData.cursorVertex.x = mouse.x;
         toolData.cursorVertex.y = mouse.y;
@@ -68,21 +70,28 @@ function onMove(mouse, graphData, toolData) {
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
  * @param {*} toolData Temporary data storage for this tool.
+ * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
  * @returns {*} The updated value for toolData.
  */
-function onUp(mouse, graphData, toolData) {
+function onUp(mouse, graphData, toolData, selectedData) {
     if(toolData !== null) {
         const selectedEnd = graphData.getClickedObject(mouse.x, mouse.y, GRAPH_DATATYPE.VERTEX);
         if(selectedEnd !== null) {
             toolData.tempEdge.end = selectedEnd;
             makeEdit(new Edit(EDIT_TYPE.ADD, toolData.tempEdge));
-            //TODO: Show curve handlebars to make it easier to edit
+            selectedData.clear();
+            selectedData.add(toolData.tempEdge);
         } else {
             graphData.edges.pop();
+            selectedData.clear();
         }
         graphData.vertices.pop();
         toolData = null;
+    } else {
+        selectedData.clear();
     }
 
     return toolData;
 }
+
+const onPaint = undefined;

@@ -1,5 +1,7 @@
 import { GraphObject } from "./graph-object.js";
 
+const MIN_OFFSET = 3;
+
 /**
  * A representation of a LaTeX Tikz path (specifically a line).
  */
@@ -30,10 +32,10 @@ export default class Edge extends GraphObject {
         ctx.strokeStyle = this.color;
         ctx.lineWidth = this.scale;
         
-        // TODO: Probably want to change to drawing to center and using clip path, easier than complex fill operations
         const angle = Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
         const startPos = this.start.borderPoint(angle);
         const endPos = this.end.borderPoint(angle + Math.PI);
+        // TODO: Probably want to change to drawing to center and using clip path, easier than complex fill operations
 
         ctx.moveTo(startPos.x, startPos.y);
         ctx.lineTo(endPos.x, endPos.y);
@@ -54,6 +56,31 @@ export default class Edge extends GraphObject {
             return false;
         }
         
-        return false; //TODO
+        const angle = Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
+        const startPos = this.start.borderPoint(angle);
+        const endPos = this.end.borderPoint(angle + Math.PI);
+
+        const t = Math.max(0, Math.min(1, 
+            ((mouseX - startPos.x) * (endPos.x - startPos.x) + (mouseY - startPos.y) * (endPos.y - startPos.y))
+            /
+            (Math.pow(endPos.x - startPos.x, 2) + Math.pow(endPos.y-startPos.y, 2))));
+
+        const minDistance = Math.sqrt(Math.pow(mouseX - startPos.x - t * (endPos.x - startPos.x), 2) + 
+                                      Math.pow(mouseY - startPos.y - t * (endPos.y - startPos.y), 2));
+
+        return minDistance <= MIN_OFFSET;
+    }
+
+    /**
+     * Gives a bounding box for the object.
+     * @returns {[[Number, Number], [Number, Number]]} The coordinates of the upper left and bottom right corner.
+     */
+    boundingBox() {
+        const angle = Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
+        const startPos = this.start.borderPoint(angle);
+        const endPos = this.end.borderPoint(angle + Math.PI);
+        
+        return [[Math.min(startPos.x, endPos.x), Math.min(startPos.y, endPos.y)],
+                [Math.max(startPos.x, endPos.x), Math.max(startPos.y, endPos.y)]];
     }
 }
