@@ -1,6 +1,37 @@
-import { clearData } from "./tools.js";
+import { GRAPH_DATATYPE } from "./graph-data/graph-object.js";
+import { GraphSession } from "./graph-session.js";
+import { clearData } from "./tools/tool.js";
+/**
+ * Defines the list of valid edit types
+ * @readonly
+ * @enum {Number}
+ */
+export const EDIT_TYPE = {
+    /** Adds an object to the graph data */
+    ADD: 0,
+    /** Removes an object from the graph data */
+    REMOVE: 1,
+    /** Changes the state of an existing graph data object */
+    MUTATION: 2,
+    /** Multiple sequential edits */
+    COMPOSITE: 3
+};
 
-class Edit {
+/**
+ * Defines an arbitrary edit performed on the graph data.
+ */
+export class Edit {
+    /**
+     * @param {EDIT_TYPE} type The type of edit being created
+     * @param {*} targetData semi-arbitrary data that describes the type of edit.
+     * For add and remove edits, consists of the object being added or removed.
+     * For composite edits, consists of a list of each individual edit.
+     * For mutation operations, consists of an object with the following attributes:
+     * - type: the type of object being edited
+     * - id: the id of the object being edited, which should already exist in the graph data
+     * - originalValues: all key-value pairs in the object that will be edited by the mutation, with their original values
+     * - modifiedValues: all key-value pairs that will be edited, with the edited values
+     */
     constructor(type, targetData) {
         this.type = type;
         this.targetData = targetData;
@@ -11,7 +42,11 @@ const history = [];
 let editPos = -1;
 let maxHistory = 500;
 
-function makeEdit(edit) {
+/**
+ * Takes an applied edit and appends it to the history stack, clearing any undone edits in the process.
+ * @param {Edit} edit The edit being applied.
+ */
+export function makeEdit(edit) {
     //Cycle out old history
     if(history.length === maxHistory) {
         history.shift();
@@ -27,7 +62,13 @@ function makeEdit(edit) {
     editPos = editPos + 1;
 }
 
-function undo(graphData) {
+/**
+ * Undoes the previously performed edit based on the current position in the edit stack.
+ * 
+ * Does nothing if there are no previous edits. Clears any active graphData to avoid dereference errors.
+ * @param {GraphSession} graphData the current state of the graph.
+ */
+export function undo(graphData) {
     clearData(graphData);
     if(editPos >= 0) {
         handleEdit(graphData, history[editPos], true);
@@ -35,7 +76,13 @@ function undo(graphData) {
     }
 }
 
-function redo(graphData) {
+/**
+ * Redoes a previously undone edit based on the current position in the edit stack.
+ * 
+ * Does nothing if no edits have been undone since the last edit made. Clears any active graphData to avoid dereference errors.
+ * @param {GraphSession} graphData the current state of the graph.
+ */
+export function redo(graphData) {
     clearData(graphData);
     if(editPos < history.length - 1) {
         editPos = editPos + 1;
@@ -43,30 +90,36 @@ function redo(graphData) {
     }
 }
 
+/**
+ * Applies or undoes the specified edit.
+ * @param {GraphSession} graphData the current state of the graph.
+ * @param {Edit} edit the edit to apply to the graph.
+ * @param {Boolean} inverted Whether the edit is being applied or undone (true is undone, defaults to false).
+ */
 function handleEdit(graphData, edit, inverted = false) {
     switch(edit.type) {
-        case "add":
+        case EDIT_TYPE.ADD:
             if(inverted) {
                 removeEdit(graphData, edit.targetData);
             } else {
                 addEdit(graphData, edit.targetData);
             }
             break;
-        case "remove":
+        case EDIT_TYPE.REMOVE:
             if(inverted) {
                 addEdit(graphData, edit.targetData);
             } else {
                 removeEdit(graphData, edit.targetData);
             }
             break;
-        case "mutation":
+        case EDIT_TYPE.MUTATION:
             if(inverted) {
                 mutationEdit(graphData, edit.targetData.type, edit.targetData.id, edit.targetData.originalValues);
             } else {
                 mutationEdit(graphData, edit.targetData.type, edit.targetData.id, edit.targetData.modifiedValues);
             }
             break;
-        case "composite":
+        case EDIT_TYPE.COMPOSITE:
             if(inverted) {
                 for(let x = edit.targetData.length - 1; x >= 0; x--) {
                     handleEdit(edit.targetData[x], inverted);
@@ -82,6 +135,11 @@ function handleEdit(graphData, edit, inverted = false) {
     }
 }
 
+/**
+ * Adds an object to the graph.
+ * @param {GraphSession} graphData the current state of the graph.
+ * @param {*} editData the object to add to the graph.
+ */
 function addEdit(graphData, editData) {
     switch(editData.constructor.name) {
         case "Vertex":
@@ -107,6 +165,11 @@ function addEdit(graphData, editData) {
     }
 }
 
+/**
+ * Removes an object from the graph.
+ * @param {GraphSession} graphData the current state of the graph.
+ * @param {*} editData the object to remove from the graph.
+ */
 function removeEdit(graphData, editData) {
     switch(editData.constructor.name) {
         case "Vertex":
@@ -128,11 +191,19 @@ function removeEdit(graphData, editData) {
     }
 }
 
+/**
+ * Applies a change of state to an object in the current graph.
+ * @param {GraphSession} graphData the current graph.
+ * @param {GRAPH_DATATYPE} type the type of object being modified.
+ * @param {Number} id the id of the object being modified.
+ * @param {*} toModify An object containing exactly the set of key-value pairs that should be modified.
+ * All keys should already exist in the target object, and the object id should not be modified.
+ */
 function mutationEdit(graphData, type, id, toModify) {
     // IMPORTANT: for simplicity & consistancy, objects should not gain or lose keys over their lifetime; 
     // otherwise this will not properly replace keys. Also, edits should not change object id
     switch(type) {
-        case "Vertex":
+        case GRAPH_DATATYPE.VERTEX:
             for(let x = graphData.vertices.length - 1; x >= 0; x--) {
                 if(graphData.vertices[x].id === id) {
                     for(const key of Object.keys(toModify)) {
@@ -141,7 +212,7 @@ function mutationEdit(graphData, type, id, toModify) {
                 }
             }
             break;
-        case "Edge":
+        case GRAPH_DATATYPE.EDGE:
             for(let x = graphData.edges.length - 1; x >= 0; x--) {
                 if(graphData.edges[x].id === id) {
                     for(const key of Object.keys(toModify)) {
@@ -154,5 +225,3 @@ function mutationEdit(graphData, type, id, toModify) {
             console.error("Mutation edit not defined for type " + type);
     }
 }
-
-export { Edit, makeEdit, undo, redo };
