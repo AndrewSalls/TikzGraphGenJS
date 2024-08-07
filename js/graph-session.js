@@ -1,6 +1,6 @@
 
 import { GRAPH_DATATYPE } from "./graph-data/graph-object.js";
-import { tool_onPaint } from "./tools/tool.js";
+import { isSelected, tool_onPaint } from "./tools/tool.js";
 
 /**
  * An enum representing the type of click performed by a mouse. Multiple values can be set,
@@ -36,6 +36,15 @@ export class MouseInteraction {
         this.y = mouseY;
         this.clickType = clickType;
     }
+}
+
+/**
+ * Describes built-in render settings, like highlighting color when selecting objects or using the select tool.
+ */
+export const RENDER_SETTINGS = {
+    SELECT_MAIN: "#93b8e799",
+    SELECT_BORDER: "#0078d499",
+    SELECT_WIDTH: 3
 }
 
 /**
@@ -113,11 +122,11 @@ export class GraphSession {
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
         for(let vertex of this.vertices) {
-            vertex.render(this.ctx);
+            vertex.render(this.ctx, isSelected(vertex));
         }
 
         for(let edge of this.edges) {
-            edge.render(this.ctx);
+            edge.render(this.ctx, isSelected(edge));
         }
 
         tool_onPaint(this, this.ctx);

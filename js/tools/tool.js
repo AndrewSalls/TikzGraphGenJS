@@ -1,3 +1,4 @@
+import { GraphObject } from "../graph-data/graph-object.js";
 import { GraphSession, MouseInteraction } from "../graph-session.js";
 import accessEdgeTool from "./edge-tool.js";
 import accessSelectTool from "./select-tool.js";
@@ -57,6 +58,15 @@ export function setTool(toolType) {
         default:
             console.error("Missing tool link to tool of type " + toolType + ", or tool is not yet implemented.");
     }
+}
+
+/**
+ * Determines if a graph object has been selected.
+ * @param {GraphObject} graphObj the object to check.
+ * @returns {Boolean} whether the object is selected.
+ */
+export function isSelected(graphObj) {
+    return selectedData.has(graphObj);
 }
 
 /**

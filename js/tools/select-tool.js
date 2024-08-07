@@ -1,5 +1,5 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
-import { GraphSession, MouseInteraction } from "../graph-session.js";
+import { GraphSession, MouseInteraction, RENDER_SETTINGS } from "../graph-session.js";
 import { Edit, EDIT_TYPE, makeEdit } from "../history.js";
 import { Tool } from "./tool.js";
 
@@ -153,11 +153,12 @@ function onUp(mouse, graphData, toolData, selectedData) {
 function onPaint(graphData, toolData, ctx) {
     if(toolData !== null && toolData.isAreaSelect) {
         ctx.beginPath();
-        ctx.fillStyle = "#93b8e799";
-        ctx.lineWidth = "3px";
-        ctx.strokeStyle = "#0078d499";
+        ctx.fillStyle = RENDER_SETTINGS.SELECT_MAIN;
+        ctx.lineWidth = RENDER_SETTINGS.SELECT_WIDTH;
+        ctx.strokeStyle = RENDER_SETTINGS.SELECT_BORDER;
         ctx.fillRect(Math.min(toolData.newX, toolData.x), Math.min(toolData.newY, toolData.y), Math.abs(toolData.newX - toolData.x), Math.abs(toolData.newY - toolData.y));
         ctx.strokeRect(Math.min(toolData.newX, toolData.x), Math.min(toolData.newY, toolData.y), Math.abs(toolData.newX - toolData.x), Math.abs(toolData.newY - toolData.y));
         ctx.stroke();
+        ctx.closePath();
     }
 }

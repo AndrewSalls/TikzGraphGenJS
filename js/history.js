@@ -60,7 +60,6 @@ export function makeEdit(edit) {
     //Add to history
     history.push(edit);
     editPos = editPos + 1;
-    console.log(history);
 }
 
 /**

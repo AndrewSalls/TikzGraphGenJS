@@ -1,4 +1,5 @@
 import { GRAPH_DATATYPE, GraphObject } from "./graph-object.js";
+import { RENDER_SETTINGS } from "../graph-session.js";
 
 /**
  * A representation of a LaTeX Tikz node.
@@ -26,9 +27,22 @@ export default class Vertex extends GraphObject {
     /**
      * Draws the vertex based on its set properties.
      * @param {CanvasRenderingContext2D} ctx The canvas rendering context with which to draw the vertex.
+     * @param {Boolean} selected Whether this vertex has been selected by the user.
      */
-    render(ctx) {
-        //TODO: support other shapes
+    render(ctx, selected = false) {
+        //TODO: support other shapes, move rendering for shapes into function to avoid duplicating code between select outline and actual shape
+
+        if(selected) {
+            ctx.beginPath();
+            ctx.fillStyle = RENDER_SETTINGS.SELECT_MAIN;
+            ctx.lineWidth = RENDER_SETTINGS.SELECT_WIDTH;
+            ctx.strokeStyle = RENDER_SETTINGS.SELECT_BORDER;
+            ctx.arc(this.x, this.y, this.scale + ctx.lineWidth, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            ctx.closePath();
+        }
+
         ctx.beginPath();
         ctx.lineWidth = this.borderScale;
         ctx.strokeStyle = this.color;
@@ -37,6 +51,7 @@ export default class Vertex extends GraphObject {
         ctx.arc(this.x, this.y, this.scale, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
+        ctx.closePath();
     }
 
     /**

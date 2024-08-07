@@ -26,12 +26,17 @@ document.addEventListener("DOMContentLoaded", () => {
     canvas.addEventListener("mousedown", ev => tool_onMouseDown(convertMouse(ev), graphData));
     canvas.addEventListener("mouseup", ev => tool_onMouseUp(convertMouse(ev), graphData));
     canvas.addEventListener("mousemove", ev => tool_onMouseMove(convertMouse(ev), graphData));
-    canvas.addEventListener("resize", () => {
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
-    });
+    // Disable right click on canvas
+    canvas.addEventListener("contextmenu", ev => ev.preventDefault());
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
+    const onResize = new ResizeObserver(entries => {
+        canvas.width = entries[0].contentBoxSize[0].inlineSize;
+        canvas.height = entries[0].contentBoxSize[0].blockSize;
+        console.log(entries[0].contentBoxSize[0]);
+    });
+    onResize.observe(canvas);
+
 
     setInterval(() => graphData.drawGraph(), 1000 / 30); // Refreshes 30 times per second
     initializeMenubar(graphData);

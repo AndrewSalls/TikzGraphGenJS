@@ -39,8 +39,9 @@ export class GraphObject {
     /**
      * Renders the object on the canvas. *SHOULD NOT BE CALLED DIRECTLY*
      * @param {CanvasRenderingContext2D} ctx The canvas rendering context with which to draw the object.
+     * @param {Boolean} selected Whether this object has been selected by the user.
      */
-    render() {
+    render(ctx, selected = false) {
         if(constructor.name === "GraphObject") {
             console.error("GraphObject is an abstract class and cannot be instantiated.");
         }
