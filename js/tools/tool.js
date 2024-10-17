@@ -3,7 +3,7 @@ import { GraphSession, MouseInteraction } from "../graph-session.js";
 import accessEdgeTool from "./edge-tool.js";
 import accessSelectTool from "./select-tool.js";
 import accessVertexTool from "./vertex-tool.js";
-import accessEraserTool from "./eraser-tool.js";
+import accessEraserTool, { eraseSelected } from "./eraser-tool.js";
 
 /**
  * An enum containing the list of valid tool types.
@@ -84,6 +84,15 @@ export function clearData(graphData) {
     activeTool.clearData(graphData, toolData);
     toolData = null;
 };
+
+/**
+ * Deletes all currently selected items.
+ * @param {GraphSession} graphData The graph data that the tool will delete selected items from.
+ */
+export function deleteSelected(graphData) {
+    eraseSelected(graphData, selectedData);
+    selectedData.clear();
+}
 
 /**
  * Calls the active tool's mouse down event handler.

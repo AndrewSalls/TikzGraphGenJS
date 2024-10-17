@@ -89,6 +89,17 @@ function onUp(mouse, graphData, toolData, selectedData) {
     return null;
 }
 
+export function eraseSelected(graphData, selectedData) {
+    const toolData = {
+        vertices: [],
+        edges: []
+    };
+
+    appendAndEraseData(selectedData, graphData, toolData);
+    createErasedHistory(toolData);
+
+}
+
 /**
  * Clears the current tool data, making sure to clean up any dummy data from the graph data as well.
  * @param {GraphSession} graphData The graph data that the tool (potentially) modified with dummy data.

@@ -1,5 +1,5 @@
 import { GraphSession } from "./graph-session.js";
-import { clearData, setTool } from "./tools/tool.js";
+import { clearData, setTool, deleteSelected } from "./tools/tool.js";
 import { undo, redo } from "./history.js";
 import { TOOL_TYPE } from "./tools/tool.js";
 
@@ -10,6 +10,7 @@ import { TOOL_TYPE } from "./tools/tool.js";
 export default function initializeMenubar(graphData) {
     document.querySelector("#undo-btn").onclick = () => undo(graphData);
     document.querySelector("#redo-btn").onclick = () => redo(graphData);
+    document.querySelector("#delete-btn").onclick = () => deleteSelected(graphData);
 
     document.querySelector("#vertex-menu-btn").onclick = () => { setTool(TOOL_TYPE.VERTEX); clearData(graphData); }
     document.querySelector("#edge-menu-btn").onclick = () => { setTool(TOOL_TYPE.EDGE); clearData(graphData); }
@@ -21,6 +22,10 @@ export default function initializeMenubar(graphData) {
                 undo(graphData);
             } else if(ev.key === "y") {
                 redo(graphData);
+            }
+        } else {
+            if(ev.key === "Delete" || ev.key === "Backspace") {
+                deleteSelected(graphData);
             }
         }
     });
