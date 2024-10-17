@@ -2,6 +2,15 @@ import { GRAPH_DATATYPE, GraphObject } from "./graph-object.js";
 import { RENDER_SETTINGS } from "../graph-session.js";
 
 /**
+ * An enum containing the list of valid vertex shapes.
+ * @enum
+ * @readonly
+ */
+export const VERTEX_SHAPE = {
+    CIRCLE: 0
+}
+
+/**
  * A representation of a LaTeX Tikz node.
  */
 export default class Vertex extends GraphObject {
@@ -17,11 +26,12 @@ export default class Vertex extends GraphObject {
 
         this.x = mouseX;
         this.y = mouseY;
-        this.shape = "circle";
+        this.shape = VERTEX_SHAPE.CIRCLE;
         this.scale = 20;
         this.borderScale = 2;
         this.color = "#000000";
         this.fill = "transparent";
+        this.adjacent = new Set();
     }
 
     /**
@@ -66,11 +76,30 @@ export default class Vertex extends GraphObject {
         }
 
         switch(this.shape) {
-            case "circle":
-                // Scale in this case is the radius
+            case VERTEX_SHAPE.CIRCLE:
                 return Math.sqrt(Math.pow(mouseX - this.x, 2) + Math.pow(mouseY - this.y, 2)) <= (this.scale + this.borderScale);
             default:
                 console.error("Intersection not implemented for shape " + this.shape);
+        }
+    }
+
+    /**
+     * Determines if the object, based on its set properties, intersects the provided circle. *SHOULD NOT BE CALLED DIRECTLY*
+     * @param {Number} mouseX the x position of the circle's center.
+     * @param {Number} mouseY the y position of the circle's center.
+     * @param {Number} radius the radius of the circle.
+     * @returns {Boolean} Whether the shape intersects the provided circle.
+     */
+    intersect(coordX, coordY, radius) {
+        if(this.id === "dummy") {
+            return false;
+        }
+
+        switch(this.shape) {
+            case VERTEX_SHAPE.CIRCLE:
+                return Math.sqrt(Math.pow(coordX - this.x, 2) + Math.pow(coordY - this.y, 2)) <= (this.scale + this.borderScale + radius);
+            default:
+                console.error("Circle intersection not implemented for shape " + this.shape);
         }
     }
 
@@ -81,7 +110,7 @@ export default class Vertex extends GraphObject {
      */
     borderPoint(angle) {
         switch(this.shape) {
-            case "circle":
+            case VERTEX_SHAPE.CIRCLE:
                 return { x: this.x + this.scale * Math.cos(angle), y: this.y + this.scale * Math.sin(angle) };
             default:
                 console.error("Border calculation not implemented for shape " + this.shape);
@@ -98,6 +127,31 @@ export default class Vertex extends GraphObject {
         }
 
         return [[this.x - this.scaleX, this.y - this.scaleY], [this.x + this.scaleX, this.y + this.scaleY]];
+    }
+
+    /**
+     * Notes that an edge connects to this vertex. This is necessary for operations such as deleting this vertex and split/merge tools.
+     * @param {Edge} edge The edge to connect.
+     */
+    connect(edge) {
+        this.adjacent.add(edge);
+    }
+
+    /**
+     * Removes an edge that has been added to this vertex. This is necessary for operations such as deleting this vertex and split/merge tools.
+     * @param {Edge} edge The edge to disconnect.
+     */
+    disconnect(edge) {
+        return this.adjacent.delete(edge);
+    }
+
+    /**
+     * Removes all edges that have been added to this vertex. This is necessary for operations such as deleting this vertex and split/merge tools.
+     */
+    disconnectAll() {
+        const adj = this.adjacent;
+        this.adjacent = new Set();
+        return adj;
     }
 
     /**

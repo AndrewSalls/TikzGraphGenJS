@@ -9,10 +9,10 @@ let increment = Number.MIN_SAFE_INTEGER; // id system, has 2^53 possible values 
  * @enum {Number}
  */
 export const GRAPH_DATATYPE = {
-    VERTEX: 0,
-    EDGE: 1,
-    EDGE_CAP: 2,
-    LABEL: 3
+    VERTEX: 1,
+    EDGE: 2,
+    EDGE_CAP: 4,
+    LABEL: 8
 }
 
 /**
@@ -60,6 +60,19 @@ export class GraphObject {
     }
 
     /**
+     * Determines if the object, based on its set properties, intersects the provided circle. *SHOULD NOT BE CALLED DIRECTLY*
+     * @param {Number} mouseX the x position of the circle's center.
+     * @param {Number} mouseY the y position of the circle's center.
+     * @param {Number} radius the radius of the circle.
+     * @returns {Boolean} Whether the shape intersects the provided circle.
+     */
+    intersect(coordX, coordY, radius) {
+        if(constructor.name === "GraphObject") {
+            console.error("GraphObject is an abstract class and cannot be instantiated.");
+        }
+    }
+
+    /**
      * Gives a bounding box for the object. *SHOULD NOT BE CALLED DIRECTLY*
      * @returns {[[Number, Number], [Number, Number]]} The coordinates of the upper left and bottom right corner.
      */
@@ -74,7 +87,8 @@ export class GraphObject {
      * @returns {GRAPH_DATATYPE} The type of graph object that this represents.
      */
     giveType() {
-        console.error("GraphObject is an abstract class and cannot be instantiated.");
-        return null;
+        if(constructor.name === "GraphObject") {
+            console.error("GraphObject is an abstract class and cannot be instantiated.");
+        }
     }
 }

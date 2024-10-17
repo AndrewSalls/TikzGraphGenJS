@@ -163,7 +163,7 @@ function onPaint(graphData, toolData, ctx) {
     if(toolData !== null && toolData.isAreaSelect) {
         ctx.beginPath();
         ctx.fillStyle = RENDER_SETTINGS.SELECT_MAIN;
-        ctx.lineWidth = RENDER_SETTINGS.SELECT_WIDTH;
+        ctx.lineWidth = RENDER_SETTINGS.SELECT_BORDER_WIDTH;
         ctx.strokeStyle = RENDER_SETTINGS.SELECT_BORDER;
         ctx.fillRect(Math.min(toolData.newX, toolData.x), Math.min(toolData.newY, toolData.y), Math.abs(toolData.newX - toolData.x), Math.abs(toolData.newY - toolData.y));
         ctx.strokeRect(Math.min(toolData.newX, toolData.x), Math.min(toolData.newY, toolData.y), Math.abs(toolData.newX - toolData.x), Math.abs(toolData.newY - toolData.y));

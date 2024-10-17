@@ -1,6 +1,6 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Edge from "../graph-data/edge.js";
-import Vertex from "../graph-data/vertex.js";
+import Vertex, { VERTEX_SHAPE } from "../graph-data/vertex.js";
 import { GraphSession, MouseInteraction } from "../graph-session.js";
 import { Edit, EDIT_TYPE, makeEdit } from "../history.js";
 import { Tool } from "./tool.js";
@@ -32,7 +32,7 @@ function onDown(mouse, graphData, toolData, selectedData) {
         
     if(toolData.startPos !== null) {
         toolData.cursorVertex = new Vertex(mouse.x, mouse.y, true);
-        toolData.cursorVertex.shape = "circle";
+        toolData.cursorVertex.shape = VERTEX_SHAPE.CIRCLE;
         toolData.cursorVertex.scale = 0;
         toolData.cursorVertex.borderScale = 0;
         toolData.cursorVertex.fill = "transparent";
@@ -78,7 +78,9 @@ function onUp(mouse, graphData, toolData, selectedData) {
         const selectedEnd = graphData.getClickedObject(mouse.x, mouse.y, GRAPH_DATATYPE.VERTEX);
         if(selectedEnd !== null) {
             toolData.tempEdge.end = selectedEnd;
+            selectedEnd.connect(toolData.tempEdge);
             makeEdit(new Edit(EDIT_TYPE.ADD, toolData.tempEdge));
+            
             selectedData.clear();
             selectedData.add(toolData.tempEdge);
         } else {

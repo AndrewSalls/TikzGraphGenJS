@@ -1,3 +1,4 @@
+
 import { GRAPH_DATATYPE, GraphObject } from "./graph-object.js";
 import { RENDER_SETTINGS } from "../graph-session.js";
 
@@ -19,6 +20,8 @@ export default class Edge extends GraphObject {
 
         this.start = vertexStart;
         this.end = vertexEnd;
+        vertexStart.connect(this);
+        vertexEnd.connect(this);
 
         this.scale = 2;
         this.color = "#000000";
@@ -37,7 +40,7 @@ export default class Edge extends GraphObject {
         
         if(selected) {
             ctx.beginPath();
-            ctx.lineWidth = RENDER_SETTINGS.SELECT_WIDTH + this.scale;
+            ctx.lineWidth = RENDER_SETTINGS.SELECT_BORDER_WIDTH + this.scale;
             ctx.strokeStyle = RENDER_SETTINGS.SELECT_BORDER;
             ctx.moveTo(startPos.x, startPos.y);
             ctx.lineTo(endPos.x, endPos.y);
@@ -68,20 +71,46 @@ export default class Edge extends GraphObject {
         if(this.id === "dummy") {
             return false;
         }
-        
+
+        const minDistance = this.smallestOffset(mouseX, mouseY);
+
+        return minDistance <= MIN_OFFSET;
+    }
+
+    /**
+     * Determines if the object, based on its set properties, intersects the provided circle. *SHOULD NOT BE CALLED DIRECTLY*
+     * @param {Number} mouseX the x position of the circle's center.
+     * @param {Number} mouseY the y position of the circle's center.
+     * @param {Number} radius the radius of the circle.
+     * @returns {Boolean} Whether the shape intersects the provided circle.
+     */
+    intersect(coordX, coordY, radius) {
+        if(this.id === "dummy") {
+            return false;
+        }
+
+        const minDistance = this.smallestOffset(coordX, coordY);
+
+        return minDistance <= radius;
+    }
+
+    /**
+     * Finds the minimum distance from this edge to the specified point.
+     * @param {Number} targetX The x coordinate of the target point.
+     * @param {Number} targetY The y coordinate of the target point.
+     * @returns {Number} The minimum distance to the point from anywhere along this edge.
+     */
+    smallestOffset(targetX, targetY) {
         const angle = Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
         const startPos = this.start.borderPoint(angle);
         const endPos = this.end.borderPoint(angle + Math.PI);
 
         const t = Math.max(0, Math.min(1, 
-            ((mouseX - startPos.x) * (endPos.x - startPos.x) + (mouseY - startPos.y) * (endPos.y - startPos.y))
-            /
-            (Math.pow(endPos.x - startPos.x, 2) + Math.pow(endPos.y-startPos.y, 2))));
+            ((targetX - startPos.x) * (endPos.x - startPos.x) + (targetY - startPos.y) * (endPos.y - startPos.y))
+            / (Math.pow(endPos.x - startPos.x, 2) + Math.pow(endPos.y-startPos.y, 2))));
 
-        const minDistance = Math.sqrt(Math.pow(mouseX - startPos.x - t * (endPos.x - startPos.x), 2) + 
-                                      Math.pow(mouseY - startPos.y - t * (endPos.y - startPos.y), 2));
-
-        return minDistance <= MIN_OFFSET;
+        return Math.sqrt(Math.pow(targetX - startPos.x - t * (endPos.x - startPos.x), 2) + 
+               Math.pow(targetY - startPos.y - t * (endPos.y - startPos.y), 2));
     }
 
     /**
