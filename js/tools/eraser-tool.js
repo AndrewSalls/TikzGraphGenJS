@@ -144,29 +144,28 @@ function appendAndEraseData(data, graphData, toolData) {
     const erasedVertices = new Set();
     const erasedEdges = new Set();
 
-    for(const entry of data) {
-        switch(entry.giveType()) {
+    for(let x = 0; x < data.length; x++) {
+        switch(data[x].giveType()) {
             case GRAPH_DATATYPE.VERTEX:
-                if(!erasedVertices.has(entry)) {
-                    toolData.vertices.push(entry);
-                    erasedVertices.add(entry);
+                if(!erasedVertices.has(data[x])) {
+                    toolData.vertices.push(data[x]);
+                    erasedVertices.add(data[x]);
 
-                    for(const edge of entry.disconnectAll()) {
-                        if(!erasedEdges.has(edge)) {
-                            toolData.edges.push(edge);
-                            erasedEdges.add(edge);
-                        }
+                    for(const edge of data[x].disconnectAll()) {
+                        data.push(edge);
                     }
                 }
                 break;
             case GRAPH_DATATYPE.EDGE:
-                if(!erasedEdges.has(entry)) {
-                    toolData.edges.push(entry);
-                    erasedEdges.add(entry);
+                if(!erasedEdges.has(data[x])) {
+                    toolData.edges.push(data[x]);
+                    erasedEdges.add(data[x]);
+                    data[x].start.disconnect(data[x]);
+                    data[x].end.disconnect(data[x]);
                 }
                 break;
             default:
-                console.error("appendErasedData not implemented for type " + entry.giveType());
+                console.error("appendErasedData not implemented for type " + data[x].giveType());
                 return;
         }
     }
