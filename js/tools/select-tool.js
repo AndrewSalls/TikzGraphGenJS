@@ -53,7 +53,6 @@ function onDown(mouse, graphData, toolData, selectedData) {
  * @returns {*} The updated value for toolData.
  */
 function onMove(mouse, graphData, toolData, selectedData) {
-    //TODO: Alt behavior for mass dragging selected items if clicking on selected item
     if(toolData !== null && toolData.dragging) {
         const deltaX = mouse.x - toolData.newX;
         const deltaY = mouse.y - toolData.newY;

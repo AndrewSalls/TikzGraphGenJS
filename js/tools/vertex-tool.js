@@ -50,7 +50,7 @@ function onDown(mouse, graphData, toolData, selectedData) {
  * @returns {*} The updated value for toolData.
  */
 function onMove(mouse, graphData, toolData, selectedData) {
-    if(toolData !== null) {
+    if(toolData !== null && !mouse.exitedBounds) {
         toolData.vertex.x = mouse.x;
         toolData.vertex.y = mouse.y;
     }
@@ -79,11 +79,13 @@ function onUp(mouse, graphData, toolData, selectedData) {
         selectedData.add(toolData.vertex);
         toolData = null;
     } else {
-        const created = new Vertex(mouse.x, mouse.y);
-        graphData.vertices.push(created);
-        makeEdit(new Edit(EDIT_TYPE.ADD, created));
-        selectedData.clear();
-        selectedData.add(created);
+        if(!mouse.exitedBounds) {
+            const created = new Vertex(mouse.x, mouse.y);
+            graphData.vertices.push(created);
+            makeEdit(new Edit(EDIT_TYPE.ADD, created));
+            selectedData.clear();
+            selectedData.add(created);
+        }
     }
 
     return toolData;

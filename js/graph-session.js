@@ -22,6 +22,19 @@ export const MOUSE_CLICK_TYPE = {
 }
 
 /**
+ * An enum representing the possible ways the mouse can leave the canvas. WINDOW can be any direction, with the mouse leaving the entire window instead of just the canvas.
+ * @enum
+ * @redonly
+ */
+export const MOUSE_EXIT_BOUND_DIRECTION = {
+    LEFT: 1,
+    TOP: 2,
+    RIGHT: 4,
+    BOTTOM: 8,
+    WINDOW: 16
+}
+
+/**
  * Contains the minimum amount of relevant information for tools interacting to a mouse event.
  */
 export class MouseInteraction {
@@ -30,11 +43,13 @@ export class MouseInteraction {
      * @param {Number} mouseX The x coordinate of the mouse interaction relative to the canvas element.
      * @param {Number} mouseY The y coordinate of the mouse interaction relative to the canvas element.
      * @param {MOUSE_CLICK_TYPE} clickType The type of click recorded.
+     * @param {Boolean} exitedBounds Whether the mouse interaction was inside or outside of the canvas.
      */
-    constructor(mouseX, mouseY, clickType) {
+    constructor(mouseX, mouseY, clickType, exitedBounds) {
         this.x = mouseX;
         this.y = mouseY;
         this.clickType = clickType;
+        this.exitedBounds = exitedBounds;
     }
 }
 

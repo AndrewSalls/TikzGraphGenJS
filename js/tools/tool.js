@@ -1,5 +1,5 @@
 import { GraphObject } from "../graph-data/graph-object.js";
-import { GraphSession, MouseInteraction } from "../graph-session.js";
+import { GraphSession, MOUSE_EXIT_BOUND_DIRECTION, MouseInteraction } from "../graph-session.js";
 import accessEdgeTool from "./edge-tool.js";
 import accessSelectTool from "./select-tool.js";
 import accessVertexTool from "./vertex-tool.js";
@@ -104,12 +104,16 @@ export function tool_onMouseDown(mouseData, graphData) {
 }
 
 /**
- * Calls the active tool's mouse move event handler.
+ * Calls the active tool's mouse move event handler. If the cursor is outside of the window, uses the mouse up event instead (treating leaving the window as letting go of click).
  * @param {MouseInteraction} mouseData the relevant mouse data for the tool.
  * @param {GraphSession} graphData the graph data the tool can modify.
  */
 export function tool_onMouseMove(mouseData, graphData) {
-    toolData = activeTool.onMove(mouseData, graphData, toolData, selectedData);
+    if(mouseData.exitedBounds & MOUSE_EXIT_BOUND_DIRECTION.WINDOW) {
+        toolData = activeTool.onUp(mouseData, graphData, toolData, selectedData);
+    } else {
+        toolData = activeTool.onMove(mouseData, graphData, toolData, selectedData);
+    }
 }
 
 /**
