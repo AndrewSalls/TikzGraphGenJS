@@ -1,5 +1,5 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
-import { GraphSession, MouseInteraction, RENDER_SETTINGS } from "../graph-session.js";
+import { GraphSession, MOUSE_CLICK_TYPE, MouseInteraction, RENDER_SETTINGS } from "../graph-session.js";
 import { Edit, EDIT_TYPE, makeEdit } from "../history.js";
 import { Tool } from "./tool.js";
 
@@ -31,7 +31,8 @@ function onDown(mouse, graphData, toolData, selectedData) {
         x: mouse.x,
         y: mouse.y,
         isAreaSelect: false,
-        dragging: false
+        dragging: false,
+        keepOldSelected: mouse.clickType & MOUSE_CLICK_TYPE.SHIFT_HELD > 0 // true if shift is held
     };
     
     if(selectedData.has(graphData.getClickedObject(mouse.x, mouse.y))) {
@@ -117,7 +118,9 @@ function onUp(mouse, graphData, toolData, selectedData) {
                 }
             }
         } else if(toolData.isAreaSelect) {
-            selectedData.clear();
+            if(!toolData.keepOldSelected) {
+                selectedData.clear();
+            }
             const iter = graphData.iterateThroughAllData();
             let next = iter.next();
             while(!next.done) {
@@ -132,7 +135,9 @@ function onUp(mouse, graphData, toolData, selectedData) {
                 next = iter.next();
             }
         } else {
-            selectedData.clear();
+            if(!toolData.keepOldSelected) {
+                selectedData.clear();
+            }
             const clicked = graphData.getClickedObject(mouse.x, mouse.y);
             if(clicked !== null) {
                 selectedData.add(clicked);
