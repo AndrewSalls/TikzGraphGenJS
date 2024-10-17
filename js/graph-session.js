@@ -42,9 +42,9 @@ export class MouseInteraction {
  * Describes built-in render settings, like highlighting color when selecting objects or using the select tool.
  */
 export const RENDER_SETTINGS = {
-    SELECT_MAIN: "#93b8e799",
-    SELECT_BORDER: "#0078d499",
-    SELECT_WIDTH: 3
+    SELECT_MAIN: "#93b8e799", // Selected object body color (for translucent objects)
+    SELECT_BORDER: "#0078d499", // Selected object border color
+    SELECT_WIDTH: 3 // Area of select tool
 }
 
 /**
@@ -100,6 +100,17 @@ export class GraphSession {
         }
 
         return null;
+    }
+
+    /**
+     * 
+     * @param {*} mouseX 
+     * @param {*} mouseY 
+     * @param {*} multiple 
+     * @param {*} filter 
+     */
+    getClickedObjectsInRange(mouseX, mouseY, multiple = true, filter = null) {
+
     }
 
     /**

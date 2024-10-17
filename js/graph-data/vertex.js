@@ -68,7 +68,7 @@ export default class Vertex extends GraphObject {
         switch(this.shape) {
             case "circle":
                 // Scale in this case is the radius
-                return Math.sqrt(Math.pow(mouseX - this.x, 2) + Math.pow(mouseY - this.y, 2)) <= (this.scale + this.borderScale) / 2;
+                return Math.sqrt(Math.pow(mouseX - this.x, 2) + Math.pow(mouseY - this.y, 2)) <= (this.scale + this.borderScale);
             default:
                 console.error("Intersection not implemented for shape " + this.shape);
         }

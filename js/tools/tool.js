@@ -12,7 +12,8 @@ import accessVertexTool from "./vertex-tool.js";
 export const TOOL_TYPE = {
     VERTEX: 0,
     EDGE: 1,
-    SELECT: 4
+    SELECT: 4,
+    ERASER: 5
 }
 
 /**
