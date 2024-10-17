@@ -13,9 +13,9 @@ const ERASER_WIDTH = 5; // Area of eraser
  * Provides access to the edge tool.
  * @returns {Tool} The edge tool.
  */
-export default function accessEdgeTool() {
+export default function accessEraserTool() {
     if(ERASER_TOOL === undefined) {
-        ERASER_TOOL = new Tool("eraser", onDown, onMove, onUp, onPaint);
+        ERASER_TOOL = new Tool("eraser", onDown, onMove, onUp, clearData, onPaint);
     }
 
     return ERASER_TOOL;
@@ -72,8 +72,17 @@ function onMove(mouse, graphData, toolData, selectedData) {
  */
 function onUp(mouse, graphData, toolData, selectedData) {
     if(toolData !== null && !toolData.dragging) {
-        
+
     }
+}
+
+/**
+ * Clears the current tool data, making sure to clean up any dummy data from the graph data as well.
+ * @param {GraphSession} graphData The graph data that the tool (potentially) modified with dummy data.
+ * @param {Object|null} toolData The local data this tool is currently using.
+ */
+function clearData(graphData, toolData) {
+    return null;
 }
 
 const onPaint = undefined;

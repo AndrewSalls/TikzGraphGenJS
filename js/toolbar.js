@@ -13,6 +13,7 @@ export default function initializeToolbar(graphData) {
     document.querySelector("#vertex-btn").onclick = ev => setSelected(TOOL_TYPE.VERTEX, ev.target, graphData);
     document.querySelector("#edge-btn").onclick = ev => setSelected(TOOL_TYPE.EDGE, ev.target, graphData);
     document.querySelector("#select-btn").onclick = ev => setSelected(TOOL_TYPE.SELECT, ev.target, graphData);
+    document.querySelector("#erase-btn").onclick = ev => setSelected(TOOL_TYPE.ERASER, ev.target, graphData);
 };
 
 /**
@@ -27,6 +28,6 @@ function setSelected(type, button, graphData) {
     button.classList.add("selected-tool");
     lastSelectedTool = button;
 
-    setTool(type);
     clearData(graphData);
+    setTool(type);
 }

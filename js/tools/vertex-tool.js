@@ -11,7 +11,7 @@ let VERTEX_TOOL;
  */
 export default function accessVertexTool() { 
     if(VERTEX_TOOL === undefined) {
-        VERTEX_TOOL = new Tool("vertex", onDown, onMove, onUp, onPaint);
+        VERTEX_TOOL = new Tool("vertex", onDown, onMove, onUp, clearData, onPaint);
     }
 
     return VERTEX_TOOL;
@@ -87,6 +87,15 @@ function onUp(mouse, graphData, toolData, selectedData) {
     }
 
     return toolData;
+}
+
+/**
+ * Clears the current tool data, making sure to clean up any dummy data from the graph data as well.
+ * @param {GraphSession} graphData The graph data that the tool (potentially) modified with dummy data.
+ * @param {Object|null} toolData The local data this tool is currently using.
+ */
+function clearData(graphData, toolData) {
+    return null;
 }
 
 const onPaint = undefined;

@@ -12,7 +12,7 @@ const MIN_AREA_SELECT = 7; // Minimum distance in pixels before switching from c
  */
 export default function accessSelectTool() {
     if(SELECT_TOOL === undefined) {
-        SELECT_TOOL = new Tool("select", onDown, onMove, onUp, onPaint);
+        SELECT_TOOL = new Tool("select", onDown, onMove, onUp, clearData, onPaint);
     }
 
     return SELECT_TOOL;
@@ -141,6 +141,15 @@ function onUp(mouse, graphData, toolData, selectedData) {
         }
     }
     
+    return null;
+}
+
+/**
+ * Clears the current tool data, making sure to clean up any dummy data from the graph data as well.
+ * @param {GraphSession} graphData The graph data that the tool (potentially) modified with dummy data.
+ * @param {Object|null} toolData The local data this tool is currently using.
+ */
+function clearData(graphData, toolData) {
     return null;
 }
 

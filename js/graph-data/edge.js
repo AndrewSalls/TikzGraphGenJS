@@ -1,7 +1,7 @@
 import { GRAPH_DATATYPE, GraphObject } from "./graph-object.js";
 import { RENDER_SETTINGS } from "../graph-session.js";
 
-const MIN_OFFSET = 3;
+const MIN_OFFSET = 6;
 
 /**
  * A representation of a LaTeX Tikz path (specifically a line).

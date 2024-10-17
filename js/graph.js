@@ -33,7 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const onResize = new ResizeObserver(entries => {
         canvas.width = entries[0].contentBoxSize[0].inlineSize;
         canvas.height = entries[0].contentBoxSize[0].blockSize;
-        console.log(entries[0].contentBoxSize[0]);
     });
     onResize.observe(canvas);
 

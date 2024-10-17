@@ -3,6 +3,7 @@ import { GraphSession, MouseInteraction } from "../graph-session.js";
 import accessEdgeTool from "./edge-tool.js";
 import accessSelectTool from "./select-tool.js";
 import accessVertexTool from "./vertex-tool.js";
+import accessEraserTool from "./eraser-tool.js";
 
 /**
  * An enum containing the list of valid tool types.
@@ -26,13 +27,15 @@ export class Tool {
      * @param {(mouseData: MouseInteraction, graphData: GraphSession, toolData: Object|null)} downEv the event called when the user starts holding a mouse button on the graph.
      * @param {(mouseData: MouseInteraction, graphData: GraphSession, toolData: Object|null)} moveEv the event called when the user moves their mouse on the graph, regardless of if they clicked or not.
      * @param {(mouseData: MouseInteraction, graphData: GraphSession, toolData: Object|null)} upEv the event called when the user releases a mouse button on the graph.
+     * @param {(graphData: GraphSession, toolData: Object|null)} clearData the event called when the tool is switched to another tool, used to clean up hanging data
      * @param {(graphData: GraphSession, toolData: Object|null, CanvasRenderingContext2D ctx)} paintEv the event called when the canvas refreshes, called after all other paint effects
      */
-    constructor(name, downEv, moveEv, upEv, paintEv = undefined) {
+    constructor(name, downEv, moveEv, upEv, clearData, paintEv = undefined) {
         this.name = name;
         this.onDown = downEv;
         this.onMove = moveEv;
         this.onUp = upEv;
+        this.clearData = clearData;
         this.onPaint = paintEv;
     }
 };
@@ -56,6 +59,9 @@ export function setTool(toolType) {
         case TOOL_TYPE.SELECT:
             activeTool = accessSelectTool();
             break;
+        case TOOL_TYPE.ERASER:
+            activeTool = accessEraserTool();
+            break;
         default:
             console.error("Missing tool link to tool of type " + toolType + ", or tool is not yet implemented.");
     }
@@ -75,16 +81,8 @@ export function isSelected(graphObj) {
  * @param {GraphSession} graphData The graph data that the tool (potentially) modified with dummy data.
  */
 export function clearData(graphData) {
-    if(toolData !== null) {
-        if('cursorVertex' in toolData) {
-            graphData.vertices.pop();
-        }
-        if('tempEdge' in toolData) {
-            graphData.edges.pop();
-        }
-
-        toolData = null;
-    }
+    activeTool.clearData(graphData, toolData);
+    toolData = null;
 };
 
 /**

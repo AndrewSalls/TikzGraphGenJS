@@ -13,7 +13,7 @@ let EDGE_TOOL;
  */
 export default function accessEdgeTool() {
     if(EDGE_TOOL === undefined) {
-        EDGE_TOOL = new Tool("edge", onDown, onMove, onUp, onPaint);
+        EDGE_TOOL = new Tool("edge", onDown, onMove, onUp, clearData, onPaint);
     }
 
     return EDGE_TOOL;
@@ -92,6 +92,22 @@ function onUp(mouse, graphData, toolData, selectedData) {
     }
 
     return toolData;
+}
+
+/**
+ * Clears the current tool data, making sure to clean up any dummy data from the graph data as well.
+ * @param {GraphSession} graphData The graph data that the tool (potentially) modified with dummy data.
+ * @param {Object|null} toolData The local data this tool is currently using.
+ */
+function clearData(graphData, toolData) {
+    if(toolData !== null) {
+        if('cursorVertex' in toolData) {
+            graphData.vertices.pop();
+        }
+        if('tempEdge' in toolData) {
+            graphData.edges.pop();
+        }
+    }
 }
 
 const onPaint = undefined;
