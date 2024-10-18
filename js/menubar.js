@@ -15,6 +15,8 @@ export default function initializeMenubar(graphData) {
     document.querySelector("#vertex-menu-btn").onclick = () => { setTool(TOOL_TYPE.VERTEX); clearData(graphData); }
     document.querySelector("#edge-menu-btn").onclick = () => { setTool(TOOL_TYPE.EDGE); clearData(graphData); }
     document.querySelector("#select-menu-btn").onclick = () => { setTool(TOOL_TYPE.SELECT); clearData(graphData); }
+    document.querySelector("#erase-menu-btn").onclick = () => { setTool(TOOL_TYPE.ERASER); clearData(graphData); }
+    document.querySelector("#split-menu-btn").onclick = () => { setTool(TOOL_TYPE.SPLIT); clearData(graphData); }
 
     document.addEventListener("keyup", ev => {
         if(ev.ctrlKey) {

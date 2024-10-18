@@ -113,6 +113,21 @@ export default class Edge extends GraphObject {
                Math.pow(targetY - startPos.y - t * (endPos.y - startPos.y), 2));
     }
 
+    closestPoint(targetX, targetY) {
+        const angle = Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
+        const startPos = this.start.borderPoint(angle);
+        const endPos = this.end.borderPoint(angle + Math.PI);
+
+        const t = Math.max(0, Math.min(1, 
+            ((targetX - startPos.x) * (endPos.x - startPos.x) + (targetY - startPos.y) * (endPos.y - startPos.y))
+            / (Math.pow(endPos.x - startPos.x, 2) + Math.pow(endPos.y-startPos.y, 2))));
+
+        return {
+            x: startPos.x + t *(endPos.x - startPos.x),
+            y: startPos.y + t * (endPos.y - startPos.y)
+        };
+    }
+
     /**
      * Gives a bounding box for the object.
      * @returns {[[Number, Number], [Number, Number]]} The coordinates of the upper left and bottom right corner.

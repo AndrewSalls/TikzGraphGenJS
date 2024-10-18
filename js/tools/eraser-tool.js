@@ -8,8 +8,8 @@ const SWITCH_TO_DRAG_ERASE = 5; // Size of a "bubble" around starting erase posi
 const ERASER_WIDTH = 20; // Area of eraser
 
 /**
- * Provides access to the edge tool.
- * @returns {Tool} The edge tool.
+ * Provides access to the eraser tool.
+ * @returns {Tool} The eraser tool.
  */
 export default function accessEraserTool() {
     if(ERASER_TOOL === undefined) {

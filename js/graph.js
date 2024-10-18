@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(ev.pageX > canvas.offsetLeft + canvas.offsetWidth) {
             withinCanvas |= MOUSE_EXIT_BOUND_DIRECTION.RIGHT;
         }
-        if(ev.pageX > canvas.offsetTop + canvas.offsetHeight) {
+        if(ev.pageY > canvas.offsetTop + canvas.offsetHeight) {
             withinCanvas |= MOUSE_EXIT_BOUND_DIRECTION.BOTTOM;
         }
         if(!onPage) {
