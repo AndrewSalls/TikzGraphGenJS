@@ -61,7 +61,7 @@ function onUp(mouse, graphData, toolData, selectedData) {
         clickedEdge.start.disconnect(clickedEdge);
         clickedEdge.end.disconnect(clickedEdge);
 
-        graphData.edges.splice(graphData.vertices.indexOf(clickedEdge), 1);
+        graphData.edges.splice(graphData.edges.indexOf(clickedEdge), 1);
         graphData.vertices.push(addedVertex);
         graphData.edges.push(addedEdge1);
         graphData.edges.push(addedEdge2);
