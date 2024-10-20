@@ -1,5 +1,6 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Vertex from "../graph-data/vertex.js";
+import { Edit, EDIT_TYPE, makeEdit } from "../history.js";
 import { Tool } from "./tool.js";
 
 let MERGE_TOOL;
@@ -53,7 +54,43 @@ function onUp(mouse, graphData, toolData, selectedData) {
 
     if(clickedVertex instanceof Vertex) {
         if(selectedData.has(clickedVertex)) {
+            const merging = [...selectedData].filter(v => v instanceof Vertex && v !== clickedVertex);
 
+            const editList = [];
+            for(const vertex of merging) {
+                for(const connectedEdge of vertex.adjacent) {
+                    if(connectedEdge.start === vertex) {
+                        connectedEdge.start = clickedVertex;
+                        editList.push(new Edit(EDIT_TYPE.MUTATION, {
+                            type: GRAPH_DATATYPE.EDGE,
+                            id: connectedEdge.id,
+                            originalValues: { start: vertex },
+                            modifiedValues: { start: clickedVertex }
+                        }));
+                    } else { // connectedEdge.end === vertex
+                        connectedEdge.end = clickedVertex;
+                        editList.push(new Edit(EDIT_TYPE.MUTATION, {
+                            type: GRAPH_DATATYPE.EDGE,
+                            id: connectedEdge.id,
+                            originalValues: { end: vertex },
+                            modifiedValues: { end: clickedVertex }
+                        }));
+                    }
+                }
+
+                graphData.vertices.splice(graphData.vertices.indexOf(vertex), 1);
+                selectedData.delete(vertex);
+                editList.push(new Edit(EDIT_TYPE.REMOVE, vertex));
+            }
+
+            // Create composite edit, vertex deletion edit, or no edit
+            if(editList.length > 0) {
+                if(editList.length === 1) {
+                    makeEdit(editList[0]);
+                } else {
+                    makeEdit(new Edit(EDIT_TYPE.COMPOSITE, editList));
+                }
+            }
         } else {
             selectedData.add(clickedVertex);
         }

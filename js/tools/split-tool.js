@@ -66,6 +66,12 @@ function onUp(mouse, graphData, toolData, selectedData) {
         graphData.edges.push(addedEdge1);
         graphData.edges.push(addedEdge2);
 
+        if(selectedData.has(clickedEdge)) {
+            selectedData.delete(clickedEdge);
+            selectedData.add(addedEdge1);
+            selectedData.add(addedEdge2);
+        }
+
         makeEdit(new Edit(EDIT_TYPE.COMPOSITE, [
             new Edit(EDIT_TYPE.REMOVE, clickedEdge),
             new Edit(EDIT_TYPE.ADD, addedVertex),

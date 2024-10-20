@@ -62,7 +62,7 @@ function onMove(mouse, graphData, toolData, selectedData) {
         toolData.currY = mouse.y;
 
         const clicked = graphData.getClickedObjectsInRange(mouse.x, mouse.y, ERASER_WIDTH);
-        appendAndEraseData(clicked, graphData, toolData);
+        appendAndEraseData(clicked, graphData, toolData, selectedData);
     }
 
     return toolData;
@@ -80,7 +80,7 @@ function onUp(mouse, graphData, toolData, selectedData) {
     if(toolData !== null) {
         if(!toolData.dragging) {
             const clicked = graphData.getClickedObjectsInRange(mouse.x, mouse.y, ERASER_WIDTH);
-            appendAndEraseData(clicked, graphData, toolData);
+            appendAndEraseData(clicked, graphData, toolData, selectedData);
         }
 
         createErasedHistory(toolData);
@@ -95,7 +95,7 @@ export function eraseSelected(graphData, selectedData) {
         edges: []
     };
 
-    appendAndEraseData(selectedData, graphData, toolData);
+    appendAndEraseData(selectedData, graphData, toolData, selectedData);
     createErasedHistory(toolData);
 
 }
@@ -135,8 +135,9 @@ function onPaint(graphData, toolData, ctx) {
  * @param {GraphObject[]} data the selected data. 
  * @param {GraphSession} graphData The graph data this tool is interacting with.
  * @param {*} toolData Temporary data storage for this tool.
+ * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
  */
-function appendAndEraseData(data, graphData, toolData) {
+function appendAndEraseData(data, graphData, toolData, selectedData) {
     if(data.length === 0) {
         return;
     }
@@ -173,6 +174,11 @@ function appendAndEraseData(data, graphData, toolData) {
     // Edge cap / label -> edges -> vertices
     graphData.edges = graphData.edges.filter(x => !erasedEdges.has(x));
     graphData.vertices = graphData.vertices.filter(x => !erasedVertices.has(x));
+    for(const entry of selectedData.values()) {
+        if(erasedVertices.has(entry) || erasedEdges.has(entry)) {
+            selectedData.delete(entry);
+        }
+    }
 }
 
 /**
