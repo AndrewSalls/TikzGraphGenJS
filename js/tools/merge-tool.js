@@ -59,8 +59,18 @@ function onUp(mouse, graphData, toolData, selectedData) {
             const editList = [];
             for(const vertex of merging) {
                 for(const connectedEdge of vertex.adjacent) {
-                    if(connectedEdge.start === vertex) {
+                    if(connectedEdge.start === clickedVertex || connectedEdge.end === clickedVertex) {
+                        // TODO: Create loop instead of deleting edge
+                        graphData.edges.splice(graphData.edges.indexOf(connectedEdge), 1);
+                        connectedEdge.start.disconnect(connectedEdge);
+                        connectedEdge.end.disconnect(connectedEdge);
+                        if(selectedData.has(connectedEdge)) {
+                            selectedData.delete(connectedEdge);
+                        }
+                        editList.push(new Edit(EDIT_TYPE.REMOVE, connectedEdge));
+                    } else if(connectedEdge.start === vertex) {
                         connectedEdge.start = clickedVertex;
+                        clickedVertex.connect(connectedEdge);
                         editList.push(new Edit(EDIT_TYPE.MUTATION, {
                             type: GRAPH_DATATYPE.EDGE,
                             id: connectedEdge.id,
@@ -69,6 +79,7 @@ function onUp(mouse, graphData, toolData, selectedData) {
                         }));
                     } else { // connectedEdge.end === vertex
                         connectedEdge.end = clickedVertex;
+                        clickedVertex.connect(connectedEdge);
                         editList.push(new Edit(EDIT_TYPE.MUTATION, {
                             type: GRAPH_DATATYPE.EDGE,
                             id: connectedEdge.id,
@@ -79,6 +90,7 @@ function onUp(mouse, graphData, toolData, selectedData) {
                 }
 
                 graphData.vertices.splice(graphData.vertices.indexOf(vertex), 1);
+                vertex.disconnectAll();
                 selectedData.delete(vertex);
                 editList.push(new Edit(EDIT_TYPE.REMOVE, vertex));
             }
