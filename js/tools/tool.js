@@ -5,6 +5,7 @@ import accessSelectTool from "./select-tool.js";
 import accessVertexTool from "./vertex-tool.js";
 import accessEraserTool, { eraseSelected } from "./eraser-tool.js";
 import accessSplitTool from "./split-tool.js";
+import accessMergeTool from "./merge-tool.js";
 
 /**
  * An enum containing the list of valid tool types.
@@ -16,7 +17,8 @@ export const TOOL_TYPE = {
     EDGE: 1,
     SELECT: 4,
     ERASER: 5,
-    SPLIT: 7
+    SPLIT: 7,
+    MERGE: 8
 }
 
 /**
@@ -66,6 +68,9 @@ export function setTool(toolType) {
             break;
         case TOOL_TYPE.SPLIT:
             activeTool = accessSplitTool();
+            break;
+        case TOOL_TYPE.MERGE:
+            activeTool = accessMergeTool();
             break;
         default:
             console.error("Missing tool link to tool of type " + toolType + ", or tool is not yet implemented.");

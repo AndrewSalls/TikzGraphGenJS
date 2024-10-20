@@ -32,7 +32,7 @@ function onDown(mouse, graphData, toolData, selectedData) {
         y: mouse.y,
         isAreaSelect: false,
         dragging: false,
-        keepOldSelected: mouse.clickType & MOUSE_CLICK_TYPE.SHIFT_HELD > 0 // true if shift is held
+        keepOldSelected: (mouse.clickType & MOUSE_CLICK_TYPE.SHIFT_HELD) > 0 // true if shift is held
     };
     
     if(selectedData.has(graphData.getClickedObject(mouse.x, mouse.y))) {
