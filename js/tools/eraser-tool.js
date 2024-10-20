@@ -95,9 +95,8 @@ export function eraseSelected(graphData, selectedData) {
         edges: []
     };
 
-    appendAndEraseData(selectedData, graphData, toolData, selectedData);
+    appendAndEraseData([...selectedData], graphData, toolData, selectedData);
     createErasedHistory(toolData);
-
 }
 
 /**
