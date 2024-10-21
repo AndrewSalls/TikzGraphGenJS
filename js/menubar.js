@@ -9,19 +9,34 @@ import { registerKey } from "./shortcut.js";
  * @param {GraphSession} graphData The graph state, so that it can be provided to functions called by using the menubar.
  */
 export default function initializeMenubar(graphData) {
+    initializeFileMenu(graphData);
+    initializeEditMenu(graphData);
+};
+
+function initializeFileMenu(graphData) {
+
+}
+
+function initializeEditMenu(graphData) {
     document.querySelector("#undo-btn").onclick = () => undo(graphData);
     document.querySelector("#redo-btn").onclick = () => redo(graphData);
     document.querySelector("#delete-btn").onclick = () => deleteSelected(graphData);
 
-    document.querySelector("#vertex-menu-btn").onclick = () => { setTool(TOOL_TYPE.VERTEX); clearData(graphData); }
-    document.querySelector("#edge-menu-btn").onclick = () => { setTool(TOOL_TYPE.EDGE); clearData(graphData); }
-    document.querySelector("#select-menu-btn").onclick = () => { setTool(TOOL_TYPE.SELECT); clearData(graphData); }
-    document.querySelector("#erase-menu-btn").onclick = () => { setTool(TOOL_TYPE.ERASER); clearData(graphData); }
-    document.querySelector("#split-menu-btn").onclick = () => { setTool(TOOL_TYPE.SPLIT); clearData(graphData); }
-    document.querySelector("#merge-menu-btn").onclick = () => { setTool(TOOL_TYPE.MERGE); clearData(graphData); }
+    const vertex = document.querySelector("#vertex-btn");
+    document.querySelector("#vertex-menu-btn").onclick = () => vertex.click();
+    const edge = document.querySelector("#edge-btn");
+    document.querySelector("#edge-menu-btn").onclick = () => edge.click();
+    const select = document.querySelector("#select-btn");
+    document.querySelector("#select-menu-btn").onclick = () => select.click();
+    const eraser = document.querySelector("#eraser-btn");
+    document.querySelector("#eraser-menu-btn").onclick = () => eraser.click();
+    const split = document.querySelector("#split-btn");
+    document.querySelector("#split-menu-btn").onclick = () => split.click();
+    const merge = document.querySelector("#merge-btn");
+    document.querySelector("#merge-menu-btn").onclick = () => merge.click();
 
     registerKey(() => undo(graphData), "z");
     registerKey(() => redo(graphData), "y");
     registerKey(() => deleteSelected(graphData), "Delete", false);
     registerKey(() => deleteSelected(graphData), "Backspace", false);
-};
+}
