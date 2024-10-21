@@ -9,7 +9,8 @@ import accessMergeTool from "./merge-tool.js";
 import { DeletionEdit } from "../history/entry-edit.js";
 import { makeEdit } from "../history/history.js";
 import { CompositeEdit } from "../history/composite-edit.js";
-import { MOUSE_EXIT_BOUND_DIRECTION, MouseInteraction } from "../mouse-interaction.js";
+import { MOUSE_CLICK_TYPE, MOUSE_EXIT_BOUND_DIRECTION, MouseInteraction } from "../mouse-interaction.js";
+import accessMouseTool from "./mouse-tool.js";
 
 /**
  * An enum containing the list of valid tool types.
@@ -37,19 +38,25 @@ export class Tool {
      * @param {(mouseData: MouseInteraction, graphData: GraphSession, toolData: Object|null)} upEv the event called when the user releases a mouse button on the graph.
      * @param {(graphData: GraphSession, toolData: Object|null)} clearData the event called when the tool is switched to another tool, used to clean up hanging data
      * @param {(graphData: GraphSession, toolData: Object|null, CanvasRenderingContext2D ctx)} paintEv the event called when the canvas refreshes, called after all other paint effects
+     * @param {boolean} acceptAllClicks Whether this tool should respond to all click events or only left click events
      */
-    constructor(name, downEv, moveEv, upEv, clearData, paintEv = undefined) {
+    constructor(name, downEv, moveEv, upEv, clearData, paintEv = undefined, acceptAllClicks = false) {
         this.name = name;
         this.onDown = downEv;
         this.onMove = moveEv;
         this.onUp = upEv;
         this.clearData = clearData;
         this.onPaint = paintEv;
+        this.acceptAllClicks = acceptAllClicks;
     }
 };
 
+const mouseHandler = accessMouseTool();
+let universalToolData = null;
+
 let activeTool = accessVertexTool();
 let toolData = null;
+let clickType = null;
 let selectedData = new Set();
 
 /**
@@ -114,7 +121,12 @@ export function deleteSelected(graphData) {
  * @param {GraphSession} graphData the graph data the tool can modify.
  */
 export function tool_onMouseDown(mouseData, graphData) {
-    toolData = activeTool.onDown(mouseData, graphData, toolData, selectedData);
+    clickType = mouseData.clickType;
+    if(activeTool.acceptAllClicks || (mouseData.clickType & MOUSE_CLICK_TYPE.LEFT_CLICK) > 0) { // Only accept left click
+        toolData = activeTool.onDown(mouseData, graphData, toolData, selectedData);
+    } else {
+        universalToolData = mouseHandler.onDown(mouseData, graphData, universalToolData, selectedData);
+    }
 }
 
 /**
@@ -123,10 +135,18 @@ export function tool_onMouseDown(mouseData, graphData) {
  * @param {GraphSession} graphData the graph data the tool can modify.
  */
 export function tool_onMouseMove(mouseData, graphData) {
-    if(mouseData.exitedBounds & MOUSE_EXIT_BOUND_DIRECTION.WINDOW) {
-        toolData = activeTool.onUp(mouseData, graphData, toolData, selectedData);
+    if(activeTool.acceptAllClicks || (clickType !== null && (clickType & MOUSE_CLICK_TYPE.LEFT_CLICK) > 0)) { // Only accept left click
+        if(mouseData.exitedBounds & MOUSE_EXIT_BOUND_DIRECTION.WINDOW) {
+            toolData = activeTool.onUp(mouseData, graphData, toolData, selectedData);
+        } else {
+            toolData = activeTool.onMove(mouseData, graphData, toolData, selectedData);
+        }
     } else {
-        toolData = activeTool.onMove(mouseData, graphData, toolData, selectedData);
+        if(mouseData.exitedBounds & MOUSE_EXIT_BOUND_DIRECTION.WINDOW) {
+            universalToolData = mouseHandler.onUp(mouseData, graphData, universalToolData, selectedData);
+        } else {
+            universalToolData = mouseHandler.onMove(mouseData, graphData, universalToolData, selectedData);
+        }
     }
 }
 
@@ -136,7 +156,13 @@ export function tool_onMouseMove(mouseData, graphData) {
  * @param {GraphSession} graphData the graph data the tool can modify.
  */
 export function tool_onMouseUp(mouseData, graphData) {
-    toolData = activeTool.onUp(mouseData, graphData, toolData, selectedData);
+    if(activeTool.acceptAllClicks || (clickType !== null && (clickType & MOUSE_CLICK_TYPE.LEFT_CLICK) > 0)) { // Only accept left click
+        toolData = activeTool.onUp(mouseData, graphData, toolData, selectedData);
+    } else {
+        universalToolData = mouseHandler.onUp(mouseData, graphData, universalToolData, selectedData);
+    }
+
+    clickType = null;
 }
 
 /**
