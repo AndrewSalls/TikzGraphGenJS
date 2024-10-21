@@ -2,6 +2,7 @@ import { GraphSession } from "./graph-session.js";
 import { clearData, setTool, deleteSelected } from "./tools/tool.js";
 import { undo, redo } from "./history/history.js";
 import { TOOL_TYPE } from "./tools/tool.js";
+import { registerKey } from "./shortcut.js";
 
 /**
  * Initializes the buttons in the menubar.
@@ -19,17 +20,8 @@ export default function initializeMenubar(graphData) {
     document.querySelector("#split-menu-btn").onclick = () => { setTool(TOOL_TYPE.SPLIT); clearData(graphData); }
     document.querySelector("#merge-menu-btn").onclick = () => { setTool(TOOL_TYPE.MERGE); clearData(graphData); }
 
-    document.addEventListener("keyup", ev => {
-        if(ev.ctrlKey) {
-            if(ev.key === "z") {
-                undo(graphData);
-            } else if(ev.key === "y") {
-                redo(graphData);
-            }
-        } else {
-            if(ev.key === "Delete" || ev.key === "Backspace") {
-                deleteSelected(graphData);
-            }
-        }
-    });
+    registerKey(() => undo(graphData), "z");
+    registerKey(() => redo(graphData), "y");
+    registerKey(() => deleteSelected(graphData), "Delete", false);
+    registerKey(() => deleteSelected(graphData), "Backspace", false);
 };
