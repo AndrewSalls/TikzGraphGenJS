@@ -1,5 +1,5 @@
 import { GraphObject } from "../graph-data/graph-object.js";
-import { GraphSession, MOUSE_EXIT_BOUND_DIRECTION, MouseInteraction } from "../graph-session.js";
+import { GraphSession } from "../graph-session.js";
 import accessEdgeTool from "./edge-tool.js";
 import accessSelectTool from "./select-tool.js";
 import accessVertexTool from "./vertex-tool.js";
@@ -9,6 +9,7 @@ import accessMergeTool from "./merge-tool.js";
 import { DeletionEdit } from "../history/entry-edit.js";
 import { makeEdit } from "../history/history.js";
 import { CompositeEdit } from "../history/composite-edit.js";
+import { MOUSE_EXIT_BOUND_DIRECTION, MouseInteraction } from "../mouse-interaction.js";
 
 /**
  * An enum containing the list of valid tool types.

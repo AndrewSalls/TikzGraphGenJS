@@ -1,10 +1,11 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Edge from "../graph-data/edge.js";
 import Vertex, { VERTEX_SHAPE } from "../graph-data/vertex.js";
-import { GraphSession, MouseInteraction } from "../graph-session.js";
+import { GraphSession } from "../graph-session.js";
 import { makeEdit } from "../history/history.js";
 import { InsertionEdit } from "../history/entry-edit.js";
 import { Tool } from "./tool.js";
+import { MouseInteraction } from "../mouse-interaction.js";
 
 let EDGE_TOOL;
 
@@ -29,10 +30,10 @@ export default function accessEdgeTool() {
  * @returns {*} The updated value for toolData.
  */
 function onDown(mouse, graphData, toolData, selectedData) {
-    toolData = { startPos: graphData.getClickedObject(mouse.x, mouse.y, GRAPH_DATATYPE.VERTEX)};
+    toolData = { startPos: graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY, GRAPH_DATATYPE.VERTEX)};
         
     if(toolData.startPos !== null) {
-        toolData.cursorVertex = new Vertex(mouse.x, mouse.y, true);
+        toolData.cursorVertex = new Vertex(mouse.shiftedX, mouse.shiftedY, true);
         toolData.cursorVertex.shape = VERTEX_SHAPE.CIRCLE;
         toolData.cursorVertex.scale = 0;
         toolData.cursorVertex.borderScale = 0;
@@ -59,8 +60,8 @@ function onDown(mouse, graphData, toolData, selectedData) {
  */
 function onMove(mouse, graphData, toolData, selectedData) {
     if(toolData !== null) {
-        toolData.cursorVertex.x = mouse.x;
-        toolData.cursorVertex.y = mouse.y;
+        toolData.cursorVertex.x = mouse.shiftedX;
+        toolData.cursorVertex.y = mouse.shiftedY;
     }
 
     return toolData;
@@ -76,7 +77,7 @@ function onMove(mouse, graphData, toolData, selectedData) {
  */
 function onUp(mouse, graphData, toolData, selectedData) {
     if(toolData !== null) {
-        const selectedEnd = graphData.getClickedObject(mouse.x, mouse.y, GRAPH_DATATYPE.VERTEX);
+        const selectedEnd = graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY, GRAPH_DATATYPE.VERTEX);
         if(selectedEnd !== null) {
             if(selectedEnd === toolData.startPos) {
                 // TODO: Create loop instead of cancelling edge creation

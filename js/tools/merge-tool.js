@@ -1,9 +1,11 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Vertex from "../graph-data/vertex.js";
+import { GraphSession } from "../graph-session.js";
 import { CompositeEdit } from "../history/composite-edit.js";
 import { DeletionEdit } from "../history/entry-edit.js";
 import { makeEdit } from "../history/history.js";
 import { MutationEdit } from "../history/mutation-edit.js";
+import { MouseInteraction } from "../mouse-interaction.js";
 import { Tool } from "./tool.js";
 
 let MERGE_TOOL;
@@ -12,7 +14,7 @@ let MERGE_TOOL;
  * Provides access to the merge tool.
  * @returns {Tool} The merge tool.
  */
-export default function accessMergeTool() { 
+export default function accessMergeTool() {
     if(MERGE_TOOL === undefined) {
         MERGE_TOOL = new Tool("merge", onDown, onMove, onUp, clearData, onPaint);
     }
@@ -53,7 +55,7 @@ function onMove(mouse, graphData, toolData, selectedData) {
  * @returns {*} The updated value for toolData.
  */
 function onUp(mouse, graphData, toolData, selectedData) {
-    const clickedVertex = graphData.getClickedObject(mouse.x, mouse.y, GRAPH_DATATYPE.VERTEX);
+    const clickedVertex = graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY, GRAPH_DATATYPE.VERTEX);
 
     if(clickedVertex instanceof Vertex) {
         if(selectedData.has(clickedVertex)) {

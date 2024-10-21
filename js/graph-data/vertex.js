@@ -37,9 +37,10 @@ export default class Vertex extends GraphObject {
     /**
      * Draws the vertex based on its set properties.
      * @param {CanvasRenderingContext2D} ctx The canvas rendering context with which to draw the vertex.
+     * @param {GraphViewport} viewport The viewport that defines panning and zoom of the canvas the vertex is drawn on.
      * @param {Boolean} selected Whether this vertex has been selected by the user.
      */
-    render(ctx, selected = false) {
+    render(ctx, viewport, selected = false) {
         //TODO: support other shapes, move rendering for shapes into function to avoid duplicating code between select outline and actual shape
 
         if(selected) {
@@ -47,7 +48,7 @@ export default class Vertex extends GraphObject {
             ctx.fillStyle = RENDER_SETTINGS.SELECT_MAIN;
             ctx.lineWidth = RENDER_SETTINGS.SELECT_WIDTH;
             ctx.strokeStyle = RENDER_SETTINGS.SELECT_BORDER;
-            ctx.arc(this.x, this.y, this.scale + ctx.lineWidth, 0, 2 * Math.PI);
+            ctx.arc(this.x - viewport.offsetX, this.y - viewport.offsetY, this.scale + ctx.lineWidth, 0, 2 * Math.PI);
             ctx.fill();
             ctx.stroke();
             ctx.closePath();
@@ -58,7 +59,7 @@ export default class Vertex extends GraphObject {
         ctx.strokeStyle = this.color;
         ctx.fillStyle = this.fill;
 
-        ctx.arc(this.x, this.y, this.scale, 0, 2 * Math.PI);
+        ctx.arc(this.x - viewport.offsetX, this.y - viewport.offsetY, this.scale, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
         ctx.closePath();
@@ -84,7 +85,7 @@ export default class Vertex extends GraphObject {
     }
 
     /**
-     * Determines if the object, based on its set properties, intersects the provided circle. *SHOULD NOT BE CALLED DIRECTLY*
+     * Determines if the object, based on its set properties, intersects the provided circle.
      * @param {Number} mouseX the x position of the circle's center.
      * @param {Number} mouseY the y position of the circle's center.
      * @param {Number} radius the radius of the circle.
@@ -119,14 +120,24 @@ export default class Vertex extends GraphObject {
 
     /**
      * Gives a bounding box for the vertex.
-     * @returns {[[Number, Number], [Number, Number]]} The coordinates of the upper left and bottom right corner.
+     * @returns {{x: Number, y: Number, width: Number, height: Number}} The upper left corner and bounding box dimensions.
      */
     boundingBox() {
         if(typeof this.scale === "number") {
-            return [[this.x - this.scale, this.y - this.scale], [this.x + this.scale, this.y + this.scale]];
+            return {
+                x: this.x - this.scale,
+                y: this.y - this.scale,
+                width: 2 * this.scale,
+                height: 2 * this.scale
+            };
         }
 
-        return [[this.x - this.scaleX, this.y - this.scaleY], [this.x + this.scaleX, this.y + this.scaleY]];
+        return {
+            x: this.x - this.scaleX,
+            y: this.y - this.scaleY,
+            width: 2 * this.scaleX,
+            height: 2 * this.scaleY
+        };
     }
 
     /**
@@ -155,7 +166,7 @@ export default class Vertex extends GraphObject {
     }
 
     /**
-     * Gives the {@link GRAPH_DATATYPE} associated with this object. *SHOULD NOT BE CALLED DIRECTLY*
+     * Gives the {@link GRAPH_DATATYPE} associated with this object.
      * @returns {GRAPH_DATATYPE} The type of graph object that this represents.
      */
     getType() {

@@ -1,8 +1,9 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
-import { GraphSession, MOUSE_CLICK_TYPE, MouseInteraction, RENDER_SETTINGS } from "../graph-session.js";
+import { GraphSession, RENDER_SETTINGS } from "../graph-session.js";
 import { CompositeEdit } from "../history/composite-edit.js";
 import { makeEdit } from "../history/history.js";
 import { MutationEdit } from "../history/mutation-edit.js";
+import { MOUSE_CLICK_TYPE, MouseInteraction } from "../mouse-interaction.js";
 import { Tool } from "./tool.js";
 
 let SELECT_TOOL;
@@ -37,11 +38,14 @@ function onDown(mouse, graphData, toolData, selectedData) {
         keepOldSelected: (mouse.clickType & MOUSE_CLICK_TYPE.SHIFT_HELD) > 0 // true if shift is held
     };
     
-    if(selectedData.has(graphData.getClickedObject(mouse.x, mouse.y))) {
+    if(selectedData.has(graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY))) {
         toolData.dragging = true;
         //Prevent initial delta from being NaN
-        toolData.newX = toolData.x;
-        toolData.newY = toolData.y;
+        toolData.newX = mouse.shiftedX;
+        toolData.newY = mouse.shiftedY;
+    } else {
+        toolData.shiftX = mouse.shiftedX;
+        toolData.shiftY = mouse.shiftedY;
     }
 
     return toolData;
@@ -57,8 +61,8 @@ function onDown(mouse, graphData, toolData, selectedData) {
  */
 function onMove(mouse, graphData, toolData, selectedData) {
     if(toolData !== null && toolData.dragging) {
-        const deltaX = mouse.x - toolData.newX;
-        const deltaY = mouse.y - toolData.newY;
+        const deltaX = mouse.shiftedX - toolData.newX;
+        const deltaY = mouse.shiftedY - toolData.newY;
 
         const iter = selectedData.values();
         let next = iter.next();
@@ -72,8 +76,8 @@ function onMove(mouse, graphData, toolData, selectedData) {
             }
         }
         
-        toolData.newX = mouse.x;
-        toolData.newY = mouse.y;
+        toolData.newX = mouse.shiftedX;
+        toolData.newY = mouse.shiftedY;
     } else if(toolData !== null && (toolData.isAreaSelect || Math.sqrt(Math.pow(mouse.x - toolData.x, 2) + Math.pow(mouse.y - toolData.y, 2)) > MIN_AREA_SELECT)) {
         toolData.newX = mouse.x;
         toolData.newY = mouse.y;
@@ -120,14 +124,15 @@ function onUp(mouse, graphData, toolData, selectedData) {
             if(!toolData.keepOldSelected) {
                 selectedData.clear();
             }
+
             const iter = graphData.iterateThroughAllData();
             let next = iter.next();
             while(!next.done) {
                 const bBox = next.value.boundingBox();
-                if(bBox[0][0] >= Math.min(toolData.newX, toolData.x) &&
-                   bBox[0][1] >= Math.min(toolData.newY, toolData.y) &&
-                   bBox[1][0] <= Math.max(toolData.newX, toolData.x) &&
-                   bBox[1][1] <= Math.max(toolData.newY, toolData.y) ) {
+                if(bBox.x >= Math.min(mouse.shiftedX, toolData.shiftX) &&
+                   bBox.y >= Math.min(mouse.shiftedY, toolData.shiftY) &&
+                   bBox.x + bBox.width <= Math.max(mouse.shiftedX, toolData.shiftX) &&
+                   bBox.y + bBox.height <= Math.max(mouse.shiftedY, toolData.shiftY)) {
                     selectedData.add(next.value);
                 }
 
@@ -137,7 +142,8 @@ function onUp(mouse, graphData, toolData, selectedData) {
             if(!toolData.keepOldSelected) {
                 selectedData.clear();
             }
-            const clicked = graphData.getClickedObject(mouse.x, mouse.y);
+
+            const clicked = graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY);
             if(clicked !== null) {
                 selectedData.add(clicked);
             }

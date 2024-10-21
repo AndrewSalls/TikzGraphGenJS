@@ -1,8 +1,10 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Vertex from "../graph-data/vertex.js";
+import { GraphSession } from "../graph-session.js";
 import { InsertionEdit } from "../history/entry-edit.js";
 import { makeEdit } from "../history/history.js";
 import { MutationEdit } from "../history/mutation-edit.js";
+import { MouseInteraction } from "../mouse-interaction.js";
 import { Tool } from "./tool.js";
 
 let VERTEX_TOOL;
@@ -29,7 +31,7 @@ export default function accessVertexTool() {
  */
 function onDown(mouse, graphData, toolData, selectedData) {
     toolData = {
-        vertex: graphData.getClickedObject(mouse.x, mouse.y, GRAPH_DATATYPE.VERTEX),
+        vertex: graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY, GRAPH_DATATYPE.VERTEX),
     };
     if(toolData.vertex instanceof Vertex) {
         toolData.originX = toolData.vertex.x;
@@ -53,8 +55,8 @@ function onDown(mouse, graphData, toolData, selectedData) {
  */
 function onMove(mouse, graphData, toolData, selectedData) {
     if(toolData !== null && !mouse.exitedBounds) {
-        toolData.vertex.x = mouse.x;
-        toolData.vertex.y = mouse.y;
+        toolData.vertex.x = mouse.shiftedX;
+        toolData.vertex.y = mouse.shiftedY;
     }
 
     return toolData;
@@ -79,7 +81,7 @@ function onUp(mouse, graphData, toolData, selectedData) {
         toolData = null;
     } else {
         if(!mouse.exitedBounds) {
-            const created = new Vertex(mouse.x, mouse.y);
+            const created = new Vertex(mouse.shiftedX, mouse.shiftedY);
             graphData.vertices.push(created);
             makeEdit(new InsertionEdit(created));
             selectedData.clear();

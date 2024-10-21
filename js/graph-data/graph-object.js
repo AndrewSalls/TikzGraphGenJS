@@ -1,3 +1,5 @@
+import { GraphViewport } from "../graph-viewport.js";
+
 /**
  * Variable that represents the next generated ID.
  */
@@ -39,9 +41,10 @@ export class GraphObject {
     /**
      * Renders the object on the canvas. *SHOULD NOT BE CALLED DIRECTLY*
      * @param {CanvasRenderingContext2D} ctx The canvas rendering context with which to draw the object.
+     * @param {GraphViewport} viewport The viewport that defines panning and zoom of the canvas the object is drawn on.
      * @param {Boolean} selected Whether this object has been selected by the user.
      */
-    render(ctx, selected = false) {
+    render(ctx, viewport, selected = false) {
         console.error("GraphObject is an abstract class and cannot be instantiated.");
     }
 
@@ -68,7 +71,7 @@ export class GraphObject {
 
     /**
      * Gives a bounding box for the object. *SHOULD NOT BE CALLED DIRECTLY*
-     * @returns {[[Number, Number], [Number, Number]]} The coordinates of the upper left and bottom right corner.
+     * @returns {{x: Number, y: Number, width: Number, height: Number}} The upper left corner and bounding box dimensions.
      */
     boundingBox() {
         console.error("GraphObject is an abstract class and cannot be instantiated.");

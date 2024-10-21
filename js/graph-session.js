@@ -1,57 +1,7 @@
 
 import { GRAPH_DATATYPE, GraphObject } from "./graph-data/graph-object.js";
+import { GraphViewport } from "./graph-viewport.js";
 import { isSelected, tool_onPaint } from "./tools/tool.js";
-
-/**
- * An enum representing the type of click performed by a mouse. Multiple values can be set,
- * and ALT, SHIFT, and CTRL will always be set in addition to one of the click types.
- * 
- * Note that the first five options should be aligned to the options for {@link MouseEvent.buttons}.
- * @enum
- * @redonly
- */
-export const MOUSE_CLICK_TYPE = {
-    LEFT_CLICK: 1,
-    RIGHT_CLICK: 2,
-    MIDDLE_CLICK: 4,
-    SIDE_BACK: 8,
-    SIDE_FORWARD: 16,
-    ALT_HELD: 32,
-    SHIFT_HELD: 64,
-    CTRL_HELD: 128
-}
-
-/**
- * An enum representing the possible ways the mouse can leave the canvas. WINDOW can be any direction, with the mouse leaving the entire window instead of just the canvas.
- * @enum
- * @redonly
- */
-export const MOUSE_EXIT_BOUND_DIRECTION = {
-    LEFT: 1,
-    TOP: 2,
-    RIGHT: 4,
-    BOTTOM: 8,
-    WINDOW: 16
-}
-
-/**
- * Contains the minimum amount of relevant information for tools interacting to a mouse event.
- */
-export class MouseInteraction {
-    /**
-     * Defines a mouse interaction.
-     * @param {Number} mouseX The x coordinate of the mouse interaction relative to the canvas element.
-     * @param {Number} mouseY The y coordinate of the mouse interaction relative to the canvas element.
-     * @param {MOUSE_CLICK_TYPE} clickType The type of click recorded.
-     * @param {Boolean} exitedBounds Whether the mouse interaction was inside or outside of the canvas.
-     */
-    constructor(mouseX, mouseY, clickType, exitedBounds) {
-        this.x = mouseX;
-        this.y = mouseY;
-        this.clickType = clickType;
-        this.exitedBounds = exitedBounds;
-    }
-}
 
 /**
  * Describes built-in render settings, like highlighting color when selecting objects or using the select tool.
@@ -76,9 +26,14 @@ export class GraphSession {
      * @param {CanvasRenderingContext2D} ctx The canvas context to draw the graph on.
      */
     constructor(ctx) {
+        /** @type {Vertex[]} */
         this.vertices = [];
+        /** @type {Edge[]} */
         this.edges = [];
+        /** @type {CanvasRenderingContext2D} */
         this.ctx = ctx;
+        /** @type {GraphViewport} */
+        this.viewport = new GraphViewport();
     }
 
     /**
@@ -86,7 +41,7 @@ export class GraphSession {
      * @param {Number} mouseX The x coordinate of the mouse click.
      * @param {Number} mouseY The y coordinate of the mouse click.
      * @param {GRAPH_DATATYPE} filter Restricts the clicked object to be of the provided datatype(s). Defaults to null if no filter is needed.
-     * @returns The first object matching the filter, or null if no relevant object was clicked.
+     * @returns {GraphObject | null} The first object matching the filter, or null if no relevant object was clicked.
      */
     getClickedObject(mouseX, mouseY, filter = null) {
         let x = this.vertices.length - 1, y = this.edges.length - 1;
@@ -127,7 +82,7 @@ export class GraphSession {
      * @param {GRAPH_DATATYPE} filter Restricts the clicked object to be of the provided datatype(s). Defaults to null if no filter is needed.
      * @returns {GraphObject[]} An array of all objects matching the supplied filter within the specified radius of the mouse click, ordered by "height".
      */
-    getClickedObjectsInRange(mouseX, mouseY, radius, filter = null) {
+    getClickedObjectsInRange(mouseX, mouseY, radius, filter = null) {        
         const clicked = [];
         let x = this.vertices.length - 1, y = this.edges.length - 1;
         while(x >= 0 && y >= 0 && filter === null) {
@@ -162,7 +117,7 @@ export class GraphSession {
 
     /**
      * Provides access to all graph objects at once in the form of an iterator.
-     * @returns {Iterator} A single iterable array containing all graph objects stored in the session.
+     * @returns {Generator<GraphObject, void, Number>} A single iterable array containing all graph objects stored in the session.
      */
     *iterateThroughAllData() {
         for(let x = 0; x < this.vertices.length; x++) {
@@ -177,14 +132,20 @@ export class GraphSession {
      * Renders the graph on screen using the graph data's specified rendering methods.
      */
     drawGraph() {
-        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+        const canvasWidth = this.ctx.canvas.width;
+        const canvasHeight = this.ctx.canvas.height;
+        this.ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
         for(let vertex of this.vertices) {
-            vertex.render(this.ctx, isSelected(vertex));
+            if(this.viewport.intersects(vertex.boundingBox(), canvasWidth, canvasHeight)) {
+                vertex.render(this.ctx, this.viewport, isSelected(vertex));
+            }
         }
 
         for(let edge of this.edges) {
-            edge.render(this.ctx, isSelected(edge));
+            if(this.viewport.intersects(edge.boundingBox(), canvasWidth, canvasHeight)) {
+                edge.render(this.ctx, this.viewport, isSelected(edge));
+            }
         }
 
         tool_onPaint(this, this.ctx);

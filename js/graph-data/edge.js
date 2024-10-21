@@ -30,9 +30,10 @@ export default class Edge extends GraphObject {
     /**
      * Draws the edge based on its set properties.
      * @param {CanvasRenderingContext2D} ctx The canvas rendering context with which to draw the edge.
+     * @param {GraphViewport} viewport The viewport that defines panning and zoom of the canvas the edge is drawn on.
      * @param {Boolean} selected Whether this edge has been selected by the user.
      */
-    render(ctx, selected = false) {
+    render(ctx, viewport, selected = false) {
         // TODO: Probably want to change to drawing to center and using clip path, easier than complex fill operations
         const angle = Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
         const startPos = this.start.borderPoint(angle);
@@ -42,8 +43,8 @@ export default class Edge extends GraphObject {
             ctx.beginPath();
             ctx.lineWidth = RENDER_SETTINGS.SELECT_BORDER_WIDTH + this.scale;
             ctx.strokeStyle = RENDER_SETTINGS.SELECT_BORDER;
-            ctx.moveTo(startPos.x, startPos.y);
-            ctx.lineTo(endPos.x, endPos.y);
+            ctx.moveTo(startPos.x - viewport.offsetX, startPos.y - viewport.offsetY);
+            ctx.lineTo(endPos.x - viewport.offsetX, endPos.y - viewport.offsetY);
             ctx.stroke();
             ctx.closePath();
         }
@@ -52,8 +53,8 @@ export default class Edge extends GraphObject {
         ctx.strokeStyle = this.color;
         ctx.lineWidth = this.scale;
         
-        ctx.moveTo(startPos.x, startPos.y);
-        ctx.lineTo(endPos.x, endPos.y);
+        ctx.moveTo(startPos.x - viewport.offsetX, startPos.y - viewport.offsetY);
+        ctx.lineTo(endPos.x - viewport.offsetX, endPos.y - viewport.offsetY);
         ctx.stroke();
         ctx.closePath();
     }
@@ -78,7 +79,7 @@ export default class Edge extends GraphObject {
     }
 
     /**
-     * Determines if the object, based on its set properties, intersects the provided circle. *SHOULD NOT BE CALLED DIRECTLY*
+     * Determines if the object, based on its set properties, intersects the provided circle.
      * @param {Number} mouseX the x position of the circle's center.
      * @param {Number} mouseY the y position of the circle's center.
      * @param {Number} radius the radius of the circle.
@@ -130,19 +131,23 @@ export default class Edge extends GraphObject {
 
     /**
      * Gives a bounding box for the object.
-     * @returns {[[Number, Number], [Number, Number]]} The coordinates of the upper left and bottom right corner.
+     * @returns {{x: Number, y: Number, width: Number, height: Number}} The upper left corner and bounding box dimensions.
      */
     boundingBox() {
         const angle = Math.atan2(this.end.y - this.start.y, this.end.x - this.start.x);
         const startPos = this.start.borderPoint(angle);
         const endPos = this.end.borderPoint(angle + Math.PI);
         
-        return [[Math.min(startPos.x, endPos.x), Math.min(startPos.y, endPos.y)],
-                [Math.max(startPos.x, endPos.x), Math.max(startPos.y, endPos.y)]];
+        return {
+            x: Math.min(startPos.x, endPos.x),
+            y: Math.min(startPos.y, endPos.y),
+            width: Math.abs(endPos.x - startPos.x),
+            height: Math.abs(endPos.y - startPos.y)
+        };
     }
 
     /**
-     * Gives the {@link GRAPH_DATATYPE} associated with this object. *SHOULD NOT BE CALLED DIRECTLY*
+     * Gives the {@link GRAPH_DATATYPE} associated with this object.
      * @returns {GRAPH_DATATYPE} The type of graph object that this represents.
      */
     getType() {

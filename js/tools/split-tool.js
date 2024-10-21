@@ -1,9 +1,11 @@
 import Edge from "../graph-data/edge.js";
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Vertex from "../graph-data/vertex.js";
+import { GraphSession } from "../graph-session.js";
 import { CompositeEdit } from "../history/composite-edit.js";
 import { DeletionEdit, InsertionEdit } from "../history/entry-edit.js";
 import { makeEdit } from "../history/history.js";
+import { MouseInteraction } from "../mouse-interaction.js";
 import { Tool } from "./tool.js";
 
 let SPLIT_TOOL;
@@ -53,9 +55,9 @@ function onMove(mouse, graphData, toolData, selectedData) {
  * @returns {*} The updated value for toolData.
  */
 function onUp(mouse, graphData, toolData, selectedData) {
-    const clickedEdge = graphData.getClickedObject(mouse.x, mouse.y, GRAPH_DATATYPE.EDGE);
+    const clickedEdge = graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY, GRAPH_DATATYPE.EDGE);
     if(clickedEdge instanceof Edge) {
-        const closestPoint = clickedEdge.closestPoint(mouse.x, mouse.y);
+        const closestPoint = clickedEdge.closestPoint(mouse.shiftedX, mouse.shiftedY);
         const addedVertex = new Vertex(closestPoint.x, closestPoint.y);
         const addedEdge1 = new Edge(clickedEdge.start, addedVertex);
         const addedEdge2 = new Edge(clickedEdge.end, addedVertex);

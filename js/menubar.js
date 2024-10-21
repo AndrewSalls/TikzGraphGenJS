@@ -1,7 +1,6 @@
 import { GraphSession } from "./graph-session.js";
-import { clearData, setTool, deleteSelected, clearGraph } from "./tools/tool.js";
+import { deleteSelected, clearGraph } from "./tools/tool.js";
 import { undo, redo } from "./history/history.js";
-import { TOOL_TYPE } from "./tools/tool.js";
 import { registerKey } from "./shortcut.js";
 
 /**
@@ -11,6 +10,7 @@ import { registerKey } from "./shortcut.js";
 export default function initializeMenubar(graphData) {
     initializeFileMenu(graphData);
     initializeEditMenu(graphData);
+    initializeViewMenu(graphData);
 };
 
 /**
@@ -47,4 +47,11 @@ function initializeEditMenu(graphData) {
     registerKey(() => redo(graphData), "y");
     registerKey(() => deleteSelected(graphData), "Delete", false);
     registerKey(() => deleteSelected(graphData), "Backspace", false);
+}
+
+/**
+ * Initializes the buttons in the view sub-menubar.
+ * @param {GraphSession} graphData The graph state, so that it can be provided to functions called by using the menubar.
+ */
+function initializeViewMenu(graphData) {
 }

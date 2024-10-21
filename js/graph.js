@@ -1,7 +1,8 @@
 import { tool_onMouseDown, tool_onMouseMove, tool_onMouseUp } from "./tools/tool.js";
 import initializeMenubar from "./menubar.js";
 import initializeToolbar from "./toolbar.js";
-import { GraphSession, MOUSE_CLICK_TYPE, MOUSE_EXIT_BOUND_DIRECTION, MouseInteraction } from "./graph-session.js";
+import { GraphSession } from "./graph-session.js";
+import { MOUSE_CLICK_TYPE, MOUSE_EXIT_BOUND_DIRECTION, MouseInteraction } from "./mouse-interaction.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("render");
@@ -38,7 +39,12 @@ document.addEventListener("DOMContentLoaded", () => {
             withinCanvas |= MOUSE_EXIT_BOUND_DIRECTION.WINDOW;
         }
 
-        return new MouseInteraction(ev.pageX - canvas.offsetLeft, ev.pageY - canvas.offsetTop, clickOptions, withinCanvas);
+        return new MouseInteraction(
+            ev.pageX - canvas.offsetLeft,
+            ev.pageY - canvas.offsetTop,
+            graphData.viewport.scale * (ev.pageX - canvas.offsetLeft) + graphData.viewport.offsetX,
+            graphData.viewport.scale * (ev.pageY - canvas.offsetTop) + graphData.viewport.offsetY, 
+            clickOptions, withinCanvas);
     }
 
     canvas.addEventListener("mousedown", ev => tool_onMouseDown(convertMouse(ev), graphData));

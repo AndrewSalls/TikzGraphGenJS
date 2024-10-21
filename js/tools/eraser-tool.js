@@ -1,8 +1,9 @@
 import { GRAPH_DATATYPE, GraphObject } from "../graph-data/graph-object.js";
-import { GraphSession, MouseInteraction, RENDER_SETTINGS } from "../graph-session.js";
+import { GraphSession, RENDER_SETTINGS } from "../graph-session.js";
 import { CompositeEdit } from "../history/composite-edit.js";
 import { DeletionEdit } from "../history/entry-edit.js";
 import { makeEdit } from "../history/history.js";
+import { MouseInteraction } from "../mouse-interaction.js";
 import { Tool } from "./tool.js";
 
 let ERASER_TOOL;
@@ -31,8 +32,8 @@ export default function accessEraserTool() {
  */
 function onDown(mouse, graphData, toolData, selectedData) {
     toolData = {
-        x: mouse.x,
-        y: mouse.y,
+        currX: mouse.x,
+        currY: mouse.y,
         vertices: [],
         edges: [],
         dragging: false
@@ -51,8 +52,8 @@ function onDown(mouse, graphData, toolData, selectedData) {
  */
 function onMove(mouse, graphData, toolData, selectedData) {
     if(toolData !== null && !toolData.dragging) {
-        const deltaX = mouse.x - toolData.x;
-        const deltaY = mouse.y - toolData.y;
+        const deltaX = mouse.x - toolData.currX;
+        const deltaY = mouse.y - toolData.currY;
         
         if(Math.sqrt(deltaX * deltaX + deltaY + deltaY) >= SWITCH_TO_DRAG_ERASE) {
             toolData.dragging = true;
@@ -63,7 +64,7 @@ function onMove(mouse, graphData, toolData, selectedData) {
         toolData.currX = mouse.x; // For drawing eraser selection area
         toolData.currY = mouse.y;
 
-        const clicked = graphData.getClickedObjectsInRange(mouse.x, mouse.y, ERASER_WIDTH);
+        const clicked = graphData.getClickedObjectsInRange(mouse.shiftedX, mouse.shiftedY, ERASER_WIDTH);
         appendAndEraseData(clicked, graphData, toolData, selectedData);
     }
 
@@ -81,7 +82,7 @@ function onMove(mouse, graphData, toolData, selectedData) {
 function onUp(mouse, graphData, toolData, selectedData) {
     if(toolData !== null) {
         if(!toolData.dragging) {
-            const clicked = graphData.getClickedObjectsInRange(mouse.x, mouse.y, ERASER_WIDTH);
+            const clicked = graphData.getClickedObjectsInRange(mouse.shiftedX, mouse.shiftedY, ERASER_WIDTH);
             appendAndEraseData(clicked, graphData, toolData, selectedData);
         }
 
