@@ -1,6 +1,9 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Vertex from "../graph-data/vertex.js";
-import { Edit, EDIT_TYPE, makeEdit } from "../history.js";
+import { CompositeEdit } from "../history/composite-edit.js";
+import { DeletionEdit } from "../history/entry-edit.js";
+import { makeEdit } from "../history/history.js";
+import { MutationEdit } from "../history/mutation-edit.js";
 import { Tool } from "./tool.js";
 
 let MERGE_TOOL;
@@ -67,32 +70,22 @@ function onUp(mouse, graphData, toolData, selectedData) {
                         if(selectedData.has(connectedEdge)) {
                             selectedData.delete(connectedEdge);
                         }
-                        editList.push(new Edit(EDIT_TYPE.REMOVE, connectedEdge));
+                        editList.push(new DeletionEdit(connectedEdge));
                     } else if(connectedEdge.start === vertex) {
                         connectedEdge.start = clickedVertex;
                         clickedVertex.connect(connectedEdge);
-                        editList.push(new Edit(EDIT_TYPE.MUTATION, {
-                            type: GRAPH_DATATYPE.EDGE,
-                            id: connectedEdge.id,
-                            originalValues: { start: vertex },
-                            modifiedValues: { start: clickedVertex }
-                        }));
+                        editList.push(new MutationEdit(connectedEdge, { start: vertex }));
                     } else { // connectedEdge.end === vertex
                         connectedEdge.end = clickedVertex;
                         clickedVertex.connect(connectedEdge);
-                        editList.push(new Edit(EDIT_TYPE.MUTATION, {
-                            type: GRAPH_DATATYPE.EDGE,
-                            id: connectedEdge.id,
-                            originalValues: { end: vertex },
-                            modifiedValues: { end: clickedVertex }
-                        }));
+                        editList.push(new MutationEdit(connectedEdge, { end: vertex }));
                     }
                 }
 
                 graphData.vertices.splice(graphData.vertices.indexOf(vertex), 1);
                 vertex.disconnectAll();
                 selectedData.delete(vertex);
-                editList.push(new Edit(EDIT_TYPE.REMOVE, vertex));
+                editList.push(new DeletionEdit(vertex));
             }
 
             // Create composite edit, vertex deletion edit, or no edit
@@ -100,7 +93,7 @@ function onUp(mouse, graphData, toolData, selectedData) {
                 if(editList.length === 1) {
                     makeEdit(editList[0]);
                 } else {
-                    makeEdit(new Edit(EDIT_TYPE.COMPOSITE, editList));
+                    makeEdit(new CompositeEdit(editList));
                 }
             }
         } else {

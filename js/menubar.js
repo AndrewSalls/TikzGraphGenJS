@@ -1,6 +1,6 @@
 import { GraphSession } from "./graph-session.js";
 import { clearData, setTool, deleteSelected } from "./tools/tool.js";
-import { undo, redo } from "./history.js";
+import { undo, redo } from "./history/history.js";
 import { TOOL_TYPE } from "./tools/tool.js";
 
 /**

@@ -23,7 +23,7 @@ export class GraphObject {
     /**
      * Defines a graph object. *SHOULD NOT BE CALLED DIRECTLY*
      */
-    constructor(dummy = false) {
+    constructor(dummy = false) { 
         if(constructor.name === "GraphObject") {
             console.error("GraphObject is an abstract class and cannot be instantiated.");
         }
@@ -42,9 +42,7 @@ export class GraphObject {
      * @param {Boolean} selected Whether this object has been selected by the user.
      */
     render(ctx, selected = false) {
-        if(constructor.name === "GraphObject") {
-            console.error("GraphObject is an abstract class and cannot be instantiated.");
-        }
+        console.error("GraphObject is an abstract class and cannot be instantiated.");
     }
 
     /**
@@ -54,9 +52,7 @@ export class GraphObject {
      * @returns {Boolean} Whether the shape intersects the provided coordinates.
      */
     intersect(coordX, coordY) {
-        if(constructor.name === "GraphObject") {
-            console.error("GraphObject is an abstract class and cannot be instantiated.");
-        }
+        console.error("GraphObject is an abstract class and cannot be instantiated.");
     }
 
     /**
@@ -67,9 +63,7 @@ export class GraphObject {
      * @returns {Boolean} Whether the shape intersects the provided circle.
      */
     intersect(coordX, coordY, radius) {
-        if(constructor.name === "GraphObject") {
-            console.error("GraphObject is an abstract class and cannot be instantiated.");
-        }
+        console.error("GraphObject is an abstract class and cannot be instantiated.");
     }
 
     /**
@@ -77,18 +71,14 @@ export class GraphObject {
      * @returns {[[Number, Number], [Number, Number]]} The coordinates of the upper left and bottom right corner.
      */
     boundingBox() {
-        if(constructor.name === "GraphObject") {
-            console.error("GraphObject is an abstract class and cannot be instantiated.")
-        }
+        console.error("GraphObject is an abstract class and cannot be instantiated.");
     }
 
     /**
      * Gives the {@link GRAPH_DATATYPE} associated with this object. *SHOULD NOT BE CALLED DIRECTLY*
      * @returns {GRAPH_DATATYPE} The type of graph object that this represents.
      */
-    giveType() {
-        if(constructor.name === "GraphObject") {
-            console.error("GraphObject is an abstract class and cannot be instantiated.");
-        }
+    getType() {
+        console.error("GraphObject is an abstract class and cannot be instantiated.");
     }
 }

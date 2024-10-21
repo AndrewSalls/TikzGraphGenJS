@@ -1,6 +1,8 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Vertex from "../graph-data/vertex.js";
-import { Edit, EDIT_TYPE, makeEdit } from "../history.js";
+import { InsertionEdit } from "../history/entry-edit.js";
+import { makeEdit } from "../history/history.js";
+import { MutationEdit } from "../history/mutation-edit.js";
 import { Tool } from "./tool.js";
 
 let VERTEX_TOOL;
@@ -68,12 +70,9 @@ function onMove(mouse, graphData, toolData, selectedData) {
  */
 function onUp(mouse, graphData, toolData, selectedData) {
     if(toolData !== null) {
-        makeEdit(new Edit(EDIT_TYPE.MUTATION, {
-            type: "Vertex",
-            id: toolData.vertex.id,
-            originalValues: { x: toolData.originX, y: toolData.originY },
-            modifiedValues: { x: toolData.vertex.x, y: toolData.vertex.y }
-        }));
+        makeEdit(new MutationEdit(toolData.vertex,
+            { x: toolData.originX, y: toolData.originY },
+            { x: toolData.vertex.x, y: toolData.vertex.y }));
         
         selectedData.clear();
         selectedData.add(toolData.vertex);
@@ -82,7 +81,7 @@ function onUp(mouse, graphData, toolData, selectedData) {
         if(!mouse.exitedBounds) {
             const created = new Vertex(mouse.x, mouse.y);
             graphData.vertices.push(created);
-            makeEdit(new Edit(EDIT_TYPE.ADD, created));
+            makeEdit(new InsertionEdit(created));
             selectedData.clear();
             selectedData.add(created);
         }

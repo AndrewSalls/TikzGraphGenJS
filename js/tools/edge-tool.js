@@ -2,7 +2,8 @@ import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Edge from "../graph-data/edge.js";
 import Vertex, { VERTEX_SHAPE } from "../graph-data/vertex.js";
 import { GraphSession, MouseInteraction } from "../graph-session.js";
-import { Edit, EDIT_TYPE, makeEdit } from "../history.js";
+import { makeEdit } from "../history/history.js";
+import { InsertionEdit } from "../history/entry-edit.js";
 import { Tool } from "./tool.js";
 
 let EDGE_TOOL;
@@ -77,16 +78,23 @@ function onUp(mouse, graphData, toolData, selectedData) {
     if(toolData !== null) {
         const selectedEnd = graphData.getClickedObject(mouse.x, mouse.y, GRAPH_DATATYPE.VERTEX);
         if(selectedEnd !== null) {
-            toolData.tempEdge.end = selectedEnd;
-            selectedEnd.connect(toolData.tempEdge);
-            makeEdit(new Edit(EDIT_TYPE.ADD, toolData.tempEdge));
-            
-            selectedData.clear();
-            selectedData.add(toolData.tempEdge);
+            if(selectedEnd === toolData.startPos) {
+                // TODO: Create loop instead of cancelling edge creation
+                graphData.edges.pop();
+                selectedData.clear();
+            } else {
+                toolData.tempEdge.end = selectedEnd;
+                selectedEnd.connect(toolData.tempEdge);
+                makeEdit(new InsertionEdit(toolData.tempEdge));
+                
+                selectedData.clear();
+                selectedData.add(toolData.tempEdge);
+            }
         } else {
             graphData.edges.pop();
             selectedData.clear();
         }
+        
         graphData.vertices.pop();
         toolData = null;
     } else {

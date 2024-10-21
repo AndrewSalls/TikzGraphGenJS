@@ -1,6 +1,8 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import { GraphSession, MOUSE_CLICK_TYPE, MouseInteraction, RENDER_SETTINGS } from "../graph-session.js";
-import { Edit, EDIT_TYPE, makeEdit } from "../history.js";
+import { CompositeEdit } from "../history/composite-edit.js";
+import { makeEdit } from "../history/history.js";
+import { MutationEdit } from "../history/mutation-edit.js";
 import { Tool } from "./tool.js";
 
 let SELECT_TOOL;
@@ -61,7 +63,7 @@ function onMove(mouse, graphData, toolData, selectedData) {
         const iter = selectedData.values();
         let next = iter.next();
         while(!next.done) {
-            if(next.value.giveType() === GRAPH_DATATYPE.VERTEX) {
+            if(next.value.getType() === GRAPH_DATATYPE.VERTEX) {
                 next.value.x += deltaX;
                 next.value.y += deltaY;
                 next = iter.next();
@@ -99,13 +101,10 @@ function onUp(mouse, graphData, toolData, selectedData) {
             const iter = selectedData.values();
             let next = iter.next();
             while(!next.done) {
-                if(next.value.giveType() === GRAPH_DATATYPE.VERTEX) {
-                    editList.push(new Edit(EDIT_TYPE.MUTATION, {
-                        type: next.value.giveType(),
-                        id: next.value.id,
-                        originalValues: { x: next.value.x - deltaX, y: next.value.y - deltaY },
-                        modifiedValues: { x: next.value.x, y: next.value.y }
-                    }));
+                if(next.value.getType() === GRAPH_DATATYPE.VERTEX) {
+                    editList.push(new MutationEdit(next.value,
+                        { x: next.value.x - deltaX, y: next.value.y - deltaY },
+                        { x: next.value.x, y: next.value.y }))
                 }
                 next = iter.next();
             }
@@ -114,7 +113,7 @@ function onUp(mouse, graphData, toolData, selectedData) {
                 if(editList.length === 1) {
                     makeEdit(editList[0]);
                 } else {
-                    makeEdit(new Edit(EDIT_TYPE.COMPOSITE, editList));
+                    makeEdit(new CompositeEdit(editList));
                 }
             }
         } else if(toolData.isAreaSelect) {

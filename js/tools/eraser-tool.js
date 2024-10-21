@@ -1,6 +1,8 @@
 import { GRAPH_DATATYPE, GraphObject } from "../graph-data/graph-object.js";
 import { GraphSession, MouseInteraction, RENDER_SETTINGS } from "../graph-session.js";
-import { Edit, EDIT_TYPE, makeEdit } from "../history.js";
+import { CompositeEdit } from "../history/composite-edit.js";
+import { DeletionEdit } from "../history/entry-edit.js";
+import { makeEdit } from "../history/history.js";
 import { Tool } from "./tool.js";
 
 let ERASER_TOOL;
@@ -145,7 +147,7 @@ function appendAndEraseData(data, graphData, toolData, selectedData) {
     const erasedEdges = new Set();
 
     for(let x = 0; x < data.length; x++) {
-        switch(data[x].giveType()) {
+        switch(data[x].getType()) {
             case GRAPH_DATATYPE.VERTEX:
                 if(!erasedVertices.has(data[x])) {
                     toolData.vertices.push(data[x]);
@@ -165,7 +167,7 @@ function appendAndEraseData(data, graphData, toolData, selectedData) {
                 }
                 break;
             default:
-                console.error("appendErasedData not implemented for type " + data[x].giveType());
+                console.error("appendErasedData not implemented for type " + data[x].getType());
                 return;
         }
     }
@@ -189,18 +191,18 @@ function createErasedHistory(toolData) {
     const editList = [];
 
     for(const entry of toolData.edges) {
-        editList.push(new Edit(EDIT_TYPE.REMOVE, entry));
+        editList.push(new DeletionEdit(entry));
     }
 
     for(const entry of toolData.vertices) {
-        editList.push(new Edit(EDIT_TYPE.REMOVE, entry));
+        editList.push(new DeletionEdit(entry));
     }
 
     if(editList.length > 0) {
         if(editList.length === 1) {
             makeEdit(editList[0]);
         } else {
-            makeEdit(new Edit(EDIT_TYPE.COMPOSITE, editList));
+            makeEdit(new CompositeEdit(editList));
         }
     }
 }

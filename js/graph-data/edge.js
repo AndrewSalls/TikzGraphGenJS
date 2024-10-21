@@ -145,7 +145,7 @@ export default class Edge extends GraphObject {
      * Gives the {@link GRAPH_DATATYPE} associated with this object. *SHOULD NOT BE CALLED DIRECTLY*
      * @returns {GRAPH_DATATYPE} The type of graph object that this represents.
      */
-    giveType() {
+    getType() {
         return GRAPH_DATATYPE.EDGE;
     }
 }

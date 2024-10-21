@@ -1,7 +1,9 @@
 import Edge from "../graph-data/edge.js";
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Vertex from "../graph-data/vertex.js";
-import { Edit, EDIT_TYPE, makeEdit } from "../history.js";
+import { CompositeEdit } from "../history/composite-edit.js";
+import { DeletionEdit, InsertionEdit } from "../history/entry-edit.js";
+import { makeEdit } from "../history/history.js";
 import { Tool } from "./tool.js";
 
 let SPLIT_TOOL;
@@ -72,11 +74,11 @@ function onUp(mouse, graphData, toolData, selectedData) {
             selectedData.add(addedEdge2);
         }
 
-        makeEdit(new Edit(EDIT_TYPE.COMPOSITE, [
-            new Edit(EDIT_TYPE.REMOVE, clickedEdge),
-            new Edit(EDIT_TYPE.ADD, addedVertex),
-            new Edit(EDIT_TYPE.ADD, addedEdge1),
-            new Edit(EDIT_TYPE.ADD, addedEdge2)
+        makeEdit(new CompositeEdit([
+            new DeletionEdit(clickedEdge),
+            new InsertionEdit(addedVertex),
+            new InsertionEdit(addedEdge1),
+            new InsertionEdit(addedEdge2)
         ]));
     }
 
