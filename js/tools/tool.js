@@ -6,6 +6,9 @@ import accessVertexTool from "./vertex-tool.js";
 import accessEraserTool, { eraseSelected } from "./eraser-tool.js";
 import accessSplitTool from "./split-tool.js";
 import accessMergeTool from "./merge-tool.js";
+import { DeletionEdit } from "../history/entry-edit.js";
+import { makeEdit } from "../history/history.js";
+import { CompositeEdit } from "../history/composite-edit.js";
 
 /**
  * An enum containing the list of valid tool types.
@@ -143,5 +146,30 @@ export function tool_onMouseUp(mouseData, graphData) {
 export function tool_onPaint(graphData, ctx) {
     if(activeTool.onPaint !== undefined) {
         activeTool.onPaint(graphData, toolData, ctx);
+    }
+}
+
+/**
+ * Removes all data from the graph, and resets the current tool.
+ * @param {GraphSession} graphData the graph data the tool can modify.
+ */
+export function clearGraph(graphData) {
+    clearData(graphData);
+    selectedData.clear();
+
+    const editList = [];
+    while(graphData.edges.length > 0) {
+        editList.push(new DeletionEdit(graphData.edges.pop()));
+    }
+    while(graphData.vertices.length > 0) {
+        editList.push(new DeletionEdit(graphData.vertices.pop()));
+    }
+    
+    if(editList.length > 0) {
+        if(editList.length === 1) {
+            makeEdit(editList[0]);
+        } else {
+            makeEdit(new CompositeEdit(editList));
+        }
     }
 }

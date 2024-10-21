@@ -1,5 +1,5 @@
 import { GraphSession } from "./graph-session.js";
-import { clearData, setTool, deleteSelected } from "./tools/tool.js";
+import { clearData, setTool, deleteSelected, clearGraph } from "./tools/tool.js";
 import { undo, redo } from "./history/history.js";
 import { TOOL_TYPE } from "./tools/tool.js";
 import { registerKey } from "./shortcut.js";
@@ -13,10 +13,18 @@ export default function initializeMenubar(graphData) {
     initializeEditMenu(graphData);
 };
 
+/**
+ * Initializes the buttons in the file sub-menubar.
+ * @param {GraphSession} graphData The graph state, so that it can be provided to functions called by using the menubar.
+ */
 function initializeFileMenu(graphData) {
-
+    document.querySelector("#new-graph-btn").onclick = () => clearGraph(graphData);
 }
 
+/**
+ * Initializes the buttons in the edit sub-menubar.
+ * @param {GraphSession} graphData The graph state, so that it can be provided to functions called by using the menubar.
+ */
 function initializeEditMenu(graphData) {
     document.querySelector("#undo-btn").onclick = () => undo(graphData);
     document.querySelector("#redo-btn").onclick = () => redo(graphData);
