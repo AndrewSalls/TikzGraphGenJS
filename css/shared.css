@@ -38,6 +38,7 @@ h1, h2, h3, h4, h5, h6 {
 .clickable {
     transition: filter 0.15s linear;
     background-color: inherit;
+    user-select: none;
 }
 .clickable:hover {
     filter: brightness(0.75);

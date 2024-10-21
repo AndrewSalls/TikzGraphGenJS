@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("render");
     let graphData = new GraphSession(canvas.getContext("2d"));
     let onPage = true;
+    let onMenubar = 0;
 
     /**
      * Converts a generic mouse event into a specifically formatted MouseInteraction.
@@ -24,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(ev.pageX < canvas.offsetLeft) {
             withinCanvas |= MOUSE_EXIT_BOUND_DIRECTION.LEFT;
         }
-        if(ev.pageY < canvas.offsetTop) {
+        if(ev.pageY < canvas.offsetTop || onMenubar > 0) {
             withinCanvas |= MOUSE_EXIT_BOUND_DIRECTION.TOP;
         }
         if(ev.pageX > canvas.offsetLeft + canvas.offsetWidth) {
@@ -55,6 +56,10 @@ document.addEventListener("DOMContentLoaded", () => {
         onPage = true;
         tool_onMouseMove(convertMouse(ev), graphData);
     });
+    for(const dropdown of document.getElementsByClassName("dropdown")) {
+        dropdown.addEventListener("mouseleave", ev => onMenubar--);
+        dropdown.addEventListener("mouseenter", ev => onMenubar++);
+    }
 
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
