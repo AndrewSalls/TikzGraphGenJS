@@ -42,8 +42,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return new MouseInteraction(
             ev.pageX - canvas.offsetLeft,
             ev.pageY - canvas.offsetTop,
-            graphData.viewport.scale * (ev.pageX - canvas.offsetLeft) + graphData.viewport.offsetX,
-            graphData.viewport.scale * (ev.pageY - canvas.offsetTop) + graphData.viewport.offsetY, 
+            (ev.pageX - canvas.offsetLeft) / graphData.viewport.scale + graphData.viewport.offsetX,
+            (ev.pageY - canvas.offsetTop) / graphData.viewport.scale + graphData.viewport.offsetY, 
             clickOptions, withinCanvas);
     }
 
