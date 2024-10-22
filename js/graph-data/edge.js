@@ -41,20 +41,20 @@ export default class Edge extends GraphObject {
         
         if(selected) {
             ctx.beginPath();
-            ctx.lineWidth = RENDER_SETTINGS.SELECT_BORDER_WIDTH + this.scale;
+            ctx.lineWidth = viewport.scale * (RENDER_SETTINGS.SELECT_BORDER_WIDTH + this.scale);
             ctx.strokeStyle = RENDER_SETTINGS.SELECT_BORDER;
-            ctx.moveTo(startPos.x - viewport.offsetX, startPos.y - viewport.offsetY);
-            ctx.lineTo(endPos.x - viewport.offsetX, endPos.y - viewport.offsetY);
+            ctx.moveTo(viewport.scale * (startPos.x - viewport.offsetX), viewport.scale * (startPos.y - viewport.offsetY));
+            ctx.lineTo(viewport.scale * (endPos.x - viewport.offsetX), viewport.scale * (endPos.y - viewport.offsetY));
             ctx.stroke();
             ctx.closePath();
         }
 
         ctx.beginPath();
         ctx.strokeStyle = this.color;
-        ctx.lineWidth = this.scale;
+        ctx.lineWidth = viewport.scale * this.scale;
         
-        ctx.moveTo(startPos.x - viewport.offsetX, startPos.y - viewport.offsetY);
-        ctx.lineTo(endPos.x - viewport.offsetX, endPos.y - viewport.offsetY);
+        ctx.moveTo(viewport.scale * (startPos.x - viewport.offsetX), viewport.scale * (startPos.y - viewport.offsetY));
+        ctx.lineTo(viewport.scale * (endPos.x - viewport.offsetX), viewport.scale * (endPos.y - viewport.offsetY));
         ctx.stroke();
         ctx.closePath();
     }

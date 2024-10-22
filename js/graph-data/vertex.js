@@ -46,20 +46,20 @@ export default class Vertex extends GraphObject {
         if(selected) {
             ctx.beginPath();
             ctx.fillStyle = RENDER_SETTINGS.SELECT_MAIN;
-            ctx.lineWidth = RENDER_SETTINGS.SELECT_WIDTH;
+            ctx.lineWidth = viewport.scale * RENDER_SETTINGS.SELECT_WIDTH;
             ctx.strokeStyle = RENDER_SETTINGS.SELECT_BORDER;
-            ctx.arc(this.x - viewport.offsetX, this.y - viewport.offsetY, this.scale + ctx.lineWidth, 0, 2 * Math.PI);
+            ctx.arc(viewport.scale * (this.x - viewport.offsetX), viewport.scale * (this.y - viewport.offsetY), viewport.scale * (this.scale) + ctx.lineWidth, 0, 2 * Math.PI);
             ctx.fill();
             ctx.stroke();
             ctx.closePath();
         }
 
         ctx.beginPath();
-        ctx.lineWidth = this.borderScale;
+        ctx.lineWidth = viewport.scale * this.borderScale;
         ctx.strokeStyle = this.color;
         ctx.fillStyle = this.fill;
 
-        ctx.arc(this.x - viewport.offsetX, this.y - viewport.offsetY, this.scale, 0, 2 * Math.PI);
+        ctx.arc(viewport.scale * (this.x - viewport.offsetX), viewport.scale * (this.y - viewport.offsetY), viewport.scale * this.scale, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
         ctx.closePath();

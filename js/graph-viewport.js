@@ -78,16 +78,18 @@ export class GraphViewport {
      * @param {Number} canvasHeight The height of the unscaled canvas.
      */
     intersects(bBox, canvasWidth, canvasHeight) {
-        const shiftedBBox = {
-            x: this.scale * (bBox.x - this.offsetX) + this.offsetX,
-            y: this.scale * (bBox.y - this.offsetY) + this.offsetY,
-            width: this.scale * bBox.width,
-            height: this.scale * bBox.height
+        const shiftedCanvas = {
+            x: this.offsetX,
+            y: this.offsetY,
+            width: canvasWidth / this.scale,
+            height: canvasHeight / this.scale
         };
 
-        return ((shiftedBBox.x >= this.offsetX && shiftedBBox.x <= this.offsetX + canvasWidth / this.scale) ||
-               (shiftedBBox.x + shiftedBBox.width >= this.offsetX && shiftedBBox.x + shiftedBBox.width <= this.offsetX + canvasWidth / this.scale)) &&
-               ((shiftedBBox.y >= this.offsetY && shiftedBBox.y <= this.offsetY + canvasHeight / this.scale) ||
-               (shiftedBBox.y + shiftedBBox.height >= this.offsetY && shiftedBBox.y + shiftedBBox.height <= this.offsetY + canvasHeight / this.scale));
+        const pastLeft = bBox.x + bBox.width < shiftedCanvas.x;
+        const pastRight = bBox.x > shiftedCanvas.x + shiftedCanvas.width;
+        const pastTop = bBox.y + bBox.height < shiftedCanvas.y;
+        const pastBottom = bBox.y > shiftedCanvas.y + shiftedCanvas.height;
+
+        return !(pastLeft || pastRight || pastTop || pastBottom);
     }
 }

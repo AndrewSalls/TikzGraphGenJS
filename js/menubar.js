@@ -49,9 +49,57 @@ function initializeEditMenu(graphData) {
     registerKey(() => deleteSelected(graphData), "Backspace", false);
 }
 
+let isShiftHeld = false;
+let isAltHeld = false;
 /**
  * Initializes the buttons in the view sub-menubar.
  * @param {GraphSession} graphData The graph state, so that it can be provided to functions called by using the menubar.
  */
 function initializeViewMenu(graphData) {
+    document.querySelector("#zoom-in-btn").onclick = () => graphData.viewport.zoomIn();
+    document.querySelector("#zoom-out-btn").onclick = () => graphData.viewport.zoomOut();
+
+    registerKey(() => graphData.viewport.zoomIn(), "=", false, false, true);
+    registerKey(() => graphData.viewport.zoomInFixed(), "+", false, true, true);
+    registerKey(() => graphData.viewport.zoomOut(), "-", false, false, true);
+    registerKey(() => graphData.viewport.zoomOutFixed(), "_", false, true, true);
+
+    // Zooming with mouse wheel
+    const canvas = document.querySelector("#render");
+    document.addEventListener("keydown", ev => {
+        if(ev.key === "Alt") {
+            isAltHeld = true;
+            ev.preventDefault();
+        } else if(ev.key === "Shift") {
+            isShiftHeld = true;
+            ev.preventDefault();
+        }
+    });
+    document.addEventListener("keyup", ev => {
+        if(ev.key === "Alt") {
+            isAltHeld = false;
+            ev.preventDefault();
+        } else if(ev.key === "Shift") {
+            isShiftHeld = false;
+            ev.preventDefault();
+        }
+    });
+
+    canvas.addEventListener("wheel", ev => {
+        if(isShiftHeld) {
+            if(ev.deltaY < 0) { // Scrolling "up"
+                if(isAltHeld) {
+                    graphData.viewport.zoomInFixed();
+                } else {
+                    graphData.viewport.zoomIn();
+                }
+            } else {
+                if(isAltHeld) {
+                    graphData.viewport.zoomOutFixed();
+                } else {
+                    graphData.viewport.zoomOut();
+                }
+            }
+        }
+    });
 }
