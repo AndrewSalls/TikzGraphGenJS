@@ -25,11 +25,10 @@ export default function accessEdgeTool() {
  * The callback used when pressing down on a mouse button.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onDown(mouse, graphData, toolData, selectedData) {
+function onDown(mouse, graphData, toolData) {
     toolData = { startPos: graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY, GRAPH_DATATYPE.VERTEX)};
         
     if(toolData.startPos !== null) {
@@ -54,11 +53,10 @@ function onDown(mouse, graphData, toolData, selectedData) {
  * The callback used when moving the mouse, regardless of if a button is pressed or not.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onMove(mouse, graphData, toolData, selectedData) {
+function onMove(mouse, graphData, toolData) {
     if(toolData !== null) {
         toolData.cursorVertex.x = mouse.shiftedX;
         toolData.cursorVertex.y = mouse.shiftedY;
@@ -71,12 +69,11 @@ function onMove(mouse, graphData, toolData, selectedData) {
  * The callback used when a mouse button stops being pressed.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onUp(mouse, graphData, toolData, selectedData) {
-    selectedData.clear();
+function onUp(mouse, graphData, toolData) {
+    graphData.clearSelected();
 
     if(toolData !== null) {
         const selectedEnd = graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY, GRAPH_DATATYPE.VERTEX);
@@ -87,9 +84,9 @@ function onUp(mouse, graphData, toolData, selectedData) {
                 graphData.removeEdge(toolData.tempEdge);
             } else {
                 toolData.tempEdge.end = selectedEnd;
+                selectedEnd.connect(toolData.tempEdge);
                 makeEdit(new InsertionEdit(toolData.tempEdge));
-                
-                selectedData.add(toolData.tempEdge);
+                graphData.select(toolData.tempEdge);
             }
         } else {
             graphData.removeEdge(toolData.tempEdge);

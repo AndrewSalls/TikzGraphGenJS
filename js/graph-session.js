@@ -5,7 +5,7 @@ import Vertex from "./graph-data/vertex.js";
 import { GraphViewport } from "./graph-viewport.js";
 import { CompositeEdit } from "./history/composite-edit.js";
 import { DeletionEdit, InsertionEdit } from "./history/entry-edit.js";
-import { isSelected, tool_onPaint } from "./tools/tool.js";
+import { tool_onPaint } from "./tools/tool.js";
 
 /**
  * Describes built-in render settings, like highlighting color when selecting objects or using the select tool.
@@ -38,6 +38,10 @@ export class GraphSession {
         this.ctx = ctx;
         /** @type {GraphViewport} */
         this.viewport = new GraphViewport();
+        /** @type {Set<Vertex>} */
+        this.selectedVertices = new Set();
+        /** @type {Set<Edge>} */
+        this.selectedEdges = new Set();
     }
 
     /**
@@ -120,16 +124,12 @@ export class GraphSession {
     }
 
     /**
-     * Provides access to all graph objects at once in the form of an iterator.
+     * Provides access to all graph objects at once in the form of an iterator. Always yields all vertices, then all edges.
      * @returns {Generator<GraphObject, void, Number>} A single iterable array containing all graph objects stored in the session.
      */
     *iterateThroughAllData() {
-        for(let x = 0; x < this.vertices.length; x++) {
-            yield this.vertices[x];
-        }
-        for(let x = 0; x < this.edges.length; x++) {
-            yield this.edges[x];
-        }
+        yield* this.vertices.values();
+        yield* this.edges.values();
     }
 
     /**
@@ -150,7 +150,7 @@ export class GraphSession {
     
     /**
      * Adds the specified edge.
-     * @param {Edge} vertex The edge being added.
+     * @param {Edge} edge The edge being added.
      * @returns {InsertionEdit} An edit representing the added edge.
      */
     addEdge(edge) {
@@ -186,6 +186,8 @@ export class GraphSession {
             edgeRemovals.push(this.removeEdge(edge));
         }
 
+        this.deselect(vertex);
+
         return edgeRemovals.length > 0 ? new CompositeEdit([...edgeRemovals, vertexRemoval]) : vertexRemoval;
     }
 
@@ -203,6 +205,8 @@ export class GraphSession {
 
         edge.start.disconnect(edge);
         edge.end.disconnect(edge);
+
+        this.deselect(edge);
 
         return new DeletionEdit(edge);
     }
@@ -229,7 +233,82 @@ export class GraphSession {
             return editList;
         }
 
+        this.clearSelected();
+
         return null;
+    }
+
+    /**
+     * Adds an item to the selected items list.
+     * @param {GraphObject} item The item to select.
+     */
+    select(item) {
+        switch(item.getType()) {
+            case GRAPH_DATATYPE.VERTEX:
+                this.selectedVertices.add(item);
+                break;
+            case GRAPH_DATATYPE.EDGE:
+                this.selectedEdges.add(item);
+                break;
+            default:
+                console.error("Selecting items does not support " + item.getType());
+        }
+    }
+
+    /**
+     * Removes an item from the selected items list.
+     * @param {GraphObject} item The item to deselect.
+     */
+    deselect(item) {
+        switch(item.getType()) {
+            case GRAPH_DATATYPE.VERTEX:
+                this.selectedVertices.delete(item);
+                break;
+            case GRAPH_DATATYPE.EDGE:
+                this.selectedEdges.delete(item);
+                break;
+            default:
+                console.error("Selecting items does not support " + item.getType());
+        }
+    }
+
+    /**
+     * Determines whether an item has been selected.
+     * @param {GraphObject} item The item to test.
+     * @returns {Boolean} Whether the item is selected.
+     */
+    isSelected(item) {
+        if(item === null) {
+            return false;
+        }
+
+        switch(item.getType()) {
+            case GRAPH_DATATYPE.VERTEX:
+                return this.selectedVertices.has(item);
+            case GRAPH_DATATYPE.EDGE:
+                return this.selectedEdges.delete(item);
+            default:
+                console.error("Selecting items does not support " + item.getType());
+        }
+
+        return false;
+    }
+
+    /**
+     * Provides access to all selected graph objects in the form of an iterator. Always yields labels, then edge caps, then edges, then vertices.
+     * @returns {Generator<GraphObject, void, Number>} A single iterable array containing all selected graph objects.
+     */
+    *iterateThroughSelectedData() {
+        yield* this.selectedEdges.values();
+        yield* this.selectedVertices.values();
+    }
+
+    /**
+     * Deselects all items.
+     */
+    clearSelected() {
+        this.selectedVertices = new Set();
+        this.selectedEdges = new Set();
     }
 
     /**
@@ -242,13 +321,13 @@ export class GraphSession {
 
         for(let vertex of this.vertices) {
             if(this.viewport.intersects(vertex.boundingBox(), canvasWidth, canvasHeight)) {
-                vertex.render(this.ctx, this.viewport, isSelected(vertex));
+                vertex.render(this.ctx, this.viewport, this.selectedVertices.has(vertex));
             }
         }
 
         for(let edge of this.edges) {
             if(this.viewport.intersects(edge.boundingBox(), canvasWidth, canvasHeight)) {
-                edge.render(this.ctx, this.viewport, isSelected(edge));
+                edge.render(this.ctx, this.viewport, this.selectedEdges.has(edge));
             }
         }
 

@@ -27,10 +27,9 @@ export default function accessEraserTool() {
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
  * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
  * @returns {*} The updated value for toolData.
  */
-function onDown(mouse, graphData, toolData, selectedData) {
+function onDown(mouse, graphData, toolData) {
     toolData = {
         currX: mouse.x,
         currY: mouse.y,
@@ -46,10 +45,9 @@ function onDown(mouse, graphData, toolData, selectedData) {
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
  * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
  * @returns {*} The updated value for toolData.
  */
-function onMove(mouse, graphData, toolData, selectedData) {
+function onMove(mouse, graphData, toolData) {
     if(toolData !== null && !toolData.dragging) {
         const deltaX = mouse.x - toolData.currX;
         const deltaY = mouse.y - toolData.currY;
@@ -64,7 +62,7 @@ function onMove(mouse, graphData, toolData, selectedData) {
         toolData.currY = mouse.y;
 
         const clicked = graphData.getClickedObjectsInRange(mouse.shiftedX, mouse.shiftedY, ERASER_WIDTH);
-        const eraseEditStep = eraseData(clicked, graphData, toolData, selectedData);
+        const eraseEditStep = eraseData(clicked, graphData, toolData);
         if(eraseEditStep.length > 0) {
             toolData.editProgress.push(...eraseEditStep);
         }
@@ -78,14 +76,13 @@ function onMove(mouse, graphData, toolData, selectedData) {
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
  * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
  * @returns {*} The updated value for toolData.
  */
-function onUp(mouse, graphData, toolData, selectedData) {
+function onUp(mouse, graphData, toolData) {
     if(toolData !== null) {
         if(!toolData.dragging) {
             const clicked = graphData.getClickedObjectsInRange(mouse.shiftedX, mouse.shiftedY, ERASER_WIDTH);
-            const eraseEditStep = eraseData(clicked, graphData, toolData, selectedData);
+            const eraseEditStep = eraseData(clicked, graphData, toolData);
             if(eraseEditStep.length > 0) {
                 toolData.editProgress.push(...eraseEditStep);
             }
@@ -140,10 +137,9 @@ function onPaint(graphData, toolData, ctx) {
  * @param {GraphObject[]} data the selected data. 
  * @param {GraphSession} graphData The graph data this tool is interacting with.
  * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
  * @returns {(DeletionEdit|CompositeEdit)[]} A series of edits representing the removed objects, with composite edits representing the removal of a vertex that still has adjacent edges.
  */
-function eraseData(data, graphData, toolData, selectedData) {
+function eraseData(data, graphData, toolData) {
     if(data.length === 0) {
         return [];
     }
@@ -153,23 +149,10 @@ function eraseData(data, graphData, toolData, selectedData) {
     for(let x = 0; x < data.length; x++) {
         switch(data[x].getType()) {
             case GRAPH_DATATYPE.VERTEX:
-                for(const adj of data[x].adjacent) { // Removing selected edges
-                    if(selectedData.has(adj)) {
-                        selectedData.delete(adj);
-                    }
-                }
-
-                if(selectedData.has(data[x])) { // Removing selected vertex
-                    selectedData.delete(data[x]);
-                }
-
                 editList.push(graphData.removeVertex(data[x]));
                 break;
             case GRAPH_DATATYPE.EDGE:
                 if(graphData.edges.indexOf(data[x]) > -1) { // Only if graphData has edge, since it may have already been removed by vertex deletion.
-                    if(selectedData.has(data[x])) {
-                        selectedData.delete(data[x]);
-                    }
                     editList.push(graphData.removeEdge(data[x]));
                 }
                 break;
@@ -185,14 +168,13 @@ function eraseData(data, graphData, toolData, selectedData) {
 /**
  * Erases all selected items using the same process the eraser tool uses.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
  */
-export function eraseSelected(graphData, selectedData) {
+export function eraseSelected(graphData) {
     const toolData = {
         editProgress: []
     };
 
-    eraseData([...selectedData], graphData, toolData, selectedData);
+    eraseData(Array.from(graphData.iterateThroughSelectedData()), graphData, toolData);
     if(toolData.editProgress.length === 1) {
         makeEdit(toolData.editProgress[0]);
     } else if(toolData.editProgress.length > 1) {

@@ -25,11 +25,10 @@ export default function accessSelectTool() {
  * The callback used when pressing down on a mouse button.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onDown(mouse, graphData, toolData, selectedData) {
+function onDown(mouse, graphData, toolData) {
     toolData = {
         x: mouse.x,
         y: mouse.y,
@@ -38,7 +37,7 @@ function onDown(mouse, graphData, toolData, selectedData) {
         keepOldSelected: (mouse.clickType & MOUSE_CLICK_TYPE.SHIFT_HELD) > 0 // true if shift is held
     };
     
-    if(selectedData.has(graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY))) {
+    if(graphData.isSelected(graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY))) {
         toolData.dragging = true;
         //Prevent initial delta from being NaN
         toolData.newX = mouse.shiftedX;
@@ -55,25 +54,17 @@ function onDown(mouse, graphData, toolData, selectedData) {
  * The callback used when moving the mouse, regardless of if a button is pressed or not.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onMove(mouse, graphData, toolData, selectedData) {
+function onMove(mouse, graphData, toolData) {
     if(toolData !== null && toolData.dragging) {
         const deltaX = mouse.shiftedX - toolData.newX;
         const deltaY = mouse.shiftedY - toolData.newY;
 
-        const iter = selectedData.values();
-        let next = iter.next();
-        while(!next.done) {
-            if(next.value.getType() === GRAPH_DATATYPE.VERTEX) {
-                next.value.x += deltaX;
-                next.value.y += deltaY;
-                next = iter.next();
-            } else { // Relies on next always returning vertices first
-                next.done = true;
-            }
+        for(const vertex of graphData.selectedVertices) {
+            vertex.x += deltaX;
+            vertex.y += deltaY;
         }
         
         toolData.newX = mouse.shiftedX;
@@ -91,26 +82,20 @@ function onMove(mouse, graphData, toolData, selectedData) {
  * The callback used when a mouse button stops being pressed.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onUp(mouse, graphData, toolData, selectedData) {
+function onUp(mouse, graphData, toolData) {
     if(toolData !== null) {
         if(toolData.dragging) {
             const deltaX = toolData.newX - toolData.x;
             const deltaY = toolData.newY - toolData.y;
-
             const editList = [];
-            const iter = selectedData.values();
-            let next = iter.next();
-            while(!next.done) {
-                if(next.value.getType() === GRAPH_DATATYPE.VERTEX) {
-                    editList.push(new MutationEdit(next.value,
-                        { x: next.value.x - deltaX, y: next.value.y - deltaY },
-                        { x: next.value.x, y: next.value.y }))
-                }
-                next = iter.next();
+
+            for(const vertex of graphData.selectedVertices) {
+                editList.push(new MutationEdit(vertex,
+                    { x: vertex.x - deltaX, y: vertex.y - deltaY },
+                    { x: vertex.x, y: vertex.y }));
             }
 
             if(editList.length > 0) {
@@ -122,7 +107,7 @@ function onUp(mouse, graphData, toolData, selectedData) {
             }
         } else if(toolData.isAreaSelect) {
             if(!toolData.keepOldSelected) {
-                selectedData.clear();
+                graphData.clearSelected();
             }
 
             const iter = graphData.iterateThroughAllData();
@@ -133,19 +118,19 @@ function onUp(mouse, graphData, toolData, selectedData) {
                    bBox.y >= Math.min(mouse.shiftedY, toolData.shiftY) &&
                    bBox.x + bBox.width <= Math.max(mouse.shiftedX, toolData.shiftX) &&
                    bBox.y + bBox.height <= Math.max(mouse.shiftedY, toolData.shiftY)) {
-                    selectedData.add(next.value);
+                    graphData.select(next.value);
                 }
 
                 next = iter.next();
             }
         } else {
             if(!toolData.keepOldSelected) {
-                selectedData.clear();
+                graphData.clearSelected();
             }
 
             const clicked = graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY);
             if(clicked !== null) {
-                selectedData.add(clicked);
+                graphData.select(clicked);
             }
         }
     }
@@ -153,14 +138,7 @@ function onUp(mouse, graphData, toolData, selectedData) {
     return null;
 }
 
-/**
- * Clears the current tool data, making sure to clean up any dummy data from the graph data as well.
- * @param {GraphSession} graphData The graph data that the tool (potentially) modified with dummy data.
- * @param {Object|null} toolData The local data this tool is currently using.
- */
-function clearData(graphData, toolData) {
-    return null;
-}
+const clearData = undefined;
 
 /**
  * The callback used when this tool is selected and a paint event is called on the canvas.

@@ -25,11 +25,10 @@ export default function accessSplitTool() {
  * The callback used when pressing down on a mouse button.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onDown(mouse, graphData, toolData, selectedData) {
+function onDown(mouse, graphData, toolData) {
     return null;
 }
 
@@ -37,11 +36,10 @@ function onDown(mouse, graphData, toolData, selectedData) {
  * The callback used when moving the mouse, regardless of if a button is pressed or not.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onMove(mouse, graphData, toolData, selectedData) {
+function onMove(mouse, graphData, toolData) {
     return null;
 }
 
@@ -49,11 +47,10 @@ function onMove(mouse, graphData, toolData, selectedData) {
  * The callback used when a mouse button stops being pressed.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onUp(mouse, graphData, toolData, selectedData) {
+function onUp(mouse, graphData, toolData) {
     const clickedEdge = graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY, GRAPH_DATATYPE.EDGE);
     if(clickedEdge instanceof Edge) {
         const closestPoint = clickedEdge.closestPoint(mouse.shiftedX, mouse.shiftedY);
@@ -61,10 +58,11 @@ function onUp(mouse, graphData, toolData, selectedData) {
         const addedEdge1 = new Edge(clickedEdge.start, addedVertex);
         const addedEdge2 = new Edge(clickedEdge.end, addedVertex);
 
-        if(selectedData.has(clickedEdge)) {
-            selectedData.delete(clickedEdge);
-            selectedData.add(addedEdge1);
-            selectedData.add(addedEdge2);
+        if(graphData.isSelected(clickedEdge)) {
+            graphData.deselect(clickedEdge);
+            graphData.select(clickedEdge);
+            graphData.select(addedEdge1);
+            graphData.select(addedEdge2);
         }
 
         makeEdit(new CompositeEdit([
@@ -78,13 +76,5 @@ function onUp(mouse, graphData, toolData, selectedData) {
     return null;
 }
 
-/**
- * Clears the current tool data, making sure to clean up any dummy data from the graph data as well.
- * @param {GraphSession} graphData The graph data that the tool (potentially) modified with dummy data.
- * @param {Object|null} toolData The local data this tool is currently using.
- */
-function clearData(graphData, toolData) {
-    return null;
-}
-
+const clearData = undefined;
 const onPaint = undefined;

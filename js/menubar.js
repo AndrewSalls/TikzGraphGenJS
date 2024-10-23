@@ -1,8 +1,9 @@
 import { GraphSession } from "./graph-session.js";
-import { deleteSelected, clearGraph } from "./tools/tool.js";
+import { clearGraph } from "./tools/tool.js";
 import { undo, redo } from "./history/history.js";
 import { registerKey } from "./shortcut.js";
 import { FIXED_ZOOM_LEVELS } from "./graph-viewport.js";
+import { eraseSelected } from "./tools/eraser-tool.js";
 
 /**
  * Initializes the buttons in the menubar.
@@ -29,7 +30,7 @@ function initializeFileMenu(graphData) {
 function initializeEditMenu(graphData) {
     document.querySelector("#undo-btn").onclick = () => undo(graphData);
     document.querySelector("#redo-btn").onclick = () => redo(graphData);
-    document.querySelector("#delete-btn").onclick = () => deleteSelected(graphData);
+    document.querySelector("#delete-btn").onclick = () => eraseSelected(graphData);
 
     const vertex = document.querySelector("#vertex-btn");
     document.querySelector("#vertex-menu-btn").onclick = () => vertex.click();

@@ -24,19 +24,18 @@ export default function accessVertexTool() {
  * The callback used when pressing down on a mouse button.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onDown(mouse, graphData, toolData, selectedData) {
+function onDown(mouse, graphData, toolData) {
     toolData = {
         vertex: graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY, GRAPH_DATATYPE.VERTEX),
     };
     if(toolData.vertex instanceof Vertex) {
         toolData.originX = toolData.vertex.x;
         toolData.originY = toolData.vertex.y;
-        selectedData.clear();
-        selectedData.add(toolData.vertex);
+        graphData.clearSelected();
+        graphData.select(toolData.vertex);
     } else {
         toolData = null;
     }
@@ -48,11 +47,10 @@ function onDown(mouse, graphData, toolData, selectedData) {
  * The callback used when moving the mouse, regardless of if a button is pressed or not.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onMove(mouse, graphData, toolData, selectedData) {
+function onMove(mouse, graphData, toolData) {
     if(toolData !== null && !mouse.exitedBounds) {
         toolData.vertex.x = mouse.shiftedX;
         toolData.vertex.y = mouse.shiftedY;
@@ -65,38 +63,29 @@ function onMove(mouse, graphData, toolData, selectedData) {
  * The callback used when a mouse button stops being pressed.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onUp(mouse, graphData, toolData, selectedData) {
+function onUp(mouse, graphData, toolData) {
     if(toolData !== null) {
         makeEdit(new MutationEdit(toolData.vertex,
             { x: toolData.originX, y: toolData.originY },
             { x: toolData.vertex.x, y: toolData.vertex.y }));
         
-        selectedData.clear();
-        selectedData.add(toolData.vertex);
+        graphData.clearSelected();
+        graphData.select(toolData.vertex);
         toolData = null;
     } else {
         if(!mouse.exitedBounds) {
             const created = new Vertex(mouse.shiftedX, mouse.shiftedY);
             makeEdit(graphData.addVertex(created));
-            selectedData.clear();
-            selectedData.add(created);
+            graphData.clearSelected();
+            graphData.select(created);
         }
     }
 
     return toolData;
 }
 
-/**
- * Clears the current tool data, making sure to clean up any dummy data from the graph data as well.
- * @param {GraphSession} graphData The graph data that the tool (potentially) modified with dummy data.
- * @param {Object|null} toolData The local data this tool is currently using.
- */
-function clearData(graphData, toolData) {
-    return null;
-}
-
+const clearData = undefined;
 const onPaint = undefined;

@@ -26,11 +26,10 @@ export default function accessMergeTool() {
  * The callback used when pressing down on a mouse button.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onDown(mouse, graphData, toolData, selectedData) {
+function onDown(mouse, graphData, toolData) {
     return null;
 }
 
@@ -38,11 +37,10 @@ function onDown(mouse, graphData, toolData, selectedData) {
  * The callback used when moving the mouse, regardless of if a button is pressed or not.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onMove(mouse, graphData, toolData, selectedData) {
+function onMove(mouse, graphData, toolData) {
     return null;
 }
 
@@ -50,25 +48,26 @@ function onMove(mouse, graphData, toolData, selectedData) {
  * The callback used when a mouse button stops being pressed.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
-function onUp(mouse, graphData, toolData, selectedData) {
+function onUp(mouse, graphData, toolData) {
     const clickedVertex = graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY, GRAPH_DATATYPE.VERTEX);
 
     if(clickedVertex instanceof Vertex) {
-        if(selectedData.has(clickedVertex)) {
-            const merging = [...selectedData].filter(v => v instanceof Vertex && v !== clickedVertex);
+        if(graphData.isSelected(clickedVertex)) {
+            const merging = graphData.selectedVertices;
 
             const editList = [];
             for(const vertex of merging) {
+                if(vertex === clickedVertex) { // merges all vertices into clicked vertex, so that one is not effected
+                    continue;
+                }
+
                 for(const connectedEdge of vertex.adjacent) {
                     if(connectedEdge.start === clickedVertex || connectedEdge.end === clickedVertex) {
                         // TODO: Create loop instead of deleting edge
-                        if(selectedData.has(connectedEdge)) {
-                            selectedData.delete(connectedEdge);
-                        }
+                        graphData.deselect(connectedEdge);
                         editList.push(graphData.removeEdge(connectedEdge));
                     } else if(connectedEdge.start === vertex) {
                         connectedEdge.start = clickedVertex;
@@ -81,7 +80,7 @@ function onUp(mouse, graphData, toolData, selectedData) {
                     }
                 }
 
-                selectedData.delete(vertex);
+                graphData.deselect(vertex);
                 editList.push(graphData.removeVertex(vertex));
             }
 
@@ -92,20 +91,12 @@ function onUp(mouse, graphData, toolData, selectedData) {
                 makeEdit(new CompositeEdit(editList));
             }
         } else {
-            selectedData.add(clickedVertex);
+            graphData.select(clickedVertex);
         }
     }
 
     return null;
 }
 
-/**
- * Clears the current tool data, making sure to clean up any dummy data from the graph data as well.
- * @param {GraphSession} graphData The graph data that the tool (potentially) modified with dummy data.
- * @param {Object|null} toolData The local data this tool is currently using.
- */
-function clearData(graphData, toolData) {
-    return null;
-}
-
+const clearData = undefined;
 const onPaint = undefined;
