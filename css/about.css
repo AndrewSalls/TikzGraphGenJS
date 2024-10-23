@@ -1,0 +1,27 @@
+.pg {
+    max-width: 50%;
+    word-wrap: break-word;
+    text-indent: 4ch;
+}
+
+.indentless {
+    text-indent: 0;
+}
+
+#comparison {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+figcaption {
+    font-weight: bold;
+    max-width: 60%;
+    text-align: center;
+}

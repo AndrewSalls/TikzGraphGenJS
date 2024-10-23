@@ -13,6 +13,7 @@ export default function initializeMenubar(graphData) {
     initializeFileMenu(graphData);
     initializeEditMenu(graphData);
     initializeViewMenu(graphData);
+    initializeOtherMenu(graphData);
 };
 
 /**
@@ -174,4 +175,12 @@ function initializeViewMenu(graphData) {
             updateZoomDisplay();
         }
     });
+}
+
+/**
+ * Initializes the buttons in the other sub-menubar.
+ * @param {GraphSession} graphData The graph state, so that it can be provided to functions called by using the menubar.
+ */
+function initializeOtherMenu(graphData) {
+    document.querySelector("#about-btn").onclick = () => window.open("../about.html", "_blank");
 }
