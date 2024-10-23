@@ -16,7 +16,13 @@ export const RENDER_SETTINGS = {
     SELECT_BORDER_WIDTH: 3, // Area of select tool
     ERASE_MAIN: "#d9d9d944", // Eraser tool highlight (to visualize what's being erased) while dragging
     ERASE_BORDER: "#d9d9d988", // Eraser tool highlight border
-    ERASE_BORDER_WIDTH: 1 // Eraser tool highlight border's radius
+    ERASE_BORDER_WIDTH: 1, // Eraser tool highlight border's radius
+    GRID_LINE_COLOR: "#c4c4c4cc", // Color of the grid lines
+    GRID_LINE_WIDTH: 2, // Width of the lines drawn for the grid at 100% scale, in pixels.
+    GRID_HORIZONTAL_SPACING: 100, // Horizontal distance between lines
+    GRID_VERTICAL_SPACING: 100, // Vertical distance between lines
+    GRID_HORIZONTAL_OFFSET: 50, // By default, lines are placed along x = 0 and y = 0 and extend outward.
+    GRID_VERTICAL_OFFSET: 50, // This and the horizontal offset control where the initial lines are placed (so placed at x = OFFSET X and y = OFFSET Y instead of 0 and 0).
 }
 
 /**
@@ -327,6 +333,33 @@ export class GraphSession {
         const canvasWidth = this.ctx.canvas.width;
         const canvasHeight = this.ctx.canvas.height;
         this.ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+        const scaledVerticalSpacing = RENDER_SETTINGS.GRID_VERTICAL_SPACING * this.viewport.scale;
+        const scaledHorizontalSpacing = RENDER_SETTINGS.GRID_HORIZONTAL_SPACING * this.viewport.scale;
+        const scaledLineWidth = RENDER_SETTINGS.GRID_LINE_WIDTH * this.viewport.scale;
+        const scaledVerticalOffset = RENDER_SETTINGS.GRID_VERTICAL_OFFSET * this.viewport.scale;
+        const scaledHorizontalOffset = RENDER_SETTINGS.GRID_HORIZONTAL_OFFSET * this.viewport.scale;
+        const viewportOffsetX = (this.viewport.offsetX % RENDER_SETTINGS.GRID_VERTICAL_SPACING) * this.viewport.scale;
+        const viewportOffsetY = (this.viewport.offsetY % RENDER_SETTINGS.GRID_HORIZONTAL_SPACING) * this.viewport.scale;
+
+        if(this.drawingGrid) {
+            let firstX = true, firstY = true;
+            this.ctx.fillStyle = RENDER_SETTINGS.GRID_LINE_COLOR;
+            for(let x = scaledLineWidth / 2 - scaledHorizontalOffset - viewportOffsetX; x < canvasWidth + scaledLineWidth; x += scaledHorizontalSpacing) {
+                if(x < -scaledLineWidth) { // Offset causes line to not be on screen yet
+                    continue;
+                }
+                this.ctx.fillRect(x, 0, scaledLineWidth, canvasHeight);
+            }
+
+            for(let y = scaledLineWidth / 2 - scaledVerticalOffset - viewportOffsetY; y < canvasHeight + scaledLineWidth; y += scaledVerticalSpacing) {
+                if(y < -scaledLineWidth) { // Offset causes line to not be on screen yet
+                    continue;
+                }
+                this.ctx.clearRect(0, y, canvasWidth, scaledLineWidth); // Prevents double-filling intersections with vertical lines
+                this.ctx.fillRect(0, y, canvasWidth, scaledLineWidth);
+            }
+        }
 
         for(let vertex of this.vertices) {
             if(this.viewport.intersects(vertex.boundingBox(), canvasWidth, canvasHeight)) {

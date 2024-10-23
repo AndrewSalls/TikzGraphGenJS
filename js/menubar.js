@@ -59,11 +59,22 @@ let mousePos = { x: 0, y: 0 };
  * @param {GraphSession} graphData The graph state, so that it can be provided to functions called by using the menubar.
  */
 function initializeViewMenu(graphData) {
+    document.querySelector("#toggle-grid-btn").onclick = () => graphData.drawingGrid = !graphData.drawingGrid;
+
     const canvas = document.querySelector("#render");
 
-    document.querySelector("#zoom-in-btn").onclick = () => graphData.viewport.zoomIn();
-    document.querySelector("#zoom-out-btn").onclick = () => graphData.viewport.zoomOut();
-
+    document.querySelector("#zoom-in-btn").onclick = () => {
+        const oldScale = graphData.viewport.scale;
+        const newScale = graphData.viewport.zoomIn();
+        graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
+        updateZoomDisplay();
+    };
+    document.querySelector("#zoom-out-btn").onclick = () => {
+        const oldScale = graphData.viewport.scale;
+        const newScale = graphData.viewport.zoomOut();
+        graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
+        updateZoomDisplay();
+    };
     const slider = document.querySelector("#zoom-slider");
     const zoomDisplay = document.querySelector("#zoom-display");
     const updateZoomDisplay = () => {
