@@ -153,11 +153,12 @@ export default class Vertex extends GraphObject {
      * @param {Edge} edge The edge to disconnect.
      */
     disconnect(edge) {
-        return this.adjacent.delete(edge);
+        this.adjacent.delete(edge);
     }
 
     /**
      * Removes all edges that have been added to this vertex. This is necessary for operations such as deleting this vertex and split/merge tools.
+     * @returns {Set<Vertex>} The set of previously-adjecent edges.
      */
     disconnectAll() {
         const adj = this.adjacent;

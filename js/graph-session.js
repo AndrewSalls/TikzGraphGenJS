@@ -1,6 +1,10 @@
 
+import Edge from "./graph-data/edge.js";
 import { GRAPH_DATATYPE, GraphObject } from "./graph-data/graph-object.js";
+import Vertex from "./graph-data/vertex.js";
 import { GraphViewport } from "./graph-viewport.js";
+import { CompositeEdit } from "./history/composite-edit.js";
+import { DeletionEdit, InsertionEdit } from "./history/entry-edit.js";
 import { isSelected, tool_onPaint } from "./tools/tool.js";
 
 /**
@@ -126,6 +130,106 @@ export class GraphSession {
         for(let x = 0; x < this.edges.length; x++) {
             yield this.edges[x];
         }
+    }
+
+    /**
+     * Adds the specified vertex.
+     * @param {Vertex} vertex The vertex being added.
+     * @returns {InsertionEdit} An edit representing the added vertex.
+     */
+    addVertex(vertex) {
+        if(this.vertices.length > 0 && this.vertices[this.vertices.length - 1].id > vertex.id) {
+            const insertPoint = this.vertices.findIndex(x => x.id > vertex.id);
+            this.vertices.splice(insertPoint, 0, vertex);
+        } else {
+            this.vertices.push(vertex);
+        }
+
+        return new InsertionEdit(vertex);
+    }
+    
+    /**
+     * Adds the specified edge.
+     * @param {Edge} vertex The edge being added.
+     * @returns {InsertionEdit} An edit representing the added edge.
+     */
+    addEdge(edge) {
+        if(this.edges.length > 0 && this.edges[this.edges.length - 1].id > edge.id) {
+            const insertPoint = this.edges.findIndex(x => x.id > edge.id);
+            this.edges.splice(insertPoint, 0, edge);
+        } else {
+            this.edges.push(edge);
+        }
+
+        edge.start.connect(edge);
+        edge.end.connect(edge);
+
+        return new InsertionEdit(edge);
+    }
+
+    /**
+     * Removes the specified vertex.
+     * @param {Vertex} vertex The vertex being removed.
+     * @returns {DeletionEdit|CompositeEdit} An edit representing the removed vertex, or a composite edit representing the removed vertex and subsequent removed edges.
+     */
+    removeVertex(vertex) {
+        if(this.vertices[this.vertices.length - 1].id !== vertex.id) {
+            this.vertices.splice(this.vertices.indexOf(vertex), 1);
+        } else {
+            this.vertices.pop();
+        }
+
+        const vertexRemoval = new DeletionEdit(vertex);
+
+        const edgeRemovals = [];
+        for(const edge of vertex.disconnectAll()) {
+            edgeRemovals.push(this.removeEdge(edge));
+        }
+
+        return edgeRemovals.length > 0 ? new CompositeEdit([...edgeRemovals, vertexRemoval]) : vertexRemoval;
+    }
+
+    /**
+     * Removes the specified edge.
+     * @param {Edge} edge The edge being removed.
+     * @returns {DeletionEdit} An edit representing the removed edge.
+     */
+    removeEdge(edge) {
+        if(this.edges[this.edges.length - 1].id !== edge.id) {
+            this.edges.splice(this.edges.indexOf(edge), 1);
+        } else {
+            this.edges.pop();
+        }
+
+        edge.start.disconnect(edge);
+        edge.end.disconnect(edge);
+
+        return new DeletionEdit(edge);
+    }
+
+    /**
+     * Clears all objects from the graph.
+     * @returns {DeletionEdit|CompositeEdit|null} The edit representing the removed objects, or null if there were no objects to remove.
+     */
+    clearObjects() {
+        if(this.vertices.length === 0) {
+            return null;
+        }
+
+        const editList = [];
+
+        // Vertices automatically remove connected edges, so this is the only loop necessary (any edges must be connected to vertices)
+        for(let x = this.vertices.length - 1; x >= 0; x--) {
+            editList.push(this.removeVertex(this.vertices[[x]]));
+        }
+
+        if(editList.length === 1) {
+            return editList[0];
+        } else if(editList.length > 1) {
+            return editList;
+        }
+
+        return null;
     }
 
     /**

@@ -34,8 +34,7 @@ function onDown(mouse, graphData, toolData, selectedData) {
     toolData = {
         currX: mouse.x,
         currY: mouse.y,
-        vertices: [],
-        edges: [],
+        editProgress: [],
         dragging: false
     };
 
@@ -65,7 +64,10 @@ function onMove(mouse, graphData, toolData, selectedData) {
         toolData.currY = mouse.y;
 
         const clicked = graphData.getClickedObjectsInRange(mouse.shiftedX, mouse.shiftedY, ERASER_WIDTH);
-        appendAndEraseData(clicked, graphData, toolData, selectedData);
+        const eraseEditStep = eraseData(clicked, graphData, toolData, selectedData);
+        if(eraseEditStep.length > 0) {
+            toolData.editProgress.push(...eraseEditStep);
+        }
     }
 
     return toolData;
@@ -83,23 +85,20 @@ function onUp(mouse, graphData, toolData, selectedData) {
     if(toolData !== null) {
         if(!toolData.dragging) {
             const clicked = graphData.getClickedObjectsInRange(mouse.shiftedX, mouse.shiftedY, ERASER_WIDTH);
-            appendAndEraseData(clicked, graphData, toolData, selectedData);
+            const eraseEditStep = eraseData(clicked, graphData, toolData, selectedData);
+            if(eraseEditStep.length > 0) {
+                toolData.editProgress.push(...eraseEditStep);
+            }
         }
 
-        createErasedHistory(toolData);
+        if(toolData.editProgress.length === 1) {
+            makeEdit(toolData.editProgress[0]);
+        } else if(toolData.editProgress.length > 1) {
+            makeEdit(new CompositeEdit(toolData.editProgress));
+        }
     }
     
     return null;
-}
-
-export function eraseSelected(graphData, selectedData) {
-    const toolData = {
-        vertices: [],
-        edges: []
-    };
-
-    appendAndEraseData([...selectedData], graphData, toolData, selectedData);
-    createErasedHistory(toolData);
 }
 
 /**
@@ -109,7 +108,11 @@ export function eraseSelected(graphData, selectedData) {
  */
 function clearData(graphData, toolData) {
     if(toolData !== null && toolData.dragging) {
-        createErasedHistory(toolData);
+        if(toolData.editProgress.length === 1) {
+            makeEdit(toolData.editProgress[0]);
+        } else if(toolData.editProgress.length > 1) {
+            makeEdit(new CompositeEdit(toolData.editProgress));
+        }
     }
 }
 
@@ -133,77 +136,66 @@ function onPaint(graphData, toolData, ctx) {
 }
 
 /**
- * Attaches the selected data to the tool data to be erased once the current erase action is completed or interrupted.
+ * Removes the specified graph objects from the graph.
  * @param {GraphObject[]} data the selected data. 
  * @param {GraphSession} graphData The graph data this tool is interacting with.
  * @param {*} toolData Temporary data storage for this tool.
  * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
+ * @returns {(DeletionEdit|CompositeEdit)[]} A series of edits representing the removed objects, with composite edits representing the removal of a vertex that still has adjacent edges.
  */
-function appendAndEraseData(data, graphData, toolData, selectedData) {
+function eraseData(data, graphData, toolData, selectedData) {
     if(data.length === 0) {
-        return;
+        return [];
     }
 
-    const erasedVertices = new Set();
-    const erasedEdges = new Set();
+    const editList = [];
 
     for(let x = 0; x < data.length; x++) {
         switch(data[x].getType()) {
             case GRAPH_DATATYPE.VERTEX:
-                if(!erasedVertices.has(data[x])) {
-                    toolData.vertices.push(data[x]);
-                    erasedVertices.add(data[x]);
-
-                    for(const edge of data[x].disconnectAll()) {
-                        data.push(edge);
+                for(const adj of data[x].adjacent) { // Removing selected edges
+                    if(selectedData.has(adj)) {
+                        selectedData.delete(adj);
                     }
                 }
+
+                if(selectedData.has(data[x])) { // Removing selected vertex
+                    selectedData.delete(data[x]);
+                }
+
+                editList.push(graphData.removeVertex(data[x]));
                 break;
             case GRAPH_DATATYPE.EDGE:
-                if(!erasedEdges.has(data[x])) {
-                    toolData.edges.push(data[x]);
-                    erasedEdges.add(data[x]);
-                    data[x].start.disconnect(data[x]);
-                    data[x].end.disconnect(data[x]);
+                if(graphData.edges.indexOf(data[x]) > -1) { // Only if graphData has edge, since it may have already been removed by vertex deletion.
+                    if(selectedData.has(data[x])) {
+                        selectedData.delete(data[x]);
+                    }
+                    editList.push(graphData.removeEdge(data[x]));
                 }
                 break;
             default:
                 console.error("appendErasedData not implemented for type " + data[x].getType());
-                return;
+                return [];
         }
     }
     
-    // Edge cap / label -> edges -> vertices
-    graphData.edges = graphData.edges.filter(x => !erasedEdges.has(x));
-    graphData.vertices = graphData.vertices.filter(x => !erasedVertices.has(x));
-    for(const entry of selectedData.values()) {
-        if(erasedVertices.has(entry) || erasedEdges.has(entry)) {
-            selectedData.delete(entry);
-        }
-    }
+    return editList;
 }
 
 /**
- * Logs the erased data as a single composite edit in history.
- * @param {*} toolData Temporary data storage for this tool.
+ * Erases all selected items using the same process the eraser tool uses.
+ * @param {GraphSession} graphData The graph data this tool is interacting with.
+ * @param {Set} selectedData The set of objects that should be displayed/marked as selected.
  */
-function createErasedHistory(toolData) {
-    // Edge cap / label -> edges -> vertices
-    const editList = [];
+export function eraseSelected(graphData, selectedData) {
+    const toolData = {
+        editProgress: []
+    };
 
-    for(const entry of toolData.edges) {
-        editList.push(new DeletionEdit(entry));
-    }
-
-    for(const entry of toolData.vertices) {
-        editList.push(new DeletionEdit(entry));
-    }
-
-    if(editList.length > 0) {
-        if(editList.length === 1) {
-            makeEdit(editList[0]);
-        } else {
-            makeEdit(new CompositeEdit(editList));
-        }
+    eraseData([...selectedData], graphData, toolData, selectedData);
+    if(toolData.editProgress.length === 1) {
+        makeEdit(toolData.editProgress[0]);
+    } else if(toolData.editProgress.length > 1) {
+        makeEdit(new CompositeEdit(toolData.editProgress));
     }
 }

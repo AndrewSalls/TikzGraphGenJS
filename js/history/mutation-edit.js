@@ -1,4 +1,4 @@
-import { GRAPH_DATATYPE, GraphObject } from "../graph-data/graph-object.js";
+import { GraphObject } from "../graph-data/graph-object.js";
 import { GraphSession } from "../graph-session.js";
 import { Edit } from "./edit.js";
 
@@ -14,8 +14,7 @@ export class MutationEdit extends Edit {
      */
     constructor(mutatingObject, oldValueMap, newValueMap = undefined) {
         super();
-        this.type = mutatingObject.getType();
-        this.id = mutatingObject.id;
+        this.target = mutatingObject;
         this.original = oldValueMap;
         if(newValueMap !== undefined) {
             this.updated = newValueMap;
@@ -32,7 +31,7 @@ export class MutationEdit extends Edit {
      * @param {GraphSession} graphData the current state of the graph.
      */
     undo(graphData) {
-        this.anydo(graphData, this.original);
+        this.anydo(this.original);
     }
 
     /**
@@ -40,38 +39,18 @@ export class MutationEdit extends Edit {
      * @param {GraphSession} graphData the current state of the graph.
      */
     redo(graphData) {
-        this.anydo(graphData, this.updated);
+        this.anydo(this.updated);
     }
 
     /**
      * Updates the object this edit references to share the key-value pairs specified by the provided object.
-     * @param {GraphSession} graphData The graph containing this edit's referenced object.
      * @param {Object} valueMap The key-value pairs to copy to the referenced object.
      */
-    anydo(graphData, valueMap) {
+    anydo(valueMap) {
         // IMPORTANT: for simplicity & consistancy, objects should not gain or lose keys over their lifetime; 
         // otherwise this will not properly replace keys. Also, edits should never change object id
-        switch(this.type) {
-            case GRAPH_DATATYPE.VERTEX:
-                for(let x = graphData.vertices.length - 1; x >= 0; x--) {
-                    if(graphData.vertices[x].id === this.id) {
-                        for(const key of Object.keys(valueMap)) {
-                            graphData.vertices[x][key] = valueMap[key];
-                        }
-                    }
-                }
-                break;
-            case GRAPH_DATATYPE.EDGE:
-                for(let x = graphData.edges.length - 1; x >= 0; x--) {
-                    if(graphData.edges[x].id === this.id) {
-                        for(const key of Object.keys(valueMap)) {
-                            graphData.edges[x][key] = valueMap[key];
-                        }
-                    }
-                }
-                break;
-            default:
-                console.error("Mutation edit not defined for type " + this.type);
+        for(const key of Object.keys(valueMap)) {
+            this.target[key] = valueMap[key];
         }
     }
 }

@@ -40,9 +40,9 @@ function onDown(mouse, graphData, toolData, selectedData) {
         toolData.cursorVertex.fill = "transparent";
         toolData.cursorVertex.color = "transparent";
         
-        graphData.vertices.push(toolData.cursorVertex);
+        graphData.addVertex(toolData.cursorVertex);
         toolData.tempEdge = new Edge(toolData.startPos, toolData.cursorVertex);
-        graphData.edges.push(toolData.tempEdge);
+        graphData.addEdge(toolData.tempEdge);
     } else {
         toolData = null;
     }
@@ -76,33 +76,30 @@ function onMove(mouse, graphData, toolData, selectedData) {
  * @returns {*} The updated value for toolData.
  */
 function onUp(mouse, graphData, toolData, selectedData) {
+    selectedData.clear();
+
     if(toolData !== null) {
         const selectedEnd = graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY, GRAPH_DATATYPE.VERTEX);
+
         if(selectedEnd !== null) {
             if(selectedEnd === toolData.startPos) {
                 // TODO: Create loop instead of cancelling edge creation
-                graphData.edges.pop();
-                selectedData.clear();
+                graphData.removeEdge(toolData.tempEdge);
             } else {
                 toolData.tempEdge.end = selectedEnd;
-                selectedEnd.connect(toolData.tempEdge);
                 makeEdit(new InsertionEdit(toolData.tempEdge));
                 
-                selectedData.clear();
                 selectedData.add(toolData.tempEdge);
             }
         } else {
-            graphData.edges.pop();
-            selectedData.clear();
+            graphData.removeEdge(toolData.tempEdge);
         }
         
-        graphData.vertices.pop();
-        toolData = null;
-    } else {
-        selectedData.clear();
+        toolData.cursorVertex.disconnect(toolData.tempEdge);
+        graphData.removeVertex(toolData.cursorVertex);
     }
 
-    return toolData;
+    return null;
 }
 
 /**
@@ -112,11 +109,8 @@ function onUp(mouse, graphData, toolData, selectedData) {
  */
 function clearData(graphData, toolData) {
     if(toolData !== null) {
-        if('cursorVertex' in toolData) {
-            graphData.vertices.pop();
-        }
-        if('tempEdge' in toolData) {
-            graphData.edges.pop();
+        if('cursorVertex' in toolData) { // temporary vertex for rendering edge while dragging still exists; need to delete
+            graphData.removeVertex(cursorVertex);
         }
     }
 }

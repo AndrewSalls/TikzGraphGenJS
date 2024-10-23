@@ -3,7 +3,6 @@ import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Vertex from "../graph-data/vertex.js";
 import { GraphSession } from "../graph-session.js";
 import { CompositeEdit } from "../history/composite-edit.js";
-import { DeletionEdit, InsertionEdit } from "../history/entry-edit.js";
 import { makeEdit } from "../history/history.js";
 import { MouseInteraction } from "../mouse-interaction.js";
 import { Tool } from "./tool.js";
@@ -62,14 +61,6 @@ function onUp(mouse, graphData, toolData, selectedData) {
         const addedEdge1 = new Edge(clickedEdge.start, addedVertex);
         const addedEdge2 = new Edge(clickedEdge.end, addedVertex);
 
-        clickedEdge.start.disconnect(clickedEdge);
-        clickedEdge.end.disconnect(clickedEdge);
-
-        graphData.edges.splice(graphData.edges.indexOf(clickedEdge), 1);
-        graphData.vertices.push(addedVertex);
-        graphData.edges.push(addedEdge1);
-        graphData.edges.push(addedEdge2);
-
         if(selectedData.has(clickedEdge)) {
             selectedData.delete(clickedEdge);
             selectedData.add(addedEdge1);
@@ -77,10 +68,10 @@ function onUp(mouse, graphData, toolData, selectedData) {
         }
 
         makeEdit(new CompositeEdit([
-            new DeletionEdit(clickedEdge),
-            new InsertionEdit(addedVertex),
-            new InsertionEdit(addedEdge1),
-            new InsertionEdit(addedEdge2)
+            graphData.removeEdge(clickedEdge),
+            graphData.addVertex(addedVertex),
+            graphData.addEdge(addedEdge1),
+            graphData.addEdge(addedEdge2)
         ]));
     }
 

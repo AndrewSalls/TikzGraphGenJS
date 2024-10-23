@@ -48,24 +48,10 @@ class EntryEdit extends Edit {
     insertEdit(graphData) {
         switch(this.target.getType()) {
             case GRAPH_DATATYPE.VERTEX:
-                let x = 0;
-                for(; x < graphData.vertices.length; x++) {
-                    if(graphData.vertices[x].id > this.target.id) {
-                        break;
-                    }
-                }
-                graphData.vertices.splice(x, 0, this.target);
+                graphData.addVertex(this.target);
                 break;
             case GRAPH_DATATYPE.EDGE:
-                let y = 0;
-                for(; y < graphData.edges.length; y++) {
-                    if(graphData.edges[y].id > this.target.id) {
-                        break;
-                    }
-                }
-                graphData.edges.splice(y, 0, this.target);
-                this.target.start.connect(this.target);
-                this.target.end.connect(this.target);
+                graphData.addEdge(this.target);
                 break;
             default:
                 console.error("Add edit not defined for type " + this.target.getType());
@@ -79,20 +65,10 @@ class EntryEdit extends Edit {
     removeEdit(graphData) {
         switch(this.target.getType()) {
             case GRAPH_DATATYPE.VERTEX:
-                for(let x = graphData.vertices.length - 1; x >= 0; x--) {
-                    if(graphData.vertices[x].id === this.target.id) {
-                        graphData.vertices.splice(x, 1);
-                    }
-                }
+                graphData.removeVertex(this.target);
                 break;
             case GRAPH_DATATYPE.EDGE:
-                for(let x = graphData.edges.length - 1; x >= 0; x--) {
-                    if(graphData.edges[x].id === this.target.id) {
-                        graphData.edges[x].start.disconnect(graphData.edges[x]);
-                        graphData.edges[x].end.disconnect(graphData.edges[x]);
-                        graphData.edges.splice(x, 1);
-                    }
-                }
+                graphData.removeEdge(this.target);
                 break;
             default:
                 console.error("Remove edit not defined for type " + this.target.getType());

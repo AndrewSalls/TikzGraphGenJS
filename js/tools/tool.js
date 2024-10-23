@@ -184,19 +184,9 @@ export function clearGraph(graphData) {
     clearData(graphData);
     selectedData.clear();
 
-    const editList = [];
-    while(graphData.edges.length > 0) {
-        editList.push(new DeletionEdit(graphData.edges.pop()));
-    }
-    while(graphData.vertices.length > 0) {
-        editList.push(new DeletionEdit(graphData.vertices.pop()));
-    }
+    const edit = graphData.clearObjects();
     
-    if(editList.length > 0) {
-        if(editList.length === 1) {
-            makeEdit(editList[0]);
-        } else {
-            makeEdit(new CompositeEdit(editList));
-        }
+    if(edit !== null) {
+        makeEdit(edit);
     }
 }

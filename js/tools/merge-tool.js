@@ -66,13 +66,10 @@ function onUp(mouse, graphData, toolData, selectedData) {
                 for(const connectedEdge of vertex.adjacent) {
                     if(connectedEdge.start === clickedVertex || connectedEdge.end === clickedVertex) {
                         // TODO: Create loop instead of deleting edge
-                        graphData.edges.splice(graphData.edges.indexOf(connectedEdge), 1);
-                        connectedEdge.start.disconnect(connectedEdge);
-                        connectedEdge.end.disconnect(connectedEdge);
                         if(selectedData.has(connectedEdge)) {
                             selectedData.delete(connectedEdge);
                         }
-                        editList.push(new DeletionEdit(connectedEdge));
+                        editList.push(graphData.removeEdge(connectedEdge));
                     } else if(connectedEdge.start === vertex) {
                         connectedEdge.start = clickedVertex;
                         clickedVertex.connect(connectedEdge);
@@ -84,19 +81,15 @@ function onUp(mouse, graphData, toolData, selectedData) {
                     }
                 }
 
-                graphData.vertices.splice(graphData.vertices.indexOf(vertex), 1);
-                vertex.disconnectAll();
                 selectedData.delete(vertex);
-                editList.push(new DeletionEdit(vertex));
+                editList.push(graphData.removeVertex(vertex));
             }
 
             // Create composite edit, vertex deletion edit, or no edit
-            if(editList.length > 0) {
-                if(editList.length === 1) {
-                    makeEdit(editList[0]);
-                } else {
-                    makeEdit(new CompositeEdit(editList));
-                }
+            if(editList.length === 1) {
+                makeEdit(editList[0]);
+            } else if(editList.length > 1) {
+                makeEdit(new CompositeEdit(editList));
             }
         } else {
             selectedData.add(clickedVertex);

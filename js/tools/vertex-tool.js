@@ -1,7 +1,6 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Vertex from "../graph-data/vertex.js";
 import { GraphSession } from "../graph-session.js";
-import { InsertionEdit } from "../history/entry-edit.js";
 import { makeEdit } from "../history/history.js";
 import { MutationEdit } from "../history/mutation-edit.js";
 import { MouseInteraction } from "../mouse-interaction.js";
@@ -82,8 +81,7 @@ function onUp(mouse, graphData, toolData, selectedData) {
     } else {
         if(!mouse.exitedBounds) {
             const created = new Vertex(mouse.shiftedX, mouse.shiftedY);
-            graphData.vertices.push(created);
-            makeEdit(new InsertionEdit(created));
+            makeEdit(graphData.addVertex(created));
             selectedData.clear();
             selectedData.add(created);
         }
