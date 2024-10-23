@@ -2,6 +2,7 @@ import { GraphSession } from "./graph-session.js";
 import { deleteSelected, clearGraph } from "./tools/tool.js";
 import { undo, redo } from "./history/history.js";
 import { registerKey } from "./shortcut.js";
+import { FIXED_ZOOM_LEVELS } from "./graph-viewport.js";
 
 /**
  * Initializes the buttons in the menubar.
@@ -62,25 +63,55 @@ function initializeViewMenu(graphData) {
     document.querySelector("#zoom-in-btn").onclick = () => graphData.viewport.zoomIn();
     document.querySelector("#zoom-out-btn").onclick = () => graphData.viewport.zoomOut();
 
+    const slider = document.querySelector("#zoom-slider");
+    const zoomDisplay = document.querySelector("#zoom-display");
+    const updateZoomDisplay = () => {
+        if(graphData.viewport.scale >= 1) {
+            zoomDisplay.textContent = `(${(100 * graphData.viewport.scale).toFixed(0)}%)`;
+        } else {
+            zoomDisplay.textContent = `(${parseFloat((100 * graphData.viewport.scale).toFixed(2))}%)`;
+        }
+
+        // Adjust fixed zoom levels to be close to actual level
+        const closest = FIXED_ZOOM_LEVELS.reduce((prev, curr) => Math.abs(curr - graphData.viewport.scale) < Math.abs(prev - graphData.viewport.scale) ? curr : prev);
+        slider.value = FIXED_ZOOM_LEVELS.indexOf(closest);
+    };
+
+    slider.setAttribute("min", 0);
+    slider.setAttribute("max", FIXED_ZOOM_LEVELS.length - 1);
+    slider.value = FIXED_ZOOM_LEVELS.indexOf(1); // Assumes that a default zoom level is 100% / 1, which should always be true
+    slider.addEventListener("input", () => {
+        console.log("INPUTTED");
+        const oldScale = graphData.viewport.scale;
+        const newScale = FIXED_ZOOM_LEVELS[parseInt(slider.value)];
+        graphData.viewport.scale = newScale;
+        graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
+        updateZoomDisplay();
+    });
+
     registerKey(() => {
         const oldScale = graphData.viewport.scale;
         const newScale = graphData.viewport.zoomIn();
         graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
+        updateZoomDisplay();
     }, "=", false, false, true);
     registerKey(() => {
         const oldScale = graphData.viewport.scale;
         const newScale = graphData.viewport.zoomInFixed();
         graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
+        updateZoomDisplay();
     }, "+", false, true, true);
     registerKey(() => {
         const oldScale = graphData.viewport.scale;
         const newScale = graphData.viewport.zoomOut();
         graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
+        updateZoomDisplay();
     }, "-", false, false, true);
     registerKey(() => {
         const oldScale = graphData.viewport.scale;
         const newScale = graphData.viewport.zoomOutFixed();
         graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
+        updateZoomDisplay();
     }, "_", false, true, true);
 
     // Zooming with mouse wheel
@@ -113,7 +144,7 @@ function initializeViewMenu(graphData) {
         if(isShiftHeld) {
             const oldScale = graphData.viewport.scale;
             let newScale = 0;
-            
+
             if(ev.deltaY < 0) { // Scrolling "up"
                 if(isAltHeld) {
                     newScale = graphData.viewport.zoomInFixed();
@@ -129,6 +160,7 @@ function initializeViewMenu(graphData) {
             }
 
             graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) * (mousePos.absX / canvas.width), (canvas.height / oldScale - canvas.height / newScale) * (mousePos.absY / canvas.height));
+            updateZoomDisplay();
         }
     });
 }

@@ -92,6 +92,12 @@
     background-color: transparent;
 }
 
+.spacer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 #vertex-btn {
     background-image: url("../img/VertexIcon.png");
 }
