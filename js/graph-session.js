@@ -42,6 +42,15 @@ export class GraphSession {
         this.selectedVertices = new Set();
         /** @type {Set<Edge>} */
         this.selectedEdges = new Set();
+
+        /** @type {Boolean} */
+        this.drawingGrid = false;
+        /** @type {Boolean} */
+        this.snapGrid = false;
+        /** @type {Boolean} */
+        this.snapAngle = false;
+        /** @type {Boolean} */
+        this.snapDistance = false;
     }
 
     /**

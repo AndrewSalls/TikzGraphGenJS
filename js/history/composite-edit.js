@@ -12,6 +12,7 @@ export class CompositeEdit extends Edit {
      */
     constructor(edits) {
         super();
+        /** @type {Edit[]} */
         this.editList = edits;
     }
 

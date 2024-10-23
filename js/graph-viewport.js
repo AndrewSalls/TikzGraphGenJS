@@ -18,8 +18,11 @@ export const ZOOM_SHIFT = 1.25; // Should be >= 1
  */
 export class GraphViewport {
     constructor() {
+        /** @type {Number} */
         this.offsetX = 0;
+        /** @type {Number} */
         this.offsetY = 0;
+        /** @type {Number} */
         this.scale = 1;
     }
 

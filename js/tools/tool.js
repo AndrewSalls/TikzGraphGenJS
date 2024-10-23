@@ -36,15 +36,22 @@ export class Tool {
      * @param {(mouseData: MouseInteraction, graphData: GraphSession, toolData: Object|null) => Object|null} upEv the event called when the user releases a mouse button on the graph.
      * @param {(graphData: GraphSession, toolData: Object|null)} clearData the event called when the tool is switched to another tool, used to clean up hanging data
      * @param {(graphData: GraphSession, toolData: Object|null, CanvasRenderingContext2D ctx)} paintEv the event called when the canvas refreshes, called after all other paint effects
-     * @param {boolean} acceptAllClicks Whether this tool should respond to all click events or only left click events
+     * @param {Boolean} acceptAllClicks Whether this tool should respond to all click events or only left click events
      */
     constructor(name, downEv, moveEv, upEv, clearData, paintEv = undefined, acceptAllClicks = false) {
+        /** @type {String} */
         this.name = name;
+        /** @type {(mouseData: MouseInteraction, graphData: GraphSession, toolData: Object|null) => Object|null} */
         this.onDown = downEv;
+        /** @type {(mouseData: MouseInteraction, graphData: GraphSession, toolData: Object|null) => Object|null} */
         this.onMove = moveEv;
+        /** @type {(mouseData: MouseInteraction, graphData: GraphSession, toolData: Object|null) => Object|null} */
         this.onUp = upEv;
+        /** @type {(graphData: GraphSession, toolData: Object|null)} */
         this.clearData = clearData;
+        /** @type {(graphData: GraphSession, toolData: Object|null, CanvasRenderingContext2D ctx)} */
         this.onPaint = paintEv;
+        /** @type {Boolean} */
         this.acceptAllClicks = acceptAllClicks;
     }
 };

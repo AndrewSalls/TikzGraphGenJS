@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
         onPage = true;
         tool_onMouseMove(convertMouse(ev), graphData);
     });
-    for(const dropdown of document.getElementsByClassName("dropdown")) {
+    for(const dropdown of document.getElementsByName("dropdown")) {
         dropdown.addEventListener("mouseleave", ev => onMenubar--);
         dropdown.addEventListener("mouseenter", ev => onMenubar++);
     }

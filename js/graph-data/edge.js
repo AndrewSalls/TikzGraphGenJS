@@ -18,12 +18,17 @@ export default class Edge extends GraphObject {
     constructor(vertexStart, vertexEnd, dummy = false) {
         super(dummy);
 
+        /** @type {Vertex} */
         this.start = vertexStart;
+        /** @type {Vertex} */
         this.end = vertexEnd;
+
         vertexStart.connect(this);
         vertexEnd.connect(this);
 
+        /** @type {Number} */
         this.scale = 2;
+        /** @type {String} a valid CSS color */
         this.color = "#000000";
     }
 

@@ -31,9 +31,11 @@ export class GraphObject {
         }
 
         if(!dummy) {
+            /** @type {Number} Normally */
             this.id = increment;
             increment = increment + 1;
         } else {
+            /** @type {"dummy"} If this graph object is used for rendering only and not as part of the graph. */
             this.id = "dummy";
         }
     }

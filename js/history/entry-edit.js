@@ -13,7 +13,9 @@ class EntryEdit extends Edit {
      */
     constructor(entryObject, inserting) {
         super();
+        /** @type {GraphObject} */
         this.target = entryObject;
+        /** @type {Boolean} */
         this.inserting = inserting;
     }
 

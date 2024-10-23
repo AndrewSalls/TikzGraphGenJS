@@ -44,11 +44,17 @@ export class MouseInteraction {
      * @param {Boolean} exitedBounds Whether the mouse interaction was inside or outside of the canvas.
      */
     constructor(mouseX, mouseY, shiftedX, shiftedY, clickType, exitedBounds) {
+        /** @type {Number} */
         this.x = mouseX;
+        /** @type {Number} */
         this.y = mouseY;
+        /** @type {Number} */
         this.shiftedX = shiftedX;
+        /** @type {Number} */
         this.shiftedY = shiftedY;
+        /** @type {MOUSE_CLICK_TYPE} */
         this.clickType = clickType;
+        /** @type {Boolean} */
         this.exitedBounds = exitedBounds;
     }
 }

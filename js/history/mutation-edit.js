@@ -14,9 +14,12 @@ export class MutationEdit extends Edit {
      */
     constructor(mutatingObject, oldValueMap, newValueMap = undefined) {
         super();
+        /** @type {GraphObject} */
         this.target = mutatingObject;
+        /** @type {Object} */
         this.original = oldValueMap;
         if(newValueMap !== undefined) {
+            /** @type {Object} */
             this.updated = newValueMap;
         } else {
             this.updated = {};

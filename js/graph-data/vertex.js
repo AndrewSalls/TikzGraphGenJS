@@ -24,13 +24,21 @@ export default class Vertex extends GraphObject {
     constructor(mouseX, mouseY, dummy = false) {
         super(dummy);
 
+        /** @type {Number} */
         this.x = mouseX;
+        /** @type {Number} */
         this.y = mouseY;
+        /** @type {VERTEX_SHAPE} */
         this.shape = VERTEX_SHAPE.CIRCLE;
+        /** @type {Number} */
         this.scale = 20;
+        /** @type {Number} */
         this.borderScale = 2;
+        /** @type {String} A valid CSS color */
         this.color = "#000000";
+        /** @type {String} A valid CSS color */
         this.fill = "transparent";
+        /** @type {Set<Edge>} */
         this.adjacent = new Set();
     }
 
