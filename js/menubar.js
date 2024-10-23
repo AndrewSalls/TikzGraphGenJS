@@ -82,7 +82,6 @@ function initializeViewMenu(graphData) {
     slider.setAttribute("max", FIXED_ZOOM_LEVELS.length - 1);
     slider.value = FIXED_ZOOM_LEVELS.indexOf(1); // Assumes that a default zoom level is 100% / 1, which should always be true
     slider.addEventListener("input", () => {
-        console.log("INPUTTED");
         const oldScale = graphData.viewport.scale;
         const newScale = FIXED_ZOOM_LEVELS[parseInt(slider.value)];
         graphData.viewport.scale = newScale;
