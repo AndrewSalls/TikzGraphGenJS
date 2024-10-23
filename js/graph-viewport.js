@@ -25,30 +25,38 @@ export class GraphViewport {
 
     /**
      * Zoom in by {@link ZOOM_SHIFT}, up to {@link MIN_ZOOM}.
+     * @returns {Number} The new scale factor.
      */
     zoomIn() {
         this.scale = Math.min(MAX_ZOOM, this.scale * ZOOM_SHIFT);
+        return this.scale;
     }
 
     /**
      * Zoom in to the next smallest zoom in {@link FIXED_ZOOM_LEVELS}, doing nothing if already smaller then the smallest value in that scale.
+     * @returns {Number} The new scale factor.
      */
     zoomInFixed() {
         this.scale = FIXED_ZOOM_LEVELS.find(v => v > this.scale) ?? this.scale;
+        return this.scale;
     }
 
     /**
      * Zoom out by {@link ZOOM_SHIFT}, up to {@link MAX_ZOOM}.
+     * @returns {Number} The new scale factor.
      */
     zoomOut() {
         this.scale = Math.max(MIN_ZOOM, this.scale / ZOOM_SHIFT);
+        return this.scale;
     }
 
     /**
      * Zoom out to the next largest zoom in {@link FIXED_ZOOM_LEVELS}, doing nothing if already larger then the largest value in that scale.
+     * @returns {Number} The new scale factor.
      */
     zoomOutFixed() {
         this.scale = FIXED_ZOOM_LEVELS.findLast(v => v < this.scale) ?? this.scale;
+        return this.scale;
     }
 
     /**

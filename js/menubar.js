@@ -51,21 +51,39 @@ function initializeEditMenu(graphData) {
 
 let isShiftHeld = false;
 let isAltHeld = false;
+let mousePos = { x: 0, y: 0 };
 /**
  * Initializes the buttons in the view sub-menubar.
  * @param {GraphSession} graphData The graph state, so that it can be provided to functions called by using the menubar.
  */
 function initializeViewMenu(graphData) {
+    const canvas = document.querySelector("#render");
+
     document.querySelector("#zoom-in-btn").onclick = () => graphData.viewport.zoomIn();
     document.querySelector("#zoom-out-btn").onclick = () => graphData.viewport.zoomOut();
 
-    registerKey(() => graphData.viewport.zoomIn(), "=", false, false, true);
-    registerKey(() => graphData.viewport.zoomInFixed(), "+", false, true, true);
-    registerKey(() => graphData.viewport.zoomOut(), "-", false, false, true);
-    registerKey(() => graphData.viewport.zoomOutFixed(), "_", false, true, true);
+    registerKey(() => {
+        const oldScale = graphData.viewport.scale;
+        const newScale = graphData.viewport.zoomIn();
+        graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
+    }, "=", false, false, true);
+    registerKey(() => {
+        const oldScale = graphData.viewport.scale;
+        const newScale = graphData.viewport.zoomInFixed();
+        graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
+    }, "+", false, true, true);
+    registerKey(() => {
+        const oldScale = graphData.viewport.scale;
+        const newScale = graphData.viewport.zoomOut();
+        graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
+    }, "-", false, false, true);
+    registerKey(() => {
+        const oldScale = graphData.viewport.scale;
+        const newScale = graphData.viewport.zoomOutFixed();
+        graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
+    }, "_", false, true, true);
 
     // Zooming with mouse wheel
-    const canvas = document.querySelector("#render");
     document.addEventListener("keydown", ev => {
         if(ev.key === "Alt") {
             isAltHeld = true;
@@ -84,22 +102,33 @@ function initializeViewMenu(graphData) {
             ev.preventDefault();
         }
     });
+    canvas.addEventListener("mousemove", ev => {
+        mousePos.x = ev.offsetX / graphData.viewport.scale + graphData.viewport.offsetX;
+        mousePos.y = ev.offsetY / graphData.viewport.scale + graphData.viewport.offsetY;
+        mousePos.absX = ev.offsetX;
+        mousePos.absY = ev.offsetY;
+    });
 
     canvas.addEventListener("wheel", ev => {
         if(isShiftHeld) {
+            const oldScale = graphData.viewport.scale;
+            let newScale = 0;
+            
             if(ev.deltaY < 0) { // Scrolling "up"
                 if(isAltHeld) {
-                    graphData.viewport.zoomInFixed();
+                    newScale = graphData.viewport.zoomInFixed();
                 } else {
-                    graphData.viewport.zoomIn();
+                    newScale = graphData.viewport.zoomIn();
                 }
             } else {
                 if(isAltHeld) {
-                    graphData.viewport.zoomOutFixed();
+                    newScale = graphData.viewport.zoomOutFixed();
                 } else {
-                    graphData.viewport.zoomOut();
+                    newScale = graphData.viewport.zoomOut();
                 }
             }
+
+            graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) * (mousePos.absX / canvas.width), (canvas.height / oldScale - canvas.height / newScale) * (mousePos.absY / canvas.height));
         }
     });
 }
