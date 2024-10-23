@@ -60,7 +60,7 @@
     top: 100%;
     left: 0;
 }
-.dropdown:hover > div {
+body:not(.supress-menu) .dropdown:hover > div {
     display: block;
 }
 

@@ -183,4 +183,23 @@ function initializeViewMenu(graphData) {
  */
 function initializeOtherMenu(graphData) {
     document.querySelector("#about-btn").onclick = () => window.open("../about.html", "_blank");
+    const graphInfoOverlay = document.querySelector("#graph-info-overlay");
+
+    const vertexCounter = document.querySelector("#vertex-count");
+    const edgeCounter = document.querySelector("#edge-count");
+    const edgeCapCounter = document.querySelector("#edge-cap-count");
+    const labelCounter = document.querySelector("#label-count");
+
+    document.querySelector("#graph-info-btn").onclick = () => {
+        document.body.classList.add("supress-menu");
+        graphInfoOverlay.classList.remove("invisible");
+        vertexCounter.textContent = graphData.vertices.length;
+        edgeCounter.textContent = graphData.edges.length;
+        edgeCapCounter.textContent = 0; // TODO: Update when adding edge caps
+        labelCounter.textContent = 0; // TODO: Update when adding labels
+    };
+    document.querySelector("#close-info-box").onclick = () => {
+        document.body.classList.remove("supress-menu");
+        graphInfoOverlay.classList.add("invisible");
+    };
 }

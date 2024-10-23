@@ -4,6 +4,8 @@
     --primary: #c38757;
     --secondary: #dbb698;
     --accent: #c3783b;
+    --overlay-bg: #000000aa;
+    --overlay-box: #dbb698;
 }
 
 :root .dark-mode {
@@ -12,6 +14,8 @@
     --primary: #ab5a17;
     --secondary: #664224;
     --accent: #7a4315;
+    --overlay-bg: #000000aa;
+    --overlay-box: #dbb698;
 }
 
 body {
@@ -58,4 +62,8 @@ h1, h2, h3, h4, h5, h6 {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+}
+
+.invisible {
+    display: none;
 }

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="./css/shared.css">
     <link rel="stylesheet" href="./css/menu.css">
-    <link rel="stylesheet" href="./css/render.css">
+    <link rel="stylesheet" href="./css/main.css">
     <script src="./js/graph.js" type="module"></script>
 </head>
 
@@ -79,7 +79,7 @@
                     <h3>Other</h3>
                 </span>
                 <div>
-                    <h4 class="clickable">Graph Info</h4>
+                    <h4 class="clickable" id="graph-info-btn">Graph Info</h4>
                     <h4 class="clickable">Toggle Grid Snap</h4>
                     <h4 class="clickable">Toggle Angle Snap</h4>
                     <h4 class="clickable">Toggle Distance Snap</h4>
@@ -107,6 +107,32 @@
             <canvas id="render">
                 Editor
             </canvas>
+        </div>
+        <div id="graph-info-overlay" class="invisible">
+            <div id="graph-info-box">
+                <div id="close-info-box">
+                    <svg viewBox="0 0 25 25" fill="none">
+                        <g>
+                            <path d="M3 22 L22 3" stroke-width="3" stroke-linecap="round"></path>
+                            <path d="M3 3 L22 22" stroke-width="3" stroke-linecap="round"></path>
+                        </g>
+                    </svg>
+                </div>
+                <div>
+                    <span>
+                        <h4>Number of vertices: </h4><p id="vertex-count">0</p>
+                    </span>
+                    <span>
+                        <h4>Number of edges: </h4><p id="edge-count">0</p>
+                    </span>
+                    <span>
+                        <h4>Number of edge caps: </h4><p id="edge-cap-count">0</p>
+                    </span>
+                    <span>
+                        <h4>Number of labels: </h4><p id="label-count">0</p>
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
 </body>
