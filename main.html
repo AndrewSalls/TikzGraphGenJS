@@ -12,6 +12,9 @@
 
 <body>
     <div id="wrapper">
+        <div id="collapsed-command-menu">
+            <p id="uncollapse-command-menu">•••</p>
+        </div>
         <menu id="command-menu">
             <div>
                 <h1>TikZGraphGen</h1>
@@ -70,8 +73,8 @@
                     <h4 class="clickable">Fit on Screen</h4>
                     <h4 class="clickable" id="toggle-grid-btn">Show Grid</h4>
                     <h4 class="clickable">Show Page Borders</h4>
-                    <h4 class="clickable">Show Menubar</h4>
-                    <h4 class="clickable">Show Toolbar</h4>
+                    <h4 class="clickable" id="toggle-menubar-btn">Hide Menubar</h4>
+                    <h4 class="clickable" id="toggle-toolbar-btn">Hide Toolbar</h4>
                 </div>
             </div>
             <div class="dropdown">
@@ -91,6 +94,9 @@
             </ul>
         </menu>
         <div class="border-line"></div>
+        <div id="collapsed-tool-menu">
+            <p id="uncollapse-tool-menu">•••</p>
+        </div>
         <menu id="tool-menu">
             <button class="clickable" id="vertex-btn" title="vertex" type="button"></button>
             <button class="clickable" id="edge-btn" title="edge" type="button"></button>

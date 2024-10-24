@@ -1,3 +1,42 @@
+#wrapper {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    --menu-size: 8%;
+    --toolbar-size: 7%;
+    grid-template-rows: var(--menu-size) 2px var(--toolbar-size) 2px minmax(0, 1fr);
+}
+
+#wrapper.shrink-menubar {
+    --menu-size: min-content;
+}
+#wrapper.shrink-toolbar {
+    --toolbar-size: min-content;
+}
+
+#collapsed-command-menu, #collapsed-tool-menu {
+    display: none;
+    background-color: var(--primary);
+    margin: 0;
+    padding: 0;
+}
+#collapsed-command-menu p, #collapsed-tool-menu p {
+    padding: 0;
+    margin: 0;
+    font-size: 8pt;
+    cursor: pointer;
+    user-select: none;
+}
+
+.shrink-menubar #collapsed-command-menu, .shrink-toolbar #collapsed-tool-menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.shrink-menubar #command-menu, .shrink-toolbar #tool-menu {
+    display: none;
+}
+
 #render-wrapper {
     width: 100%;
     height: 100%;
@@ -9,7 +48,7 @@
     display: block;
 }
 
-#graph-info-overlay:not(.invisible) {
+#graph-info-overlay {
     position: fixed;
     top: 0;
     left: 0;

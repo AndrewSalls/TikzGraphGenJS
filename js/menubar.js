@@ -63,7 +63,20 @@ function initializeViewMenu(graphData) {
     document.querySelector("#toggle-grid-btn").onclick = ev => {
         graphData.drawingGrid = !graphData.drawingGrid;
         ev.target.textContent = (graphData.drawingGrid ? "Hide" : "Show") + " Grid";
-    }
+    };
+
+    const layout = document.querySelector("#wrapper");
+    const toggleCommands = document.querySelector("#toggle-menubar-btn");
+    toggleCommands.onclick = ev => {
+        ev.target.textContent = (layout.classList.toggle("shrink-menubar") ? "Show" : "Hide") + " Menubar";
+    };
+    document.querySelector("#uncollapse-command-menu").onclick = () => toggleCommands.click();
+
+    const toggleTools = document.querySelector("#toggle-toolbar-btn");
+    toggleTools.onclick = ev => {
+        ev.target.textContent = (layout.classList.toggle("shrink-toolbar") ? "Show" : "Hide") + " Toolbar";
+    };
+    document.querySelector("#uncollapse-tool-menu").onclick = () => toggleTools.click();
 
     const canvas = document.querySelector("#render");
 
