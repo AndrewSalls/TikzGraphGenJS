@@ -43,7 +43,7 @@ function onDown(mouse, graphData, toolData) {
  */
 function onMove(mouse, graphData, toolData) {
     if(toolData !== null) {
-        graphData.viewport.pan(toolData.panX - mouse.x, toolData.panY - mouse.y);
+        graphData.viewport.pan((toolData.panX - mouse.x) / graphData.viewport.scale, (toolData.panY - mouse.y) / graphData.viewport.scale);
 
         return {
             panX: mouse.x,
