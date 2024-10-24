@@ -15,7 +15,7 @@ const MIN_AREA_SELECT = 7; // Minimum distance in pixels before switching from c
  */
 export default function accessSelectTool() {
     if(SELECT_TOOL === undefined) {
-        SELECT_TOOL = new Tool("select", onDown, onMove, onUp, clearData, onPaint);
+        SELECT_TOOL = new Tool("select", onDown, onMove, onUp, initializeData, clearData, onPaint);
     }
 
     return SELECT_TOOL;
@@ -138,6 +138,7 @@ function onUp(mouse, graphData, toolData) {
     return null;
 }
 
+const initializeData = undefined;
 const clearData = undefined;
 
 /**

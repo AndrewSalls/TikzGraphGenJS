@@ -15,7 +15,7 @@ let SPLIT_TOOL;
  */
 export default function accessSplitTool() { 
     if(SPLIT_TOOL === undefined) {
-        SPLIT_TOOL = new Tool("split", onDown, onMove, onUp, clearData, onPaint);
+        SPLIT_TOOL = new Tool("split", onDown, onMove, onUp, initializeData, clearData, onPaint);
     }
 
     return SPLIT_TOOL;
@@ -76,5 +76,6 @@ function onUp(mouse, graphData, toolData) {
     return null;
 }
 
+const initializeData = undefined;
 const clearData = undefined;
 const onPaint = undefined;

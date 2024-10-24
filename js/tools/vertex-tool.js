@@ -1,6 +1,6 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Vertex from "../graph-data/vertex.js";
-import { GraphSession } from "../graph-session.js";
+import { GraphSession, RENDER_SETTINGS } from "../graph-session.js";
 import { makeEdit } from "../history/history.js";
 import { MutationEdit } from "../history/mutation-edit.js";
 import { MouseInteraction } from "../mouse-interaction.js";
@@ -14,7 +14,7 @@ let VERTEX_TOOL;
  */
 export default function accessVertexTool() { 
     if(VERTEX_TOOL === undefined) {
-        VERTEX_TOOL = new Tool("vertex", onDown, onMove, onUp, clearData, onPaint);
+        VERTEX_TOOL = new Tool("vertex", onDown, onMove, onUp, initializeData, clearData, onPaint);
     }
 
     return VERTEX_TOOL;
@@ -28,16 +28,16 @@ export default function accessVertexTool() {
  * @returns {Object|null} The updated value for toolData.
  */
 function onDown(mouse, graphData, toolData) {
-    toolData = {
-        vertex: graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY, GRAPH_DATATYPE.VERTEX),
-    };
-    if(toolData.vertex instanceof Vertex) {
+    const clickVertex = graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY, GRAPH_DATATYPE.VERTEX);
+
+    if(clickVertex instanceof Vertex) {
+        toolData.vertex = clickVertex;
         toolData.originX = toolData.vertex.x;
         toolData.originY = toolData.vertex.y;
+        toolData.dragging = true;
+        toolData.displayVertex.opacity = 0;
         graphData.clearSelected();
         graphData.select(toolData.vertex);
-    } else {
-        toolData = null;
     }
 
     return toolData;
@@ -51,9 +51,12 @@ function onDown(mouse, graphData, toolData) {
  * @returns {Object|null} The updated value for toolData.
  */
 function onMove(mouse, graphData, toolData) {
-    if(toolData !== null && !mouse.exitedBounds) {
+    if(toolData.dragging && !mouse.exitedBounds) {
         toolData.vertex.x = mouse.shiftedX;
         toolData.vertex.y = mouse.shiftedY;
+    } else if(!toolData.dragging) {
+        toolData.displayVertex.x = mouse.shiftedX;
+        toolData.displayVertex.y = mouse.shiftedY;
     }
 
     return toolData;
@@ -67,14 +70,15 @@ function onMove(mouse, graphData, toolData) {
  * @returns {Object|null} The updated value for toolData.
  */
 function onUp(mouse, graphData, toolData) {
-    if(toolData !== null) {
+    if(toolData.dragging) {
         makeEdit(new MutationEdit(toolData.vertex,
             { x: toolData.originX, y: toolData.originY },
             { x: toolData.vertex.x, y: toolData.vertex.y }));
         
         graphData.clearSelected();
         graphData.select(toolData.vertex);
-        toolData = null;
+        toolData.displayVertex.opacity = RENDER_SETTINGS.VERTEX_PREVIEW_OPACITY;
+        toolData.dragging = false;
     } else {
         if(!mouse.exitedBounds) {
             const created = new Vertex(mouse.shiftedX, mouse.shiftedY);
@@ -87,5 +91,28 @@ function onUp(mouse, graphData, toolData) {
     return toolData;
 }
 
-const clearData = undefined;
+/**
+ * Initializes the tool data, for when the tool has a constantly active effect (that doesn't rely on clicking)
+ * @param {GraphSession} graphData The graph data that the tool will be interacting with.
+ */
+function initializeData(graphData) {
+    const output = {
+        displayVertex: new Vertex(0, 0, true),
+        dragging: false
+    };
+    output.displayVertex.opacity = RENDER_SETTINGS.VERTEX_PREVIEW_OPACITY;
+    graphData.addVertex(output.displayVertex);
+
+    return output;
+}
+
+/**
+ * Clears the current tool data, making sure to clean up any dummy data from the graph data as well.
+ * @param {GraphSession} graphData The graph data that the tool (potentially) modified with dummy data.
+ * @param {Object|null} toolData The local data this tool is currently using.
+ */
+function clearData(graphData, toolData) {
+    graphData.removeVertex(toolData.displayVertex);
+}
+
 const onPaint = undefined;

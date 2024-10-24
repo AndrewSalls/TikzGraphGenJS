@@ -16,7 +16,7 @@ let MERGE_TOOL;
  */
 export default function accessMergeTool() {
     if(MERGE_TOOL === undefined) {
-        MERGE_TOOL = new Tool("merge", onDown, onMove, onUp, clearData, onPaint);
+        MERGE_TOOL = new Tool("merge", onDown, onMove, onUp, initializeData, clearData, onPaint);
     }
 
     return MERGE_TOOL;
@@ -98,5 +98,6 @@ function onUp(mouse, graphData, toolData) {
     return null;
 }
 
+const initializeData = undefined;
 const clearData = undefined;
 const onPaint = undefined;

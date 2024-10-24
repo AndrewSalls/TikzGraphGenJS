@@ -202,4 +202,8 @@ function initializeOtherMenu(graphData) {
         document.body.classList.remove("supress-menu");
         graphInfoOverlay.classList.add("invisible");
     };
+
+    document.querySelector("#grid-snap-btn").onclick = () => graphData.snapGrid = !graphData.snapGrid;
+    document.querySelector("#angle-snap-btn").onclick = () => graphData.snapAngle = !graphData.snapAngle;
+    document.querySelector("#distance-snap-btn").onclick = () => graphData.snapDistance = !graphData.snapDistance;
 }

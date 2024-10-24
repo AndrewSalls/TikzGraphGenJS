@@ -5,6 +5,8 @@ import { GraphViewport } from "../graph-viewport.js";
  */
 let increment = Number.MIN_SAFE_INTEGER; // id system, has 2^53 possible values before collision occurs, so don't do that
 
+export const DUMMY_ID = "DUMMY";
+
 /**
  * An enum of the valid datatypes, used in filtering and describing data containing graph datatypes.
  * @readonly
@@ -35,8 +37,8 @@ export class GraphObject {
             this.id = increment;
             increment = increment + 1;
         } else {
-            /** @type {"dummy"} If this graph object is used for rendering only and not as part of the graph. */
-            this.id = "dummy";
+            /** @type {DUMMY_ID} If this graph object is used for rendering only and not as part of the graph. */
+            this.id = DUMMY_ID;
         }
     }
 

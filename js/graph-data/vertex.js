@@ -38,6 +38,8 @@ export default class Vertex extends GraphObject {
         this.color = "#000000";
         /** @type {String} A valid CSS color */
         this.fill = "transparent";
+        /** @type {Number} A percentage opacity between 0 and 1, inclusive */
+        this.opacity = 1.00;
         /** @type {Set<Edge>} */
         this.adjacent = new Set();
     }
@@ -66,11 +68,13 @@ export default class Vertex extends GraphObject {
         ctx.lineWidth = viewport.scale * this.borderScale;
         ctx.strokeStyle = this.color;
         ctx.fillStyle = this.fill;
+        ctx.globalAlpha = this.opacity;
 
         ctx.arc(viewport.scale * (this.x - viewport.offsetX), viewport.scale * (this.y - viewport.offsetY), viewport.scale * this.scale, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
         ctx.closePath();
+        ctx.globalAlpha = 1;
     }
 
     /**

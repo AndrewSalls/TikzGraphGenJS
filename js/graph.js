@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ev.pageX - canvas.offsetLeft,
             ev.pageY - canvas.offsetTop,
             (ev.pageX - canvas.offsetLeft) / graphData.viewport.scale + graphData.viewport.offsetX,
-            (ev.pageY - canvas.offsetTop) / graphData.viewport.scale + graphData.viewport.offsetY, 
+            (ev.pageY - canvas.offsetTop) / graphData.viewport.scale + graphData.viewport.offsetY,
             clickOptions, withinCanvas);
     }
 

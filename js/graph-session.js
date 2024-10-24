@@ -1,6 +1,6 @@
 
 import Edge from "./graph-data/edge.js";
-import { GRAPH_DATATYPE, GraphObject } from "./graph-data/graph-object.js";
+import { DUMMY_ID, GRAPH_DATATYPE, GraphObject } from "./graph-data/graph-object.js";
 import Vertex from "./graph-data/vertex.js";
 import { GraphViewport } from "./graph-viewport.js";
 import { CompositeEdit } from "./history/composite-edit.js";
@@ -23,6 +23,11 @@ export const RENDER_SETTINGS = {
     GRID_VERTICAL_SPACING: 100, // Vertical distance between lines
     GRID_HORIZONTAL_OFFSET: 50, // By default, lines are placed along x = 0 and y = 0 and extend outward.
     GRID_VERTICAL_OFFSET: 50, // This and the horizontal offset control where the initial lines are placed (so placed at x = OFFSET X and y = OFFSET Y instead of 0 and 0).
+    ANGLE_SNAP_DEGREE: 15, // Rotation amounts in degree for angle snapping to snap to. Snaps to any multiple of the specified degree between 0 and 360 degrees, including 0.
+    ANGLE_SNAP_OFFSET: 0, // Offset from 0 degrees (straight right) for angle snap points. Instead of being between 0 and 360 degrees, is between offset and 360 + offset.
+    DISTANCE_SNAP_COUNT: 4, // Number of distance snap "rings" to allow snapping to.
+    VERTEX_SNAP_MAX_RANGE: 200, // Max distance to detect vertices when finding the closest vertex for angle/distance-based snap
+    VERTEX_PREVIEW_OPACITY: 0.2 // Opacity of the preview vertex shown when using the vertex tool before clicking
 }
 
 /**
@@ -50,9 +55,9 @@ export class GraphSession {
         this.selectedEdges = new Set();
 
         /** @type {Boolean} */
-        this.drawingGrid = false;
+        this.drawingGrid = true;
         /** @type {Boolean} */
-        this.snapGrid = false;
+        this.snapGrid = true;
         /** @type {Boolean} */
         this.snapAngle = false;
         /** @type {Boolean} */
@@ -60,7 +65,7 @@ export class GraphSession {
     }
 
     /**
-     * Finds the topmost object in the graph that was clicked on, with "height" being determined by object id.
+     * Finds the topmost object in the graph that was clicked on, with "height" being determined by object id. Cannot get a dummy object.
      * @param {Number} mouseX The x coordinate of the mouse click.
      * @param {Number} mouseY The y coordinate of the mouse click.
      * @param {GRAPH_DATATYPE} filter Restricts the clicked object to be of the provided datatype(s). Defaults to null if no filter is needed.
@@ -69,6 +74,15 @@ export class GraphSession {
     getClickedObject(mouseX, mouseY, filter = null) {
         let x = this.vertices.length - 1, y = this.edges.length - 1;
         while(x >= 0 && y >= 0 && filter === null) {
+            if(this.vertices[x].id === DUMMY_ID) {
+                x = x - 1;
+                continue;
+            }
+            if(this.edges[y].id === DUMMY_ID) {
+                y = y - 1;
+                continue;
+            }
+
             if(this.vertices[x].id >= this.edges[y].id) {
                 if(this.vertices[x].intersects(mouseX, mouseY)) {
                     return this.vertices[x];
@@ -83,12 +97,22 @@ export class GraphSession {
         }
 
         while(x >= 0 && (filter & GRAPH_DATATYPE.VERTEX || filter === null)) {
+            if(this.vertices[x].id === DUMMY_ID) {
+                x = x - 1;
+                continue;
+            }
+
             if(this.vertices[x].intersects(mouseX, mouseY)) {
                 return this.vertices[x];
             }
             x = x - 1;
         }
         while(y >= 0 && (filter & GRAPH_DATATYPE.EDGE || filter === null)) {
+            if(this.edges[y].id === DUMMY_ID) {
+                y = y - 1;
+                continue;
+            }
+
             if(this.edges[y].intersects(mouseX, mouseY)) {
                 return this.edges[y];
             }
@@ -98,7 +122,7 @@ export class GraphSession {
         return null;
     }
     /**
-     * Finds the topmost object in the graph that was clicked on, with "height" being determined by object id.
+     * Finds the topmost object in the graph that was clicked on, with "height" being determined by object id. Cannot get any dummy objects.
      * @param {Number} mouseX The x coordinate of the mouse click.
      * @param {Number} mouseY The y coordinate of the mouse click.
      * @param {Number} radius The maximum distance of objects from the provided mouse position to get included in the search.
@@ -109,6 +133,15 @@ export class GraphSession {
         const clicked = [];
         let x = this.vertices.length - 1, y = this.edges.length - 1;
         while(x >= 0 && y >= 0 && filter === null) {
+            if(this.vertices[x].id === DUMMY_ID) {
+                x = x - 1;
+                continue;
+            }
+            if(this.edges[y].id === DUMMY_ID) {
+                y = y - 1;
+                continue;
+            }
+            
             if(this.vertices[x].id >= this.edges[y].id) {
                 if(this.vertices[x].intersect(mouseX, mouseY, radius)) {
                     clicked.push(this.vertices[x]);
@@ -123,12 +156,22 @@ export class GraphSession {
         }
 
         while(x >= 0 && (filter & GRAPH_DATATYPE.VERTEX || filter === null)) {
+            if(this.vertices[x].id === DUMMY_ID) {
+                x = x - 1;
+                continue;
+            }
+
             if(this.vertices[x].intersect(mouseX, mouseY, radius)) {
                 clicked.push(this.vertices[x]);
             }
             x = x - 1;
         }
         while(y >= 0 && (filter & GRAPH_DATATYPE.EDGE || filter === null)) {
+            if(this.edges[y].id === DUMMY_ID) {
+                y = y - 1;
+                continue;
+            }
+            
             if(this.edges[y].intersect(mouseX, mouseY, radius)) {
                 clicked.push(this.edges[y]);
             }
@@ -139,7 +182,7 @@ export class GraphSession {
     }
 
     /**
-     * Provides access to all graph objects at once in the form of an iterator. Always yields all vertices, then all edges.
+     * Provides access to all graph objects at once in the form of an iterator. Always yields all vertices, then all edges. Can return dummy objects.
      * @returns {Generator<GraphObject, void, Number>} A single iterable array containing all graph objects stored in the session.
      */
     *iterateThroughAllData() {
@@ -327,7 +370,7 @@ export class GraphSession {
     }
 
     /**
-     * Renders the graph on screen using the graph data's specified rendering methods.
+     * Renders the graph on screen using the graph data's specified rendering methods. Draws dummy objects.
      */
     drawGraph() {
         const canvasWidth = this.ctx.canvas.width;

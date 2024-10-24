@@ -16,7 +16,7 @@ const ERASER_WIDTH = 20; // Area of eraser
  */
 export default function accessEraserTool() {
     if(ERASER_TOOL === undefined) {
-        ERASER_TOOL = new Tool("eraser", onDown, onMove, onUp, clearData, onPaint);
+        ERASER_TOOL = new Tool("eraser", onDown, onMove, onUp, initializeData, clearData, onPaint);
     }
 
     return ERASER_TOOL;
@@ -26,15 +26,16 @@ export default function accessEraserTool() {
  * The callback used when pressing down on a mouse button.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
 function onDown(mouse, graphData, toolData) {
     toolData = {
         currX: mouse.x,
         currY: mouse.y,
         editProgress: [],
-        dragging: false
+        dragging: false,
+        attemptDrag: true
     };
 
     return toolData;
@@ -44,27 +45,28 @@ function onDown(mouse, graphData, toolData) {
  * The callback used when moving the mouse, regardless of if a button is pressed or not.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
 function onMove(mouse, graphData, toolData) {
-    if(toolData !== null && !toolData.dragging) {
-        const deltaX = mouse.x - toolData.currX;
-        const deltaY = mouse.y - toolData.currY;
-        
-        if(Math.sqrt(deltaX * deltaX + deltaY + deltaY) >= SWITCH_TO_DRAG_ERASE) {
-            toolData.dragging = true;
+    if(toolData !== null) {
+        if(toolData.attemptDrag && !toolData.dragging) {
+            const deltaX = mouse.x - toolData.currX;
+            const deltaY = mouse.y - toolData.currY;
+            
+            if(Math.sqrt(deltaX * deltaX + deltaY + deltaY) >= SWITCH_TO_DRAG_ERASE) {
+                toolData.dragging = true;
+            }
         }
-    }
-
-    if(toolData !== null && toolData.dragging) {
-        toolData.currX = mouse.x; // For drawing eraser selection area
+    
+        toolData.currX = mouse.x;
         toolData.currY = mouse.y;
-
-        const clicked = graphData.getClickedObjectsInRange(mouse.shiftedX, mouse.shiftedY, ERASER_WIDTH);
-        const eraseEditStep = eraseData(clicked, graphData, toolData);
-        if(eraseEditStep.length > 0) {
-            toolData.editProgress.push(...eraseEditStep);
+        if(toolData.dragging) {
+            const clicked = graphData.getClickedObjectsInRange(mouse.shiftedX, mouse.shiftedY, ERASER_WIDTH);
+            const eraseEditStep = eraseData(clicked, graphData, toolData);
+            if(eraseEditStep.length > 0) {
+                toolData.editProgress.push(...eraseEditStep);
+            }
         }
     }
 
@@ -75,11 +77,11 @@ function onMove(mouse, graphData, toolData) {
  * The callback used when a mouse button stops being pressed.
  * @param {MouseInteraction} mouse Mouse data relevant to tools.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
- * @returns {*} The updated value for toolData.
+ * @param {Object|null} toolData Temporary data storage for this tool.
+ * @returns {Object|null} The updated value for toolData.
  */
 function onUp(mouse, graphData, toolData) {
-    if(toolData !== null) {
+    if(toolData !== null && toolData.attemptDrag) {
         if(!toolData.dragging) {
             const clicked = graphData.getClickedObjectsInRange(mouse.shiftedX, mouse.shiftedY, ERASER_WIDTH);
             const eraseEditStep = eraseData(clicked, graphData, toolData);
@@ -93,9 +95,23 @@ function onUp(mouse, graphData, toolData) {
         } else if(toolData.editProgress.length > 1) {
             makeEdit(new CompositeEdit(toolData.editProgress));
         }
+
+        return initializeData(graphData);
     }
     
-    return null;
+    return toolData;
+}
+
+/**
+ * Initializes the tool data, for when the tool has a constantly active effect (that doesn't rely on clicking)
+ * @param {GraphSession} graphData The graph data that the tool will be interacting with.
+ */
+function initializeData(graphData) {
+    return {
+        currX: 0,
+        currY: 0,
+        attemptDrag: false
+    };
 }
 
 /**
@@ -116,11 +132,11 @@ function clearData(graphData, toolData) {
 /**
  * The callback used when this tool is selected and a paint event is called on the canvas.
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
+ * @param {Object|null} toolData Temporary data storage for this tool.
  * @param {CanvasRenderingContext2D} ctx The context of the canvas to be drawn on.
  */
 function onPaint(graphData, toolData, ctx) {
-    if(toolData !== null && toolData.dragging) {
+    if(toolData !== null) {
         ctx.beginPath();
         ctx.fillStyle = RENDER_SETTINGS.ERASE_MAIN;
         ctx.lineWidth = RENDER_SETTINGS.ERASE_BORDER_WIDTH;
@@ -136,7 +152,7 @@ function onPaint(graphData, toolData, ctx) {
  * Removes the specified graph objects from the graph.
  * @param {GraphObject[]} data the selected data. 
  * @param {GraphSession} graphData The graph data this tool is interacting with.
- * @param {*} toolData Temporary data storage for this tool.
+ * @param {Object|null} toolData Temporary data storage for this tool.
  * @returns {(DeletionEdit|CompositeEdit)[]} A series of edits representing the removed objects, with composite edits representing the removal of a vertex that still has adjacent edges.
  */
 function eraseData(data, graphData, toolData) {

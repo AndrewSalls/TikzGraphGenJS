@@ -10,7 +10,7 @@ let MOUSE_TOOL;
  */
 export default function accessMouseTool() { 
     if(MOUSE_TOOL === undefined) {
-        MOUSE_TOOL = new Tool("mouse", onDown, onMove, onUp, clearData, onPaint);
+        MOUSE_TOOL = new Tool("mouse", onDown, onMove, onUp, initializeData, clearData, onPaint);
     }
 
     return MOUSE_TOOL;
@@ -65,5 +65,6 @@ function onUp(mouse, graphData, toolData) {
     return null;
 }
 
+const initializeData = undefined;
 const clearData = undefined;
 const onPaint = undefined;

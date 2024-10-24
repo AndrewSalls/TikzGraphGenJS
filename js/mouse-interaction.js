@@ -57,4 +57,25 @@ export class MouseInteraction {
         /** @type {Boolean} */
         this.exitedBounds = exitedBounds;
     }
+
+    /**
+     * Snaps a mouse position to the closest grid position.
+     * @param {Number} mouseX The original x coordinate of the mouse.
+     * @param {Number} mouseY The original y coordinate of the mouse.
+     * @returns {{x: Number, y: Number}} The x and y coordinates of the closest grid line intersection.
+     */
+    static snapToGrid(mouseX, mouseY) {
+
+    }
+    
+    /**
+     * Snaps a mouse position to the closest angle and/or distance snap point from a given vertex.
+     * @param {Number} mouseX The original x coordinate of the mouse.
+     * @param {Number} mouseY The original y coordinate of the mouse.
+     * @param {Vertex} vertex The vertex to use as reference for angle snap and distance snap points.
+     * @returns {{x: Number, y: Number}} The x and y coordinates of the closest angle snap/distance snap point.
+     */
+    static snapToVertex(mouseX, mouseY, vertex) {
+
+    }
 }

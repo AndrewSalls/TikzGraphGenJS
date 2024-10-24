@@ -15,7 +15,7 @@ let EDGE_TOOL;
  */
 export default function accessEdgeTool() {
     if(EDGE_TOOL === undefined) {
-        EDGE_TOOL = new Tool("edge", onDown, onMove, onUp, clearData, onPaint);
+        EDGE_TOOL = new Tool("edge", onDown, onMove, onUp, initializeData, clearData, onPaint);
     }
 
     return EDGE_TOOL;
@@ -98,6 +98,8 @@ function onUp(mouse, graphData, toolData) {
 
     return null;
 }
+
+const initializeData = undefined;
 
 /**
  * Clears the current tool data, making sure to clean up any dummy data from the graph data as well.
