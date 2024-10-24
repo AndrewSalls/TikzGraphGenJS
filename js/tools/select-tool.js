@@ -1,4 +1,4 @@
-import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
+import Vertex from "../graph-data/vertex.js";
 import { GraphSession, RENDER_SETTINGS } from "../graph-session.js";
 import { CompositeEdit } from "../history/composite-edit.js";
 import { makeEdit } from "../history/history.js";
@@ -41,7 +41,7 @@ function onDown(mouse, graphData, toolData) {
     if(graphData.isSelected(clicked)) {
         toolData.dragging = true;
 
-        if(graphData.snapGrid) {
+        if(graphData.snapGrid || graphData.snapAngle || graphData.snapDistance) {
             // midpoint of selected object
             const bBox = clicked.boundingBox();
             const viewportMidpoint = graphData.viewport.canvasToViewport(bBox.x + bBox.width / 2, bBox.y + bBox.height / 2);
@@ -69,19 +69,30 @@ function onDown(mouse, graphData, toolData) {
  */
 function onMove(mouse, graphData, toolData) {
     if(toolData !== null && toolData.dragging) {
-        let newX = mouse.shiftedX, newY = mouse.shiftedY;
-        let deltaX, deltaY;
+        let newX = mouse.shiftedX;
+        let newY = mouse.shiftedY;
+        let deltaX = mouse.shiftedX - toolData.newX;
+        let deltaY = mouse.shiftedY - toolData.newY;
+
         if(graphData.snapGrid) {
             const snap = MouseInteraction.snapToGrid(mouse.shiftedX, mouse.shiftedY);
             deltaX = snap.x - toolData.newX;
             deltaY = snap.y - toolData.newY;
-
             newX = snap.x;
             newY = snap.y;
-        } else {
-            deltaX = mouse.shiftedX - toolData.newX;
-            deltaY = mouse.shiftedY - toolData.newY;
-        }
+        } else if(graphData.snapAngle || graphData.snapDistance) {
+            const closest = graphData.getClosestVertex(mouse.shiftedX, mouse.shiftedY, RENDER_SETTINGS.VERTEX_SNAP_MAX_RANGE, false);
+    
+            if(closest !== null) {
+                const snap = MouseInteraction.snapToVertex(mouse.shiftedX, mouse.shiftedY, closest, graphData.snapAngle, graphData.snapDistance);
+                toolData.snapVertex = closest;
+
+                deltaX = snap.x - toolData.newX;
+                deltaY = snap.y - toolData.newY;
+                newX = snap.x;
+                newY = snap.y;
+            }
+        } 
 
         for(const vertex of graphData.selectedVertices) {
             vertex.x += deltaX;
@@ -169,14 +180,18 @@ const clearData = undefined;
  * @param {CanvasRenderingContext2D} ctx The context of the canvas to be drawn on.
  */
 function onPaint(graphData, toolData, ctx) {
-    if(toolData !== null && toolData.isAreaSelect) {
-        ctx.beginPath();
-        ctx.fillStyle = RENDER_SETTINGS.SELECT_MAIN;
-        ctx.lineWidth = RENDER_SETTINGS.SELECT_BORDER_WIDTH;
-        ctx.strokeStyle = RENDER_SETTINGS.SELECT_BORDER;
-        ctx.fillRect(Math.min(toolData.newX, toolData.x), Math.min(toolData.newY, toolData.y), Math.abs(toolData.newX - toolData.x), Math.abs(toolData.newY - toolData.y));
-        ctx.strokeRect(Math.min(toolData.newX, toolData.x), Math.min(toolData.newY, toolData.y), Math.abs(toolData.newX - toolData.x), Math.abs(toolData.newY - toolData.y));
-        ctx.stroke();
-        ctx.closePath();
+    if(toolData !== null) {
+        if(toolData.isAreaSelect) {
+            ctx.beginPath();
+            ctx.fillStyle = RENDER_SETTINGS.SELECT_MAIN;
+            ctx.lineWidth = RENDER_SETTINGS.SELECT_BORDER_WIDTH;
+            ctx.strokeStyle = RENDER_SETTINGS.SELECT_BORDER;
+            ctx.fillRect(Math.min(toolData.newX, toolData.x), Math.min(toolData.newY, toolData.y), Math.abs(toolData.newX - toolData.x), Math.abs(toolData.newY - toolData.y));
+            ctx.strokeRect(Math.min(toolData.newX, toolData.x), Math.min(toolData.newY, toolData.y), Math.abs(toolData.newX - toolData.x), Math.abs(toolData.newY - toolData.y));
+            ctx.stroke();
+            ctx.closePath();
+        } else if (toolData.snapVertex instanceof Vertex) {
+            Tool.renderVertexSnapLines(ctx, toolData.snapVertex, graphData.snapAngle, graphData.snapDistance);
+        }
     }
 }

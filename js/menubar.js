@@ -60,7 +60,10 @@ let mousePos = { x: 0, y: 0 };
  * @param {GraphSession} graphData The graph state, so that it can be provided to functions called by using the menubar.
  */
 function initializeViewMenu(graphData) {
-    document.querySelector("#toggle-grid-btn").onclick = () => graphData.drawingGrid = !graphData.drawingGrid;
+    document.querySelector("#toggle-grid-btn").onclick = ev => {
+        graphData.drawingGrid = !graphData.drawingGrid;
+        ev.target.textContent = (graphData.drawingGrid ? "Hide" : "Show") + " Grid";
+    }
 
     const canvas = document.querySelector("#render");
 
@@ -203,7 +206,16 @@ function initializeOtherMenu(graphData) {
         graphInfoOverlay.classList.add("invisible");
     };
 
-    document.querySelector("#grid-snap-btn").onclick = () => graphData.snapGrid = !graphData.snapGrid;
-    document.querySelector("#angle-snap-btn").onclick = () => graphData.snapAngle = !graphData.snapAngle;
-    document.querySelector("#distance-snap-btn").onclick = () => graphData.snapDistance = !graphData.snapDistance;
+    document.querySelector("#grid-snap-btn").onclick = ev => {
+        graphData.snapGrid = !graphData.snapGrid;
+        ev.target.textContent = (graphData.snapGrid ? "Disable" : "Enable") + " Grid Snap";
+    };
+    document.querySelector("#angle-snap-btn").onclick = ev => {
+        graphData.snapAngle = !graphData.snapAngle;
+        ev.target.textContent = (graphData.snapAngle ? "Disable" : "Enable") + " Angle Snap";
+    };
+    document.querySelector("#distance-snap-btn").onclick = ev => {
+        graphData.snapDistance = !graphData.snapDistance;
+        ev.target.textContent = (graphData.snapDistance ? "Disable" : "Enable") + " Distance Snap";
+    };
 }

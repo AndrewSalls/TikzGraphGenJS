@@ -11,23 +11,26 @@ import { tool_onPaint } from "./tools/tool.js";
  * Describes built-in render settings, like highlighting color when selecting objects or using the select tool.
  */
 export const RENDER_SETTINGS = {
-    SELECT_MAIN: "#93b8e799", // Selected object body color (for translucent objects)
-    SELECT_BORDER: "#0078d499", // Selected object border color
-    SELECT_BORDER_WIDTH: 3, // Area of select tool
-    ERASE_MAIN: "#d9d9d944", // Eraser tool highlight (to visualize what's being erased) while dragging
-    ERASE_BORDER: "#d9d9d988", // Eraser tool highlight border
-    ERASE_BORDER_WIDTH: 1, // Eraser tool highlight border's radius
-    GRID_LINE_COLOR: "#c4c4c4cc", // Color of the grid lines
+    SELECT_MAIN: "#93b8e799", // Selected object body color (for translucent objects).
+    SELECT_BORDER: "#0078d499", // Selected object border color.
+    SELECT_BORDER_WIDTH: 3, // Area of select tool.
+    ERASE_MAIN: "#d9d9d944", // Eraser tool highlight (to visualize what's being erased) while dragging.
+    ERASE_BORDER: "#d9d9d988", // Eraser tool highlight border.
+    ERASE_BORDER_WIDTH: 1, // Eraser tool highlight border's radius.
+    GRID_LINE_COLOR: "#c4c4c4cc", // Color of the grid lines.
     GRID_LINE_WIDTH: 2, // Width of the lines drawn for the grid at 100% scale, in pixels.
-    GRID_HORIZONTAL_SPACING: 100, // Horizontal distance between lines
-    GRID_VERTICAL_SPACING: 100, // Vertical distance between lines
+    GRID_HORIZONTAL_SPACING: 100, // Horizontal distance between lines.
+    GRID_VERTICAL_SPACING: 100, // Vertical distance between lines.
     GRID_HORIZONTAL_OFFSET: 50, // By default, lines are placed along x = 0 and y = 0 and extend outward.
     GRID_VERTICAL_OFFSET: 50, // This and the horizontal offset control where the initial lines are placed (so placed at x = OFFSET X and y = OFFSET Y instead of 0 and 0).
     ANGLE_SNAP_DEGREE: 15, // Rotation amounts in degree for angle snapping to snap to. Snaps to any multiple of the specified degree between 0 and 360 degrees, including 0.
     ANGLE_SNAP_OFFSET: 0, // Offset from 0 degrees (straight right) for angle snap points. Instead of being between 0 and 360 degrees, is between offset and 360 + offset.
-    DISTANCE_SNAP_COUNT: 4, // Number of distance snap "rings" to allow snapping to.
-    VERTEX_SNAP_MAX_RANGE: 200, // Max distance to detect vertices when finding the closest vertex for angle/distance-based snap
-    VERTEX_PREVIEW_OPACITY: 0.3 // Opacity of the preview vertex shown when using the vertex tool before clicking
+    DISTANCE_SNAP_SPACING: 50, // Space between each distance snap length. First snap distance is this far away from vertex (so no snapping to a 0 distance ring).
+    DISTANCE_SNAP_OFFSET: 50, // Distance between center of vertex and the first distance snap length.
+    VERTEX_SNAP_LINE_COLOR: "#a4a4a4cc", // Color of the lines displayed when snapping to a vertex with angle/distance snap.
+    VERTEX_SNAP_LINE_WIDTH: 2, // Width of the lines displayed when snapping to a vertex with angle/distance snap.
+    VERTEX_SNAP_MAX_RANGE: 200, // Max distance to detect vertices when finding the closest vertex for angle/distance-based snap.
+    VERTEX_PREVIEW_OPACITY: 0.3 // Opacity of the preview vertex shown when using the vertex tool before clicking.
 }
 
 /**
@@ -179,6 +182,33 @@ export class GraphSession {
         }
 
         return clicked;
+    }
+
+    /**
+     * Finds the closest vertex to the provided mouse coordinates. Does not include dummy vertices.
+     * @param {Number} mouseX The x coordinate to check distance from.
+     * @param {Number} mouseY The y coordinate to check distance from.
+     * @param {Number} maxDistance The maximum distance from the mouse coordinates before the vertex cannot be selected.
+     * @param {boolean} includeSelected Whether selected vertices should be valid options for the closest vertex.
+     * @returns {Vertex|null} The closest vertex, or null if this graph has no vertices.
+     */
+    getClosestVertex(mouseX, mouseY, maxDistance, includeSelected = true) {
+        let closest = null;
+        let closestDistance = null;
+
+        for(let i = 0; i < this.vertices.length; i++) {
+            if(this.vertices[i].id === DUMMY_ID || (!includeSelected && this.selectedVertices.has(this.vertices[i]))) {
+                continue;
+            }
+
+            const currentDistance = Math.sqrt(Math.pow(this.vertices[i].x - mouseX, 2) + Math.pow(this.vertices[i].y - mouseY, 2));
+            if(currentDistance <= maxDistance && (closest === null || currentDistance < closestDistance)) {
+                closest = this.vertices[i];
+                closestDistance = currentDistance;
+            }
+        }
+
+        return closest;
     }
 
     /**
@@ -386,23 +416,27 @@ export class GraphSession {
         const viewportOffsetY = (this.viewport.offsetY % RENDER_SETTINGS.GRID_HORIZONTAL_SPACING) * this.viewport.scale;
 
         if(this.drawingGrid) {
-            this.ctx.fillStyle = RENDER_SETTINGS.GRID_LINE_COLOR;
-            for(let x = -scaledLineWidth / 2 - scaledHorizontalOffset - viewportOffsetX; x < canvasWidth + scaledLineWidth; x += scaledHorizontalSpacing) {
+            this.ctx.strokeStyle = RENDER_SETTINGS.GRID_LINE_COLOR;
+            this.ctx.lineWidth = scaledLineWidth;
+            this.ctx.beginPath();
+            for(let x = -scaledHorizontalOffset - viewportOffsetX; x < canvasWidth + scaledLineWidth; x += scaledHorizontalSpacing) {
                 if(x < -scaledLineWidth) { // Offset causes line to not be on screen yet
                     continue;
                 }
 
-                this.ctx.fillRect(x, 0, scaledLineWidth, canvasHeight);
+                this.ctx.moveTo(x, 0);
+                this.ctx.lineTo(x, canvasHeight);
             }
 
-            for(let y = -scaledLineWidth / 2 - scaledVerticalOffset - viewportOffsetY; y < canvasHeight + scaledLineWidth; y += scaledVerticalSpacing) {
+            for(let y = -scaledVerticalOffset - viewportOffsetY; y < canvasHeight + scaledLineWidth; y += scaledVerticalSpacing) {
                 if(y < -scaledLineWidth) { // Offset causes line to not be on screen yet
                     continue;
                 }
                 
-                this.ctx.clearRect(0, y, canvasWidth, scaledLineWidth); // Prevents double-filling intersections with vertical lines
-                this.ctx.fillRect(0, y, canvasWidth, scaledLineWidth);
+                this.ctx.moveTo(0, y);
+                this.ctx.lineTo(canvasWidth, y);
             }
+            this.ctx.stroke();
         }
 
         for(let vertex of this.vertices) {

@@ -66,18 +66,10 @@ export class MouseInteraction {
      * @param {Number} shiftedY The original y coordinate of the mouse relative to the viewport.
      * @returns {{x: Number, y: Number}} The x and y coordinates of the closest grid line intersection.
      */
-    static snapToGrid(shiftedX, shiftedY) {
-        shiftedX -= RENDER_SETTINGS.GRID_HORIZONTAL_OFFSET;
-        shiftedY -= RENDER_SETTINGS.GRID_VERTICAL_OFFSET;
-
-        const xLower = Math.floor(shiftedX / RENDER_SETTINGS.GRID_HORIZONTAL_SPACING) * RENDER_SETTINGS.GRID_HORIZONTAL_SPACING;
-        const xHigher = xLower + RENDER_SETTINGS.GRID_HORIZONTAL_SPACING;
-        const yLower = Math.floor(shiftedY / RENDER_SETTINGS.GRID_VERTICAL_SPACING) * RENDER_SETTINGS.GRID_VERTICAL_SPACING;
-        const yHigher = yLower + RENDER_SETTINGS.GRID_VERTICAL_SPACING;
-        
+    static snapToGrid(shiftedX, shiftedY) {        
         return {
-            x: (Math.abs(shiftedX - xLower) < Math.abs(shiftedX - xHigher) ? xLower : xHigher) + RENDER_SETTINGS.GRID_HORIZONTAL_OFFSET,
-            y: (Math.abs(shiftedY - yLower) < Math.abs(shiftedY - yHigher) ? yLower : yHigher) + RENDER_SETTINGS.GRID_VERTICAL_OFFSET
+            x: MouseInteraction.roundToMultiple(shiftedX - RENDER_SETTINGS.GRID_HORIZONTAL_OFFSET, RENDER_SETTINGS.GRID_HORIZONTAL_SPACING) + RENDER_SETTINGS.GRID_HORIZONTAL_OFFSET,
+            y: MouseInteraction.roundToMultiple(shiftedY - RENDER_SETTINGS.GRID_VERTICAL_OFFSET, RENDER_SETTINGS.GRID_VERTICAL_SPACING) + RENDER_SETTINGS.GRID_VERTICAL_OFFSET
         };
     }
     
@@ -86,9 +78,47 @@ export class MouseInteraction {
      * @param {Number} shiftedX The original x coordinate of the mouse relative to the viewport.
      * @param {Number} shiftedY The original y coordinate of the mouse relative to the viewport.
      * @param {Vertex} vertex The vertex to use as reference for angle snap and distance snap points.
+     * @param {Boolean} angleSnap Whether to consider the closest angle when snapping. One of this and distanceSnap are assumed to be true.
+     * @param {Boolean} distanceSnap Whether to consider the closest multiple of the distance constant when snapping. One of this and distanceSnap are assumed to be true.
      * @returns {{x: Number, y: Number}} The x and y coordinates of the closest angle snap/distance snap point.
      */
-    static snapToVertex(mouseX, shiftedY, vertex) {
+    static snapToVertex(shiftedX, shiftedY, vertex, angleSnap, distanceSnap) {
+        let distance = Math.sqrt(Math.pow(shiftedY - vertex.y, 2) + Math.pow(shiftedX - vertex.x, 2));
 
+        if(distance > RENDER_SETTINGS.VERTEX_SNAP_MAX_RANGE) {
+            return {
+                x: shiftedX,
+                y: shiftedY
+            };
+        }
+
+        let angle = Math.atan2(shiftedY - vertex.y, shiftedX - vertex.x);
+        
+        if(angleSnap) {
+            angle = angle / Math.PI * 180;
+            angle = MouseInteraction.roundToMultiple(angle - RENDER_SETTINGS.ANGLE_SNAP_OFFSET, RENDER_SETTINGS.ANGLE_SNAP_DEGREE) + RENDER_SETTINGS.ANGLE_SNAP_OFFSET;
+            angle = angle * Math.PI / 180;
+        }
+        if(distanceSnap) {
+            distance = Math.max(RENDER_SETTINGS.DISTANCE_SNAP_OFFSET, MouseInteraction.roundToMultiple(distance - RENDER_SETTINGS.DISTANCE_SNAP_OFFSET, RENDER_SETTINGS.DISTANCE_SNAP_SPACING) + RENDER_SETTINGS.DISTANCE_SNAP_OFFSET);
+        }
+
+        return {
+            x: vertex.x + Math.cos(angle) * distance,
+            y: vertex.y + Math.sin(angle) * distance
+        }
+    }
+
+    /**
+     * Rounds a value to the nearest multiple of a number.
+     * @param {Number} val The value to be rounded.
+     * @param {Number} multiple The number to round to the nearest multiple of.
+     * @returns {Number} The nearest number to {@link val} that is a multiple of {@link multiple}.
+     */
+    static roundToMultiple(val, multiple) {
+        const valLower = Math.floor(val / multiple) * multiple;
+        const valUpper = valLower + multiple;
+
+        return Math.abs(val - valLower) < Math.abs(val - valUpper) ? valLower : valUpper;
     }
 }

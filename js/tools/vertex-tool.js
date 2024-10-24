@@ -35,6 +35,7 @@ function onDown(mouse, graphData, toolData) {
         toolData.originX = toolData.vertex.x;
         toolData.originY = toolData.vertex.y;
         toolData.dragging = true;
+        toolData.snapVertex = null;
         toolData.displayVertex.opacity = 0;
         graphData.clearSelected();
         graphData.select(toolData.vertex);
@@ -55,8 +56,17 @@ function onMove(mouse, graphData, toolData) {
         x: mouse.shiftedX,
         y: mouse.shiftedY
     }
+    toolData.snapVertex = null;
+
     if(graphData.snapGrid) {
         pos = MouseInteraction.snapToGrid(mouse.shiftedX, mouse.shiftedY);
+    } else if(graphData.snapAngle || graphData.snapDistance) {
+        const closest = graphData.getClosestVertex(mouse.shiftedX, mouse.shiftedY, RENDER_SETTINGS.VERTEX_SNAP_MAX_RANGE, !toolData.dragging);
+        toolData.snapVertex = closest;
+
+        if(closest !== null) {
+            pos = MouseInteraction.snapToVertex(mouse.shiftedX, mouse.shiftedY, closest, graphData.snapAngle, graphData.snapDistance);
+        }
     }
 
     if(toolData.dragging && !mouse.exitedBounds) {
@@ -93,6 +103,15 @@ function onUp(mouse, graphData, toolData) {
             if(graphData.snapGrid) {
                 const snap = MouseInteraction.snapToGrid(mouse.shiftedX, mouse.shiftedY);
                 created = new Vertex(snap.x, snap.y);
+            } else if(graphData.snapAngle || graphData.snapDistance) {
+                const closest = graphData.getClosestVertex(mouse.shiftedX, mouse.shiftedY, RENDER_SETTINGS.VERTEX_SNAP_MAX_RANGE);
+        
+                if(closest !== null) {
+                    const snap = MouseInteraction.snapToVertex(mouse.shiftedX, mouse.shiftedY, closest, graphData.snapAngle, graphData.snapDistance);
+                    created = new Vertex(snap.x, snap.y);
+                } else {
+                    created = new Vertex(mouse.shiftedX, mouse.shiftedY);
+                }
             } else {
                 created = new Vertex(mouse.shiftedX, mouse.shiftedY);
             }
@@ -110,9 +129,11 @@ function onUp(mouse, graphData, toolData) {
  * @param {GraphSession} graphData The graph data that the tool will be interacting with.
  */
 function initializeData(graphData) {
+    const offScreen = graphData.viewport.canvasToViewport(-10000, 0); // Don't make vertices large enough that this would cause problems
     const output = {
-        displayVertex: new Vertex(0, 0, true),
-        dragging: false
+        displayVertex: new Vertex(offScreen.x, offScreen.y, true),
+        dragging: false,
+        snapVertex: null
     };
     output.displayVertex.opacity = RENDER_SETTINGS.VERTEX_PREVIEW_OPACITY;
     graphData.addVertex(output.displayVertex);
@@ -129,4 +150,14 @@ function clearData(graphData, toolData) {
     graphData.removeVertex(toolData.displayVertex);
 }
 
-const onPaint = undefined;
+/**
+ * The callback used when this tool is selected and a paint event is called on the canvas.
+ * @param {GraphSession} graphData The graph data this tool is interacting with.
+ * @param {*} toolData Temporary data storage for this tool.
+ * @param {CanvasRenderingContext2D} ctx The context of the canvas to be drawn on.
+ */
+function onPaint(graphData, toolData, ctx) {
+    if((graphData.snapAngle || graphData.snapDistance) && toolData.snapVertex !== null) {
+        Tool.renderVertexSnapLines(ctx, toolData.snapVertex, graphData.snapAngle, graphData.snapDistance);
+    }
+}

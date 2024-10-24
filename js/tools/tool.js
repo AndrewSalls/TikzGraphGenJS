@@ -1,5 +1,5 @@
 import { GraphObject } from "../graph-data/graph-object.js";
-import { GraphSession } from "../graph-session.js";
+import { GraphSession, RENDER_SETTINGS } from "../graph-session.js";
 import accessEdgeTool from "./edge-tool.js";
 import accessSelectTool from "./select-tool.js";
 import accessVertexTool from "./vertex-tool.js";
@@ -56,6 +56,36 @@ export class Tool {
         this.onPaint = paintEv;
         /** @type {Boolean} */
         this.acceptAllClicks = acceptAllClicks;
+    }
+
+    /**
+     * Helper function used for tools to visually display the snap points of the vertex they are snapping to.
+     * @param {CanvasRenderingContext2D} ctx the canvas context to draw on.
+     * @param {Vertex} target The vertex that is being snapped to.
+     * @param {Boolean} angleSnap Whether to consider the closest angle when snapping. One of this and distanceSnap are assumed to be true.
+     * @param {Boolean} distanceSnap Whether to consider the closest multiple of the distance constant when snapping. One of this and distanceSnap are assumed to be true.
+     */
+    static renderVertexSnapLines(ctx, target, angleSnap, distanceSnap) {
+        ctx.lineWidth = RENDER_SETTINGS.VERTEX_SNAP_LINE_WIDTH;
+        ctx.strokeStyle = RENDER_SETTINGS.VERTEX_SNAP_LINE_COLOR;
+
+        ctx.beginPath();
+        if(angleSnap) {
+            for(let angle = RENDER_SETTINGS.ANGLE_SNAP_OFFSET; angle <= RENDER_SETTINGS.ANGLE_SNAP_OFFSET + 360; angle += RENDER_SETTINGS.ANGLE_SNAP_DEGREE) {
+                const angleRad = angle / 180 * Math.PI;
+                const startPoint = target.borderPoint(angleRad);
+                const borderDistance = Math.sqrt(Math.pow(startPoint.x - target.x, 2) + Math.pow(startPoint.y - target.y, 2));
+                ctx.moveTo(startPoint.x, startPoint.y);
+                ctx.lineTo(startPoint.x + Math.cos(angleRad) * (RENDER_SETTINGS.VERTEX_SNAP_MAX_RANGE - borderDistance), startPoint.y + Math.sin(angleRad) * (RENDER_SETTINGS.VERTEX_SNAP_MAX_RANGE - borderDistance));
+            }
+        }
+
+        if(distanceSnap) {
+            for(let distance = RENDER_SETTINGS.DISTANCE_SNAP_OFFSET; distance <= RENDER_SETTINGS.VERTEX_SNAP_MAX_RANGE; distance += RENDER_SETTINGS.DISTANCE_SNAP_SPACING) {
+                ctx.arc(target.x, target.y, distance - RENDER_SETTINGS.VERTEX_SNAP_LINE_WIDTH / 2, 0, 2 * Math.PI);
+            }
+        }
+        ctx.stroke();
     }
 };
 
