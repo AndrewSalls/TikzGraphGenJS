@@ -191,7 +191,7 @@ function onPaint(graphData, toolData, ctx) {
             ctx.stroke();
             ctx.closePath();
         } else if (toolData.snapVertex instanceof Vertex) {
-            Tool.renderVertexSnapLines(ctx, toolData.snapVertex, graphData.snapAngle, graphData.snapDistance);
+            Tool.renderVertexSnapLines(ctx, toolData.snapVertex, graphData.viewport, graphData.snapAngle, graphData.snapDistance);
         }
     }
 }

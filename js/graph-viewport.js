@@ -116,4 +116,17 @@ export class GraphViewport {
             y: mouseY / this.scale + this.offsetY
         }
     }
+    
+    /**
+     * Converts from a viewport coordinate to a canvas coordinate.
+     * @param {Number} mouseX The x coordinate of the mouse relative to the viewport.
+     * @param {Number} mouseY The y coordinate of the mouse relative to the viewport.
+     * @returns {{x: Number, y: Number}} The absolute (canvas) x and y coordinates.
+     */
+    viewportToCanvas(mouseX, mouseY) {
+        return {
+            x: (mouseX - this.offsetX) * this.scale,
+            y: (mouseY - this.offsetY) * this.scale
+        }
+    }
 }

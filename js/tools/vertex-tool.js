@@ -158,6 +158,6 @@ function clearData(graphData, toolData) {
  */
 function onPaint(graphData, toolData, ctx) {
     if((graphData.snapAngle || graphData.snapDistance) && toolData.snapVertex !== null) {
-        Tool.renderVertexSnapLines(ctx, toolData.snapVertex, graphData.snapAngle, graphData.snapDistance);
+        Tool.renderVertexSnapLines(ctx, toolData.snapVertex, graphData.viewport, graphData.snapAngle, graphData.snapDistance);
     }
 }
