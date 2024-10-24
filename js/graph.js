@@ -39,6 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
             withinCanvas |= MOUSE_EXIT_BOUND_DIRECTION.WINDOW;
         }
 
+        // console.log(`SHIFTED X: ${(ev.pageX - canvas.offsetLeft) / graphData.viewport.scale + graphData.viewport.offsetX}`);
+        // console.log(`SHIFTED Y: ${(ev.pageY - canvas.offsetTop) / graphData.viewport.scale + graphData.viewport.offsetY}`);
         return new MouseInteraction(
             ev.pageX - canvas.offsetLeft,
             ev.pageY - canvas.offsetTop,

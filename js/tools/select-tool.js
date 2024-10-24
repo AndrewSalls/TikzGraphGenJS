@@ -37,11 +37,21 @@ function onDown(mouse, graphData, toolData) {
         keepOldSelected: (mouse.clickType & MOUSE_CLICK_TYPE.SHIFT_HELD) > 0 // true if shift is held
     };
     
-    if(graphData.isSelected(graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY))) {
+    const clicked = graphData.getClickedObject(mouse.shiftedX, mouse.shiftedY);
+    if(graphData.isSelected(clicked)) {
         toolData.dragging = true;
-        //Prevent initial delta from being NaN
-        toolData.newX = mouse.shiftedX;
-        toolData.newY = mouse.shiftedY;
+
+        if(graphData.snapGrid) {
+            // midpoint of selected object
+            const bBox = clicked.boundingBox();
+            const viewportMidpoint = graphData.viewport.canvasToViewport(bBox.x + bBox.width / 2, bBox.y + bBox.height / 2);
+            toolData.newX = viewportMidpoint.x;
+            toolData.newY = viewportMidpoint.y;
+        } else {
+            // Current mouse position
+            toolData.newX = mouse.shiftedX;
+            toolData.newY = mouse.shiftedY;
+        }
     } else {
         toolData.shiftX = mouse.shiftedX;
         toolData.shiftY = mouse.shiftedY;
@@ -59,16 +69,27 @@ function onDown(mouse, graphData, toolData) {
  */
 function onMove(mouse, graphData, toolData) {
     if(toolData !== null && toolData.dragging) {
-        const deltaX = mouse.shiftedX - toolData.newX;
-        const deltaY = mouse.shiftedY - toolData.newY;
+        let newX = mouse.shiftedX, newY = mouse.shiftedY;
+        let deltaX, deltaY;
+        if(graphData.snapGrid) {
+            const snap = MouseInteraction.snapToGrid(mouse.shiftedX, mouse.shiftedY);
+            deltaX = snap.x - toolData.newX;
+            deltaY = snap.y - toolData.newY;
+
+            newX = snap.x;
+            newY = snap.y;
+        } else {
+            deltaX = mouse.shiftedX - toolData.newX;
+            deltaY = mouse.shiftedY - toolData.newY;
+        }
 
         for(const vertex of graphData.selectedVertices) {
             vertex.x += deltaX;
             vertex.y += deltaY;
         }
         
-        toolData.newX = mouse.shiftedX;
-        toolData.newY = mouse.shiftedY;
+        toolData.newX = newX;
+        toolData.newY = newY;
     } else if(toolData !== null && (toolData.isAreaSelect || Math.sqrt(Math.pow(mouse.x - toolData.x, 2) + Math.pow(mouse.y - toolData.y, 2)) > MIN_AREA_SELECT)) {
         toolData.newX = mouse.x;
         toolData.newY = mouse.y;

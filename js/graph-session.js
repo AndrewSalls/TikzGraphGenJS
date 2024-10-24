@@ -27,7 +27,7 @@ export const RENDER_SETTINGS = {
     ANGLE_SNAP_OFFSET: 0, // Offset from 0 degrees (straight right) for angle snap points. Instead of being between 0 and 360 degrees, is between offset and 360 + offset.
     DISTANCE_SNAP_COUNT: 4, // Number of distance snap "rings" to allow snapping to.
     VERTEX_SNAP_MAX_RANGE: 200, // Max distance to detect vertices when finding the closest vertex for angle/distance-based snap
-    VERTEX_PREVIEW_OPACITY: 0.2 // Opacity of the preview vertex shown when using the vertex tool before clicking
+    VERTEX_PREVIEW_OPACITY: 0.3 // Opacity of the preview vertex shown when using the vertex tool before clicking
 }
 
 /**
@@ -55,9 +55,9 @@ export class GraphSession {
         this.selectedEdges = new Set();
 
         /** @type {Boolean} */
-        this.drawingGrid = true;
+        this.drawingGrid = false;
         /** @type {Boolean} */
-        this.snapGrid = true;
+        this.snapGrid = false;
         /** @type {Boolean} */
         this.snapAngle = false;
         /** @type {Boolean} */
@@ -344,7 +344,7 @@ export class GraphSession {
             case GRAPH_DATATYPE.VERTEX:
                 return this.selectedVertices.has(item);
             case GRAPH_DATATYPE.EDGE:
-                return this.selectedEdges.delete(item);
+                return this.selectedEdges.has(item);
             default:
                 console.error("Selecting items does not support " + item.getType());
         }
@@ -386,19 +386,20 @@ export class GraphSession {
         const viewportOffsetY = (this.viewport.offsetY % RENDER_SETTINGS.GRID_HORIZONTAL_SPACING) * this.viewport.scale;
 
         if(this.drawingGrid) {
-            let firstX = true, firstY = true;
             this.ctx.fillStyle = RENDER_SETTINGS.GRID_LINE_COLOR;
-            for(let x = scaledLineWidth / 2 - scaledHorizontalOffset - viewportOffsetX; x < canvasWidth + scaledLineWidth; x += scaledHorizontalSpacing) {
+            for(let x = -scaledLineWidth / 2 - scaledHorizontalOffset - viewportOffsetX; x < canvasWidth + scaledLineWidth; x += scaledHorizontalSpacing) {
                 if(x < -scaledLineWidth) { // Offset causes line to not be on screen yet
                     continue;
                 }
+
                 this.ctx.fillRect(x, 0, scaledLineWidth, canvasHeight);
             }
 
-            for(let y = scaledLineWidth / 2 - scaledVerticalOffset - viewportOffsetY; y < canvasHeight + scaledLineWidth; y += scaledVerticalSpacing) {
+            for(let y = -scaledLineWidth / 2 - scaledVerticalOffset - viewportOffsetY; y < canvasHeight + scaledLineWidth; y += scaledVerticalSpacing) {
                 if(y < -scaledLineWidth) { // Offset causes line to not be on screen yet
                     continue;
                 }
+                
                 this.ctx.clearRect(0, y, canvasWidth, scaledLineWidth); // Prevents double-filling intersections with vertical lines
                 this.ctx.fillRect(0, y, canvasWidth, scaledLineWidth);
             }

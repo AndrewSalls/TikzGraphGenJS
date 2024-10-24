@@ -1,3 +1,5 @@
+import { RENDER_SETTINGS } from "./graph-session.js";
+
 /**
  * An enum representing the type of click performed by a mouse. Multiple values can be set,
  * and ALT, SHIFT, and CTRL will always be set in addition to one of the click types.
@@ -60,22 +62,33 @@ export class MouseInteraction {
 
     /**
      * Snaps a mouse position to the closest grid position.
-     * @param {Number} mouseX The original x coordinate of the mouse.
-     * @param {Number} mouseY The original y coordinate of the mouse.
+     * @param {Number} shiftedX The original x coordinate of the mouse relative to the viewport.
+     * @param {Number} shiftedY The original y coordinate of the mouse relative to the viewport.
      * @returns {{x: Number, y: Number}} The x and y coordinates of the closest grid line intersection.
      */
-    static snapToGrid(mouseX, mouseY) {
+    static snapToGrid(shiftedX, shiftedY) {
+        shiftedX -= RENDER_SETTINGS.GRID_HORIZONTAL_OFFSET;
+        shiftedY -= RENDER_SETTINGS.GRID_VERTICAL_OFFSET;
 
+        const xLower = Math.floor(shiftedX / RENDER_SETTINGS.GRID_HORIZONTAL_SPACING) * RENDER_SETTINGS.GRID_HORIZONTAL_SPACING;
+        const xHigher = xLower + RENDER_SETTINGS.GRID_HORIZONTAL_SPACING;
+        const yLower = Math.floor(shiftedY / RENDER_SETTINGS.GRID_VERTICAL_SPACING) * RENDER_SETTINGS.GRID_VERTICAL_SPACING;
+        const yHigher = yLower + RENDER_SETTINGS.GRID_VERTICAL_SPACING;
+        
+        return {
+            x: (Math.abs(shiftedX - xLower) < Math.abs(shiftedX - xHigher) ? xLower : xHigher) + RENDER_SETTINGS.GRID_HORIZONTAL_OFFSET,
+            y: (Math.abs(shiftedY - yLower) < Math.abs(shiftedY - yHigher) ? yLower : yHigher) + RENDER_SETTINGS.GRID_VERTICAL_OFFSET
+        };
     }
     
     /**
      * Snaps a mouse position to the closest angle and/or distance snap point from a given vertex.
-     * @param {Number} mouseX The original x coordinate of the mouse.
-     * @param {Number} mouseY The original y coordinate of the mouse.
+     * @param {Number} shiftedX The original x coordinate of the mouse relative to the viewport.
+     * @param {Number} shiftedY The original y coordinate of the mouse relative to the viewport.
      * @param {Vertex} vertex The vertex to use as reference for angle snap and distance snap points.
      * @returns {{x: Number, y: Number}} The x and y coordinates of the closest angle snap/distance snap point.
      */
-    static snapToVertex(mouseX, mouseY, vertex) {
+    static snapToVertex(mouseX, shiftedY, vertex) {
 
     }
 }

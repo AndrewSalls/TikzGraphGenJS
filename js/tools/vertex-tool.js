@@ -51,12 +51,20 @@ function onDown(mouse, graphData, toolData) {
  * @returns {Object|null} The updated value for toolData.
  */
 function onMove(mouse, graphData, toolData) {
+    let pos = {
+        x: mouse.shiftedX,
+        y: mouse.shiftedY
+    }
+    if(graphData.snapGrid) {
+        pos = MouseInteraction.snapToGrid(mouse.shiftedX, mouse.shiftedY);
+    }
+
     if(toolData.dragging && !mouse.exitedBounds) {
-        toolData.vertex.x = mouse.shiftedX;
-        toolData.vertex.y = mouse.shiftedY;
+        toolData.vertex.x = pos.x;
+        toolData.vertex.y = pos.y;
     } else if(!toolData.dragging) {
-        toolData.displayVertex.x = mouse.shiftedX;
-        toolData.displayVertex.y = mouse.shiftedY;
+        toolData.displayVertex.x = pos.x;
+        toolData.displayVertex.y = pos.y;
     }
 
     return toolData;
@@ -81,7 +89,13 @@ function onUp(mouse, graphData, toolData) {
         toolData.dragging = false;
     } else {
         if(!mouse.exitedBounds) {
-            const created = new Vertex(mouse.shiftedX, mouse.shiftedY);
+            let created;
+            if(graphData.snapGrid) {
+                const snap = MouseInteraction.snapToGrid(mouse.shiftedX, mouse.shiftedY);
+                created = new Vertex(snap.x, snap.y);
+            } else {
+                created = new Vertex(mouse.shiftedX, mouse.shiftedY);
+            }
             makeEdit(graphData.addVertex(created));
             graphData.clearSelected();
             graphData.select(created);
