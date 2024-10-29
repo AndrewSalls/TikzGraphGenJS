@@ -122,7 +122,7 @@ export default class Vertex extends GraphObject {
     borderPoint(angle) {
         switch(this.shape) {
             case VERTEX_SHAPE.CIRCLE:
-                return { x: this.x + this.scale * Math.cos(angle), y: this.y + this.scale * Math.sin(angle) };
+                return { x: this.x + (this.scale + this.borderScale / 2) * Math.cos(angle), y: this.y + (this.scale + this.borderScale / 2) * Math.sin(angle) };
             default:
                 console.error("Border calculation not implemented for shape " + this.shape);
         }
