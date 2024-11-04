@@ -99,31 +99,34 @@ body:not(.supress-menu) .dropdown:hover > div {
 }
 
 #vertex-btn {
-    background-image: url("../img/VertexIcon.png");
+    background-image: url("../img/Vertex.svg");
 }
 #edge-btn {
-    background-image: url("../img/EdgeIcon.png");
+    background-image: url("../img/Edge.svg");
 }
 #edge-cap-btn {
-    background-image: url("../img/EdgeCapIcon.png");
+    background-image: url("../img/EdgeCap.svg");
 }
 #label-btn {
-    background-image: url("../img/LabelIcon.png");
+    background-image: url("../img/Label.svg");
 }
 #select-btn {
-    background-image: url("../img/SelectIcon.png");
+    background-image: url("../img/Select.svg");
+}
+#lasso-btn {
+    background-image: url("../img/Lasso.svg");
 }
 #eraser-btn {
-    background-image: url("../img/EraserIcon.png");
+    background-image: url("../img/Eraser.svg");
 }
 #transform-btn {
-    background-image: url("../img/TransformIcon.png");
+    background-image: url("../img/Transform.svg");
 }
 #split-btn {
-    background-image: url("../img/SplitIcon.png");
+    background-image: url("../img/Split.svg");
 }
 #merge-btn {
-    background-image: url("../img/MergeIcon.png");
+    background-image: url("../img/Merge.svg");
 }
 
 #tool-menu .selected-tool {

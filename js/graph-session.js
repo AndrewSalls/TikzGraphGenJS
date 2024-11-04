@@ -14,6 +14,7 @@ export const RENDER_SETTINGS = {
     SELECT_MAIN: "#93b8e799", // Selected object body color (for translucent objects).
     SELECT_BORDER: "#0078d499", // Selected object border color.
     SELECT_BORDER_WIDTH: 3, // Area of select tool.
+    LASSO_BORDER_POINT_INCREASE: 2, // Amount to increase the width of lasso border points by beyond SELECT_BORDER_WIDTH
     ERASE_MAIN: "#d9d9d944", // Eraser tool highlight (to visualize what's being erased) while dragging.
     ERASE_BORDER: "#d9d9d988", // Eraser tool highlight border.
     ERASE_BORDER_WIDTH: 1, // Eraser tool highlight border's radius.

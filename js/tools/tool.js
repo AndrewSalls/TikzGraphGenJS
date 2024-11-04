@@ -1,15 +1,15 @@
-import { GraphObject } from "../graph-data/graph-object.js";
 import { GraphSession, RENDER_SETTINGS } from "../graph-session.js";
 import accessEdgeTool from "./edge-tool.js";
 import accessSelectTool from "./select-tool.js";
 import accessVertexTool from "./vertex-tool.js";
-import accessEraserTool, { eraseSelected } from "./eraser-tool.js";
+import accessEraserTool from "./eraser-tool.js";
 import accessSplitTool from "./split-tool.js";
 import accessMergeTool from "./merge-tool.js";
 import { makeEdit } from "../history/history.js";
 import { MOUSE_CLICK_TYPE, MOUSE_EXIT_BOUND_DIRECTION, MouseInteraction } from "../mouse-interaction.js";
 import accessMouseTool from "./mouse-tool.js";
 import { GraphViewport } from "../graph-viewport.js";
+import accessLassoTool from "./lasso-tool.js";
 
 /**
  * An enum containing the list of valid tool types.
@@ -20,9 +20,10 @@ export const TOOL_TYPE = {
     VERTEX: 0,
     EDGE: 1,
     SELECT: 4,
-    ERASER: 5,
-    SPLIT: 7,
-    MERGE: 8
+    LASSO: 5,
+    ERASER: 7,
+    SPLIT: 8,
+    MERGE: 9,
 }
 
 /**
@@ -117,6 +118,9 @@ export function setTool(toolType, graphData) {
             break;
         case TOOL_TYPE.SELECT:
             activeTool = accessSelectTool();
+            break;
+        case TOOL_TYPE.LASSO:
+            activeTool = accessLassoTool();
             break;
         case TOOL_TYPE.ERASER:
             activeTool = accessEraserTool();

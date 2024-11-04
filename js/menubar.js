@@ -45,6 +45,8 @@ function initializeEditMenu(graphData) {
     document.querySelector("#split-menu-btn").onclick = () => split.click();
     const merge = document.querySelector("#merge-btn");
     document.querySelector("#merge-menu-btn").onclick = () => merge.click();
+    const lasso = document.querySelector("#lasso-btn");
+    document.querySelector("#lasso-menu-btn").onclick = () => select.click();
 
     registerKey(() => undo(graphData), "z");
     registerKey(() => redo(graphData), "y");
