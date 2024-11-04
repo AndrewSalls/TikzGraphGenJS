@@ -88,13 +88,12 @@ function onUp(mouse, graphData, toolData) {
                     }
             
                     const topCount = getRightCount({x: bBox.x + bBox.width / 2, y: bBox.y + bBox.height / 2}, toolData.points); // Only need to check one point, since there are no intersections.
-                    console.log(topCount);
-                    if(topCount.count % 2 === 1) {
+                    if(EVEN_ODD && topCount.count % 2 === 1) {
                         // corner is in polygon if drawing line to the right intersects odd number of polygon lines
                         graphData.select(next.value);
-                    } else if(!EVEN_ODD && topCount.winding === 0) {
+                    } else if(!EVEN_ODD && topCount.winding !== 0) {
                         // winding number starts at 0, increases by 1 for every line with positive slope, and decreases by 1 for line with negative slope. 
-                        // Corner is in polygon if winding number is 0 or if even odd rule applies
+                        // Corner is in polygon if winding number is not 0
                         graphData.select(next.value);
                     }
 
@@ -181,10 +180,10 @@ function withinRange(point1, point2, range) {
 function intersect(bBox, region) {
     for(let first = 0; first < region.length - 1; first++) {
         const line1 = {
-            startX: region[first].currX,
-            startY: region[first].currY,
-            endX: region[first + 1].currX,
-            endY: region[first + 1].currY
+            startX: region[first].selectX,
+            startY: region[first].selectY,
+            endX: region[first + 1].selectX,
+            endY: region[first + 1].selectY
         };
 
         if (intersectLineSegments(line1, { startX: bBox.x, endX: bBox.x + bBox.width, startY: bBox.y, endY: bBox.y}) || // intersects top of bounding box
@@ -223,27 +222,26 @@ function getRightCount(point, region) {
     let output = 0, winding = 0;
 
     for(let first = 0; first < region.length - 1; first++) {
-        if((region[first].currY >= point.y && region[first + 1].currY <= point.y) || (region[first + 1].currY >= point.y && region[first].currY <= point.y)) {
+        if((region[first].selectY >= point.y && region[first + 1].selectY <= point.y) || (region[first + 1].selectY >= point.y && region[first].selectY <= point.y)) {
             // line intersects horizontal line, need to check that it is to the right of the point
             let slope, xOffset, xDist;
 
-            if(region[first].currY === region[first + 1].currY) { // Horizontal line
+            if(region[first].selectY === region[first + 1].selectY) { // Horizontal line
                 continue;
             }
 
-            if(region[first].currX === region[first + 1].currX) { // Vertical line
+            if(region[first].selectX === region[first + 1].selectX) { // Vertical line
                 xOffset = 0;
-                slope = region[first + 1].currY - region[first].currY; // To properly set winding, positive if first point is below next point
             } else {
-                slope = (region[first + 1].currY - region[first].currY) / (region[first + 1].currX - region[first].currX);
-                xOffset = (point.y - region[first].currY) / slope;
+                slope = (region[first + 1].selectY - region[first].selectY) / (region[first + 1].selectX - region[first].selectX);
+                xOffset = (point.y - region[first].selectY) / slope;
             }
 
-            xDist = xOffset + (region[first].currX - point.x);
+            xDist = xOffset + (region[first].selectX - point.x);
             if(xDist > 0) {
                 output++;
 
-                if(slope > 0) {
+                if(region[first].selectY >= region[first + 1].selectY) {
                     winding++;
                 } else {
                     winding--;
