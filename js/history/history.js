@@ -1,5 +1,5 @@
-import { GraphSession } from "../graph-session.js";
-import { clearData } from "../tools/tool.js";
+import { GraphSession } from "../graph-session/graph-session.js";
+import { clearData } from "../graph-session/session-manager.js";
 import { Edit } from "./edit.js";
 
 const history = [];

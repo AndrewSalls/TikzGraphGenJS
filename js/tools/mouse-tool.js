@@ -1,4 +1,4 @@
-import { GraphSession } from "../graph-session.js";
+import { GraphSession } from "../graph-session/graph-session.js";
 import { MOUSE_CLICK_TYPE, MouseInteraction } from "../mouse-interaction.js";
 import { Tool } from "./tool.js";
 

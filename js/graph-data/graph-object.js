@@ -1,4 +1,4 @@
-import { GraphViewport } from "../graph-viewport.js";
+import { GraphViewport } from "../graph-session/graph-viewport.js";
 
 /**
  * Variable that represents the next generated ID.

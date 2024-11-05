@@ -1,4 +1,4 @@
-import { GraphSession, RENDER_SETTINGS } from "../graph-session.js";
+import { GraphSession, RENDER_SETTINGS } from "../graph-session/graph-session.js";
 import { MouseInteraction } from "../mouse-interaction.js";
 import { Tool } from "./tool.js";
 

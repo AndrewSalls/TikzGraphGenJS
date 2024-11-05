@@ -1,4 +1,4 @@
-import { GraphSession } from "../graph-session.js";
+import { GraphSession } from "../graph-session/graph-session.js";
 import { Edit } from "./edit.js";
 
 /**

@@ -1,8 +1,8 @@
-import { GraphSession } from "./graph-session.js";
-import { clearGraph, zoomToCenter, zoomToMouse } from "./tools/tool.js";
+import { GraphSession } from "./graph-session/graph-session.js";
+import { clearGraph, zoomToCenter, zoomToMouse } from "./graph-session/session-manager.js";
 import { undo, redo } from "./history/history.js";
 import { registerKey } from "./shortcut.js";
-import { FIXED_ZOOM_LEVELS } from "./graph-viewport.js";
+import { FIXED_ZOOM_LEVELS } from "./graph-session/graph-viewport.js";
 import { eraseSelected } from "./tools/eraser-tool.js";
 import { MouseInteraction } from "./mouse-interaction.js";
 

@@ -1,6 +1,6 @@
 
 import { GRAPH_DATATYPE, GraphObject } from "./graph-object.js";
-import { RENDER_SETTINGS } from "../graph-session.js";
+import { RENDER_SETTINGS } from "../graph-session/graph-session.js";
 
 const MIN_OFFSET = 6;
 

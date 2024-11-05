@@ -1,5 +1,6 @@
-import { GraphSession } from "./graph-session.js";
-import { clearData, setTool, TOOL_TYPE } from "./tools/tool.js";
+import { GraphSession } from "./graph-session/graph-session.js";
+import { clearData, setTool } from "./graph-session/session-manager.js";
+import { TOOL_TYPE } from "./tools/tool.js";
 
 let lastSelectedTool;
 

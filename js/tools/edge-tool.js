@@ -1,7 +1,7 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Edge from "../graph-data/edge.js";
 import Vertex, { VERTEX_SHAPE } from "../graph-data/vertex.js";
-import { GraphSession } from "../graph-session.js";
+import { GraphSession } from "../graph-session/graph-session.js";
 import { makeEdit } from "../history/history.js";
 import { InsertionEdit } from "../history/entry-edit.js";
 import { Tool } from "./tool.js";

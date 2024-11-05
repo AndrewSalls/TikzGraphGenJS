@@ -1,5 +1,5 @@
 import Vertex from "../graph-data/vertex.js";
-import { GraphSession, RENDER_SETTINGS } from "../graph-session.js";
+import { GraphSession, RENDER_SETTINGS } from "../graph-session/graph-session.js";
 import { CompositeEdit } from "../history/composite-edit.js";
 import { makeEdit } from "../history/history.js";
 import { MutationEdit } from "../history/mutation-edit.js";

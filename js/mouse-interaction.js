@@ -1,5 +1,5 @@
-import { RENDER_SETTINGS } from "./graph-session.js";
-import { GraphViewport } from "./graph-viewport.js";
+import { RENDER_SETTINGS } from "./graph-session/graph-session.js";
+import { GraphViewport } from "./graph-session/graph-viewport.js";
 
 /**
  * An enum representing the type of click performed by a mouse. Multiple values can be set,

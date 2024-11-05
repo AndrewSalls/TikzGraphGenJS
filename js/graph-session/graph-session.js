@@ -1,11 +1,11 @@
 
-import Edge from "./graph-data/edge.js";
-import { DUMMY_ID, GRAPH_DATATYPE, GraphObject } from "./graph-data/graph-object.js";
-import Vertex from "./graph-data/vertex.js";
+import Edge from "../graph-data/edge.js";
+import { DUMMY_ID, GRAPH_DATATYPE, GraphObject } from "../graph-data/graph-object.js";
+import Vertex from "../graph-data/vertex.js";
 import { GraphViewport } from "./graph-viewport.js";
-import { CompositeEdit } from "./history/composite-edit.js";
-import { DeletionEdit, InsertionEdit } from "./history/entry-edit.js";
-import { tool_onPaint } from "./tools/tool.js";
+import { CompositeEdit } from "../history/composite-edit.js";
+import { DeletionEdit, InsertionEdit } from "../history/entry-edit.js";
+import { tool_onPaint } from "./session-manager.js";
 
 /**
  * Describes built-in render settings, like highlighting color when selecting objects or using the select tool.

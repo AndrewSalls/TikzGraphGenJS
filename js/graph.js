@@ -1,7 +1,7 @@
-import { tool_onMouseDown, tool_onMouseMove, tool_onMouseUp } from "./tools/tool.js";
+import { tool_onMouseDown, tool_onMouseMove, tool_onMouseUp } from "./graph-session/session-manager.js";
 import initializeMenubar from "./menubar.js";
 import initializeToolbar from "./toolbar.js";
-import { GraphSession } from "./graph-session.js";
+import { GraphSession } from "./graph-session/graph-session.js";
 import { MouseInteraction } from "./mouse-interaction.js";
 
 document.addEventListener("DOMContentLoaded", () => {

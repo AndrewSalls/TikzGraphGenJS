@@ -1,6 +1,6 @@
 import { GRAPH_DATATYPE } from "../graph-data/graph-object.js";
 import Vertex from "../graph-data/vertex.js";
-import { GraphSession } from "../graph-session.js";
+import { GraphSession } from "../graph-session/graph-session.js";
 import { CompositeEdit } from "../history/composite-edit.js";
 import { DeletionEdit } from "../history/entry-edit.js";
 import { makeEdit } from "../history/history.js";

@@ -1,5 +1,5 @@
 import { GRAPH_DATATYPE, GraphObject } from "../graph-data/graph-object.js";
-import { GraphSession, RENDER_SETTINGS } from "../graph-session.js";
+import { GraphSession, RENDER_SETTINGS } from "../graph-session/graph-session.js";
 import { CompositeEdit } from "../history/composite-edit.js";
 import { DeletionEdit } from "../history/entry-edit.js";
 import { makeEdit } from "../history/history.js";
