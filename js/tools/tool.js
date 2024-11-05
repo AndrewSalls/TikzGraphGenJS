@@ -158,11 +158,14 @@ export function clearData(graphData) {
  * @param {GraphSession} graphData the graph data the tool can modify.
  */
 export function tool_onMouseDown(mouseData, graphData) {
-    clickType = mouseData.clickType;
-    if(activeTool.acceptAllClicks || (clickType !== null && (clickType & MOUSE_CLICK_TYPE.LEFT_CLICK) > 0)) { // Only accept left click
-        toolData = activeTool.onDown(mouseData, graphData, toolData);
-    } else {
-        universalToolData = mouseHandler.onDown(mouseData, graphData, universalToolData);
+    if(clickType === null) { // Only one click type is allowed at a time
+        clickType = mouseData.clickType;
+
+        if(activeTool.acceptAllClicks || (clickType !== null && (clickType & MOUSE_CLICK_TYPE.LEFT_CLICK) > 0)) { // Only accept left click
+            toolData = activeTool.onDown(mouseData, graphData, toolData);
+        } else {
+            universalToolData = mouseHandler.onDown(mouseData, graphData, universalToolData);
+        }
     }
 }
 
@@ -193,13 +196,15 @@ export function tool_onMouseMove(mouseData, graphData) {
  * @param {GraphSession} graphData the graph data the tool can modify.
  */
 export function tool_onMouseUp(mouseData, graphData) {
-    if(activeTool.acceptAllClicks || (clickType !== null && (clickType & MOUSE_CLICK_TYPE.LEFT_CLICK) > 0)) { // Only accept left click
-        toolData = activeTool.onUp(mouseData, graphData, toolData);
-    } else {
-        universalToolData = mouseHandler.onUp(mouseData, graphData, universalToolData);
-    }
+    if(clickType === null || mouseData.activeClick === clickType) { // Only triggers for same click type currently taking place
+        if(activeTool.acceptAllClicks || (clickType !== null && (clickType & MOUSE_CLICK_TYPE.LEFT_CLICK) > 0)) { // Only accept left click
+            toolData = activeTool.onUp(mouseData, graphData, toolData);
+        } else {
+            universalToolData = mouseHandler.onUp(mouseData, graphData, universalToolData);
+        }
 
-    clickType = null;
+        clickType = null;
+    }
 }
 
 /**
@@ -226,4 +231,59 @@ export function clearGraph(graphData) {
     if(edit !== null) {
         makeEdit(edit);
     }
+}
+
+/**
+ * Controls zooming to the center of the scaled rendered area.
+ * @param {GraphSession} graphData The graph data the camera is zooming in on.
+ * @param {Number} viewportWidth The width of the viewport.
+ * @param {Number} viewportHeight The height of the viewport.
+ * @param {Boolean} zoomIn Whether this is to zoom in or zoom out.
+ * @param {Boolean} fixedAmount Whether the zoom should snap to the nearest fixed zoom level or zoom by a percentage.
+ * @returns {Number} The new zoom percentage.
+ */
+export function zoomToCenter(graphData, viewportWidth, viewportHeight, zoomIn, fixedAmount) {
+    const oldScale = graphData.viewport.scale;
+
+    if(clickType === null) {
+        let newScale;
+        if(zoomIn) {
+            newScale = fixedAmount ? graphData.viewport.zoomInFixed() : graphData.viewport.zoomIn();
+        } else {
+            newScale = fixedAmount ? graphData.viewport.zoomOutFixed() : graphData.viewport.zoomOut();
+        }
+
+        graphData.viewport.pan((viewportWidth / oldScale - viewportWidth / newScale) / 2, (viewportHeight / oldScale - viewportHeight / newScale) / 2);
+        return newScale;
+    }
+
+    return oldScale;
+}
+
+/**
+ * Controls zooming to the user's mouse in the graph.
+ * @param {MouseInteraction} mouseData The relevant mouse data for the tool.
+ * @param {GraphSession} graphData The graph data the camera is zooming in on.
+ * @param {Number} viewportWidth The width of the viewport.
+ * @param {Number} viewportHeight The height of the viewport.
+ * @param {Boolean} zoomIn Whether this is to zoom in or zoom out.
+ * @param {Boolean} fixedAmount Whether the zoom should snap to the nearest fixed zoom level or zoom by a percentage.
+ * @returns {Number} The new zoom percentage.
+ */
+export function zoomToMouse(mouseData, graphData, viewportWidth, viewportHeight, zoomIn, fixedAmount) {
+    const oldScale = graphData.viewport.scale;
+
+    if(clickType === null) {
+        let newScale;
+        if(zoomIn) {
+            newScale = fixedAmount ? graphData.viewport.zoomInFixed() : graphData.viewport.zoomIn();
+        } else {
+            newScale = fixedAmount ? graphData.viewport.zoomOutFixed() : graphData.viewport.zoomOut();
+        }
+
+        graphData.viewport.pan((viewportWidth / oldScale - viewportWidth / newScale) * (mouseData.x / viewportWidth), (viewportHeight / oldScale - viewportHeight / newScale) * (mouseData.y / viewportHeight));
+        return newScale;
+    }
+
+    return oldScale;
 }

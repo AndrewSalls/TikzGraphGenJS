@@ -1,4 +1,5 @@
 import { RENDER_SETTINGS } from "./graph-session.js";
+import { GraphViewport } from "./graph-viewport.js";
 
 /**
  * An enum representing the type of click performed by a mouse. Multiple values can be set,
@@ -43,9 +44,10 @@ export class MouseInteraction {
      * @param {Number} shiftedX The x coordinate of the mouse interaction relative to the viewport.
      * @param {Number} shiftedY The y coordinate of the mouse interaction relative to the viewport.
      * @param {MOUSE_CLICK_TYPE} clickType The type of click recorded.
+     * @param {MOUSE_CLICK_TYPE} activeClick The type of clicks actively taking place (mouse events that are in the mousedown or mousemove state)
      * @param {Boolean} exitedBounds Whether the mouse interaction was inside or outside of the canvas.
      */
-    constructor(mouseX, mouseY, shiftedX, shiftedY, clickType, exitedBounds) {
+    constructor(mouseX, mouseY, shiftedX, shiftedY, clickType, activeClick, exitedBounds) {
         /** @type {Number} */
         this.x = mouseX;
         /** @type {Number} */
@@ -56,6 +58,8 @@ export class MouseInteraction {
         this.shiftedY = shiftedY;
         /** @type {MOUSE_CLICK_TYPE} */
         this.clickType = clickType;
+        /** @type {MOUSE_CLICK_TYPE} */
+        this.activeClick = activeClick
         /** @type {Boolean} */
         this.exitedBounds = exitedBounds;
     }
@@ -120,5 +124,56 @@ export class MouseInteraction {
         const valUpper = valLower + multiple;
 
         return Math.abs(val - valLower) < Math.abs(val - valUpper) ? valLower : valUpper;
+    }
+
+    /**
+     * Converts a generic mouse event into a specifically formatted MouseInteraction.
+     * @param {MouseEvent} ev The original mouse event.
+     * @param {HTMLCanvasElement} canvas The canvas the mouse event takes place with respect to.
+     * @param {GraphViewport} viewport The viewport for the canvas.
+     * @param {Boolean} onPage Whether the mouse event is for leaving the page
+     * @param {Number} onMenubar The number of dropdown menus currently hovered over (Typically 0 or 1).
+     * @returns {MouseInteraction} The corresponding MouseInteraction.
+     */
+    static convertMouse(ev, canvas, viewport, onPage, onMenubar) {
+        let clickOptions = 0;
+        clickOptions += ev.buttons;
+        clickOptions += ev.shiftKey ? MOUSE_CLICK_TYPE.SHIFT_HELD : 0;
+        clickOptions += ev.altKey ? MOUSE_CLICK_TYPE.ALT_HELD : 0;
+        clickOptions += ev.ctrlKey ? MOUSE_CLICK_TYPE.CTRL_HELD : 0;
+
+        // Why does ev.button use a different labelling system than ev.buttons for which buttons are selected ahh
+        let activeButton = (ev.type === "mouseup" || ev.type === "mousedown") ? Math.pow(2, ev.button) : -1;
+        if(activeButton === 2) { // e.g. why do the orderings of the secondary button and auxiliary button swap
+            activeButton = 4;
+        } else if(activeButton === 4) {
+            activeButton =  2;
+        }
+
+        let withinCanvas = 0;
+        if(ev.pageX < canvas.offsetLeft) {
+            withinCanvas |= MOUSE_EXIT_BOUND_DIRECTION.LEFT;
+        }
+        if(ev.pageY < canvas.offsetTop || onMenubar > 0) {
+            withinCanvas |= MOUSE_EXIT_BOUND_DIRECTION.TOP;
+        }
+        if(ev.pageX > canvas.offsetLeft + canvas.offsetWidth) {
+            withinCanvas |= MOUSE_EXIT_BOUND_DIRECTION.RIGHT;
+        }
+        if(ev.pageY > canvas.offsetTop + canvas.offsetHeight) {
+            withinCanvas |= MOUSE_EXIT_BOUND_DIRECTION.BOTTOM;
+        }
+        if(!onPage) {
+            withinCanvas |= MOUSE_EXIT_BOUND_DIRECTION.WINDOW;
+        }
+        
+        return new MouseInteraction(
+            ev.pageX - canvas.offsetLeft,
+            ev.pageY - canvas.offsetTop,
+            (ev.pageX - canvas.offsetLeft) / viewport.scale + viewport.offsetX,
+            (ev.pageY - canvas.offsetTop) / viewport.scale + viewport.offsetY,
+            clickOptions,
+            activeButton,
+            withinCanvas);
     }
 }

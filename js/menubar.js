@@ -1,20 +1,49 @@
 import { GraphSession } from "./graph-session.js";
-import { clearGraph } from "./tools/tool.js";
+import { clearGraph, zoomToCenter, zoomToMouse } from "./tools/tool.js";
 import { undo, redo } from "./history/history.js";
 import { registerKey } from "./shortcut.js";
 import { FIXED_ZOOM_LEVELS } from "./graph-viewport.js";
 import { eraseSelected } from "./tools/eraser-tool.js";
+import { MouseInteraction } from "./mouse-interaction.js";
 
 /**
  * Initializes the buttons in the menubar.
  * @param {GraphSession} graphData The graph state, so that it can be provided to functions called by using the menubar.
  */
 export default function initializeMenubar(graphData) {
+    initializeGeneralKeybinds();
     initializeFileMenu(graphData);
     initializeEditMenu(graphData);
     initializeViewMenu(graphData);
     initializeOtherMenu(graphData);
 };
+
+let isShiftHeld = false;
+let isAltHeld = false;
+/**
+ * Initializes key listeners for alt and shift, which modify what shortcuts work and are available to the menus.
+ */
+function initializeGeneralKeybinds() {
+    document.addEventListener("keydown", ev => {
+        if(ev.key === "Alt") {
+            isAltHeld = true;
+            ev.preventDefault();
+        } else if(ev.key === "Shift") {
+            isShiftHeld = true;
+            ev.preventDefault();
+        }
+    });
+
+    document.addEventListener("keyup", ev => {
+        if(ev.key === "Alt") {
+            isAltHeld = false;
+            ev.preventDefault();
+        } else if(ev.key === "Shift") {
+            isShiftHeld = false;
+            ev.preventDefault();
+        }
+    });
+}
 
 /**
  * Initializes the buttons in the file sub-menubar.
@@ -54,9 +83,6 @@ function initializeEditMenu(graphData) {
     registerKey(() => deleteSelected(graphData), "Backspace", false);
 }
 
-let isShiftHeld = false;
-let isAltHeld = false;
-let mousePos = { x: 0, y: 0 };
 /**
  * Initializes the buttons in the view sub-menubar.
  * @param {GraphSession} graphData The graph state, so that it can be provided to functions called by using the menubar.
@@ -69,128 +95,64 @@ function initializeViewMenu(graphData) {
 
     const layout = document.querySelector("#wrapper");
     const toggleCommands = document.querySelector("#toggle-menubar-btn");
-    toggleCommands.onclick = ev => {
-        ev.target.textContent = (layout.classList.toggle("shrink-menubar") ? "Show" : "Hide") + " Menubar";
-    };
+    toggleCommands.onclick = ev => ev.target.textContent = (layout.classList.toggle("shrink-menubar") ? "Show" : "Hide") + " Menubar";
     document.querySelector("#uncollapse-command-menu").onclick = () => toggleCommands.click();
 
     const toggleTools = document.querySelector("#toggle-toolbar-btn");
-    toggleTools.onclick = ev => {
-        ev.target.textContent = (layout.classList.toggle("shrink-toolbar") ? "Show" : "Hide") + " Toolbar";
-    };
+    toggleTools.onclick = ev => ev.target.textContent = (layout.classList.toggle("shrink-toolbar") ? "Show" : "Hide") + " Toolbar";
     document.querySelector("#uncollapse-tool-menu").onclick = () => toggleTools.click();
 
     const canvas = document.querySelector("#render");
-
-    document.querySelector("#zoom-in-btn").onclick = () => {
-        const oldScale = graphData.viewport.scale;
-        const newScale = graphData.viewport.zoomIn();
-        graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
-        updateZoomDisplay();
-    };
-    document.querySelector("#zoom-out-btn").onclick = () => {
-        const oldScale = graphData.viewport.scale;
-        const newScale = graphData.viewport.zoomOut();
-        graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
-        updateZoomDisplay();
-    };
     const slider = document.querySelector("#zoom-slider");
     const zoomDisplay = document.querySelector("#zoom-display");
-    const updateZoomDisplay = () => {
-        if(graphData.viewport.scale >= 1) {
-            zoomDisplay.textContent = `(${(100 * graphData.viewport.scale).toFixed(0)}%)`;
+    let oldPos = slider.value;
+
+    const updateZoomDisplay = (newValue) => {
+        if(newValue >= 1) {
+            zoomDisplay.textContent = `(${(100 * newValue).toFixed(0)}%)`;
         } else {
-            zoomDisplay.textContent = `(${parseFloat((100 * graphData.viewport.scale).toFixed(2))}%)`;
+            zoomDisplay.textContent = `(${parseFloat((100 * newValue).toFixed(2))}%)`;
         }
 
         // Adjust fixed zoom levels to be close to actual level
-        const closest = FIXED_ZOOM_LEVELS.reduce((prev, curr) => Math.abs(curr - graphData.viewport.scale) < Math.abs(prev - graphData.viewport.scale) ? curr : prev);
+        const closest = FIXED_ZOOM_LEVELS.reduce((prev, curr) => Math.abs(curr - newValue) < Math.abs(prev - newValue) ? curr : prev);
         slider.value = FIXED_ZOOM_LEVELS.indexOf(closest);
+        oldPos = slider.value;
     };
+
+    document.querySelector("#zoom-in-btn").onclick = () => updateZoomDisplay(zoomToCenter(graphData, canvas.width, canvas.height, true, false));
+    document.querySelector("#zoom-out-btn").onclick = () => updateZoomDisplay(zoomToCenter(graphData, canvas.width, canvas.height, false, false));
 
     slider.setAttribute("min", 0);
     slider.setAttribute("max", FIXED_ZOOM_LEVELS.length - 1);
     slider.value = FIXED_ZOOM_LEVELS.indexOf(1); // Assumes that a default zoom level is 100% / 1, which should always be true
     slider.addEventListener("input", () => {
-        const oldScale = graphData.viewport.scale;
-        const newScale = FIXED_ZOOM_LEVELS[parseInt(slider.value)];
-        graphData.viewport.scale = newScale;
-        graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
-        updateZoomDisplay();
-    });
+        let newPos = slider.value;
+        let zoomAmount = null;
+        while(oldPos > newPos) {
+            zoomAmount = zoomToCenter(graphData, canvas.width, canvas.height, false, true);
+            oldPos--;
+        }
+        while(oldPos < newPos) {
+            zoomAmount = zoomToCenter(graphData, canvas.width, canvas.height, true, true);
+            oldPos++;
+        }
 
-    registerKey(() => {
-        const oldScale = graphData.viewport.scale;
-        const newScale = graphData.viewport.zoomIn();
-        graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
-        updateZoomDisplay();
-    }, "=", false, false, true);
-    registerKey(() => {
-        const oldScale = graphData.viewport.scale;
-        const newScale = graphData.viewport.zoomInFixed();
-        graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
-        updateZoomDisplay();
-    }, "+", false, true, true);
-    registerKey(() => {
-        const oldScale = graphData.viewport.scale;
-        const newScale = graphData.viewport.zoomOut();
-        graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
-        updateZoomDisplay();
-    }, "-", false, false, true);
-    registerKey(() => {
-        const oldScale = graphData.viewport.scale;
-        const newScale = graphData.viewport.zoomOutFixed();
-        graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) / 2, (canvas.height / oldScale - canvas.height / newScale) / 2);
-        updateZoomDisplay();
-    }, "_", false, true, true);
-
-    // Zooming with mouse wheel
-    document.addEventListener("keydown", ev => {
-        if(ev.key === "Alt") {
-            isAltHeld = true;
-            ev.preventDefault();
-        } else if(ev.key === "Shift") {
-            isShiftHeld = true;
-            ev.preventDefault();
+        if(zoomAmount !== null) {
+            updateZoomDisplay(zoomAmount);
         }
     });
-    document.addEventListener("keyup", ev => {
-        if(ev.key === "Alt") {
-            isAltHeld = false;
-            ev.preventDefault();
-        } else if(ev.key === "Shift") {
-            isShiftHeld = false;
-            ev.preventDefault();
-        }
-    });
-    canvas.addEventListener("mousemove", ev => {
-        mousePos.x = ev.offsetX / graphData.viewport.scale + graphData.viewport.offsetX;
-        mousePos.y = ev.offsetY / graphData.viewport.scale + graphData.viewport.offsetY;
-        mousePos.absX = ev.offsetX;
-        mousePos.absY = ev.offsetY;
-    });
+
+    registerKey(() => updateZoomDisplay(zoomToCenter(graphData, canvas.width, canvas.height, true, false)), "=", false, false, true);
+    registerKey(() => updateZoomDisplay(zoomToCenter(graphData, canvas.width, canvas.height, true, true)), "+", false, true, true);
+    registerKey(() => updateZoomDisplay(zoomToCenter(graphData, canvas.width, canvas.height, false, false)), "-", false, false, true);
+    registerKey(() => updateZoomDisplay(zoomToCenter(graphData, canvas.width, canvas.height, false, true)), "_", false, true, true);
 
     canvas.addEventListener("wheel", ev => {
         if(isShiftHeld) {
-            const oldScale = graphData.viewport.scale;
-            let newScale = 0;
-
-            if(ev.deltaY < 0) { // Scrolling "up"
-                if(isAltHeld) {
-                    newScale = graphData.viewport.zoomInFixed();
-                } else {
-                    newScale = graphData.viewport.zoomIn();
-                }
-            } else {
-                if(isAltHeld) {
-                    newScale = graphData.viewport.zoomOutFixed();
-                } else {
-                    newScale = graphData.viewport.zoomOut();
-                }
-            }
-
-            graphData.viewport.pan((canvas.width / oldScale - canvas.width / newScale) * (mousePos.absX / canvas.width), (canvas.height / oldScale - canvas.height / newScale) * (mousePos.absY / canvas.height));
-            updateZoomDisplay();
+            // deltaY < 0 implies that scroll direction is upwards
+            const newScale = zoomToMouse(MouseInteraction.convertMouse(ev, canvas, graphData.viewport, true, false), graphData, canvas.width, canvas.height, ev.deltaY < 0, isAltHeld);
+            updateZoomDisplay(newScale);
         }
     });
 }
