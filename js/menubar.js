@@ -162,7 +162,7 @@ function initializeViewMenu(graphData) {
  * @param {GraphSession} graphData The graph state, so that it can be provided to functions called by using the menubar.
  */
 function initializeOtherMenu(graphData) {
-    document.querySelector("#about-btn").onclick = () => window.open("about.html", "_blank");
+    document.querySelector("#about-btn").onclick = () => window.open("./about.html", "_blank");
     const graphInfoOverlay = document.querySelector("#graph-info-overlay");
 
     const vertexCounter = document.querySelector("#vertex-count");
